@@ -1,8 +1,6 @@
 #pragma once
 #include "envision\envpch.h"
 
-#define ID_ERROR 0;
-
 namespace env
 {
 

@@ -152,14 +152,22 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="source\core\Application.cpp" />
     <ClCompile Include="source\envpch.cpp" />
     <ClCompile Include="source\core\IDGenerator.cpp" />
+    <ClCompile Include="source\platform\DX12ResourceManager.cpp" />
+    <ClCompile Include="source\resource\ResourceManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\envision\core\Application.h" />
     <ClInclude Include="include\envision\core\Command.h" />
+    <ClInclude Include="include\envision\core\Event.h" />
     <ClInclude Include="include\envision\core\IDGenerator.h" />
+    <ClInclude Include="include\envision\core\Layer.h" />
+    <ClInclude Include="include\envision\core\Time.h" />
     <ClInclude Include="include\envision\envpch.h" />
     <ClInclude Include="include\envision\core\CommandBuffer.h" />
+    <ClInclude Include="include\envision\platform\DX12\DX12Resource.h" />
     <ClInclude Include="include\envision\platform\DX12\DX12ResourceManager.h" />
     <ClInclude Include="include\envision\resource\Resource.h" />
     <ClInclude Include="include\envision\resource\ResourceManager.h" />
