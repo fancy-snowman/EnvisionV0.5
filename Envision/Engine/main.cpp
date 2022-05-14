@@ -63,6 +63,7 @@ int main(int argc, char** argv)
 {
 	env::Application* application = env::CreateApplication(argc, argv);
 	application->Run();
+	delete application;
 
 	return 0;
 }
