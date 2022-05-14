@@ -1,5 +1,10 @@
 #include "envision\resource\ResourceManager.h"
 
+env::ResourceManager::ResourceManager(EventBusObject eventBus) : m_eventBus(eventBus)
+{
+	//
+}
+
 env::Buffer* env::ResourceManager::GetBuffer(ID resourceID)
 {
 	if (m_buffers.count(resourceID) == 0)

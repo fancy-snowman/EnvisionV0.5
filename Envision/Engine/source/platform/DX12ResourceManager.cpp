@@ -1,6 +1,12 @@
 #include "envision\envpch.h"
 #include "..\..\include\envision\platform\DX12\DX12ResourceManager.h"
 
+env::DX12ResourceManager::DX12ResourceManager(EventBusObject eventBus) :
+	env::ResourceManager(eventBus)
+{
+	//
+}
+
 void env::DX12ResourceManager::Initialize(IDX12Device* device)
 {
 	m_frameCount = 3;

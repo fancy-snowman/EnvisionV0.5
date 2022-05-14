@@ -17,10 +17,13 @@ namespace env
 		std::unordered_map<ID, Texture2DArray*> m_texture2DArrays;
 		std::unordered_map<ID, Window*> m_windows;
 
+		// Has to be passed to window objects
+		EventBusObject m_eventBus;
+
 	public:
 
-		ResourceManager() = default;
-		~ResourceManager() = default;
+		ResourceManager(EventBusObject eventBus);
+		virtual ~ResourceManager() = default;
 
 	public:
 
@@ -40,4 +43,7 @@ namespace env
 		virtual ID CreateTexture2DArray(const std::string& name, const FrameRWPatternType frameRWPattern, const int width, const int height, const ElementFormatType elementFormat, const int textureCount) = 0;
 		virtual ID CreateAppWindow(const std::string& name, const int width, const int height) = 0;
 	};
+
+	// Defined in PlatformAdapter.cpp
+	ResourceManager* CreateResourceManager(EventBusObject eventBus);
 }

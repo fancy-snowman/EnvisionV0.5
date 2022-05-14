@@ -151,6 +151,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="include\envision\core\EventBusObject.cpp" />
+    <ClCompile Include="include\envision\platform\PlatformAdapter.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="source\core\Application.cpp" />
     <ClCompile Include="source\envpch.cpp" />
@@ -162,6 +164,7 @@
     <ClInclude Include="include\envision\core\Application.h" />
     <ClInclude Include="include\envision\core\Command.h" />
     <ClInclude Include="include\envision\core\Event.h" />
+    <ClInclude Include="include\envision\core\EventBusObject.h" />
     <ClInclude Include="include\envision\core\IDGenerator.h" />
     <ClInclude Include="include\envision\core\KeyCodes.h" />
     <ClInclude Include="include\envision\core\Layer.h" />

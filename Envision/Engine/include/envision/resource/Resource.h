@@ -1,6 +1,7 @@
 #pragma once
 #include "envision\envpch.h"
-
+#include "envision\core\EventBusObject.h"
+ 
 namespace env
 {
 	enum class ElementFormatType
@@ -174,11 +175,14 @@ namespace env
 		virtual void GetWidth() = 0;
 		virtual void GetHeight() = 0;
 		virtual void Update() = 0;
+		EventBusObject EventBus;
 
 	protected:
 		Window(const ID resourceID,
 			const std::string& name,
-			const FrameRWPatternType frameRWPattern) :
+			const FrameRWPatternType frameRWPattern,
+			EventBusObject eventBus) :
+			EventBus(eventBus),
 			Resource(resourceID, name, frameRWPattern, ResourceType::WINDOW) {}
 		friend class env::ResourceManager;
 	};

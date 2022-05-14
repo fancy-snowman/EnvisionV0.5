@@ -3,8 +3,13 @@
 #include <iostream>
 #include <string>
 #include <unordered_map>
+#include <queue>
 #include <chrono>
 
+
+#define PLATFORM_DIRECT3D_12
+
+#ifdef PLATFORM_DIRECT3D_12
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include <d3dcompiler.h>
@@ -26,6 +31,7 @@ typedef IDXGIDevice IDXDevice;
 typedef IDXGIFactory IDXFactory;
 typedef IDXGIResource IDXResource;
 typedef IDXGISwapChain IDXSwapChain;
+#endif
 
 typedef long long ID;
 #define ID_ERROR 0;

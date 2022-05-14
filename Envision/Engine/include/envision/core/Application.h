@@ -1,6 +1,7 @@
 #pragma once
 #include "envision\envpch.h"
 #include "envision\core\Layer.h"
+#include "envision\resource\ResourceManager.h"
 
 int main(int argc, char** argv);
 
@@ -10,6 +11,10 @@ namespace env
 	{
 		std::string m_name;
 		std::vector<Layer*> m_layerStack;
+
+	protected:
+
+		ResourceManager* m_resourceManger;
 
 	public:
 

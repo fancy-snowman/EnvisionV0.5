@@ -21,8 +21,8 @@ namespace env
 
 	public:
 
-		DX12ResourceManager() = default;
-		~DX12ResourceManager() = default;
+		DX12ResourceManager(EventBusObject eventBus);
+		~DX12ResourceManager() final = default;
 
 	public:
 

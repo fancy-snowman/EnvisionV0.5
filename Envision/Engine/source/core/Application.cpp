@@ -5,7 +5,8 @@
 env::Application::Application(int argc, char** argv, const std::string& name) :
 	m_name(name)
 {
-	//
+	EventBusObject eventBus(*this);
+	m_resourceManger = CreateResourceManager(eventBus);
 }
 
 env::Application::~Application()
