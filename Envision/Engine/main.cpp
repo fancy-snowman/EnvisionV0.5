@@ -22,12 +22,21 @@ public:
 
 	void OnUpdate(const env::Duration& delta) final
 	{
-		std::cout << "Updated with delta " << delta.InSeconds() << std::endl;
+		//std::cout << "Updated with delta " << delta.InSeconds() << std::endl;
+
+		//env::KeyUpEvent kdevent;
+		//env::Event& e = (env::Event&)kdevent;
+		//OnEvent(e);
 	}
 
-	void OnEvent()
+	void OnEvent(env::Event& event)
 	{
-		std::cout << "New event" << std::endl;
+		std::cout << "New event: " << event.GetTypeName() << std::endl;
+
+		//event.CallIf<env::KeyDownEvent>([](auto& e) {
+		//	std::cout << "New key down event" << std::endl;
+		//	return false;
+		//});
 	}
 
 };

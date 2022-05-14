@@ -71,5 +71,8 @@
     <ClInclude Include="include\envision\core\Event.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\envision\core\KeyCodes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

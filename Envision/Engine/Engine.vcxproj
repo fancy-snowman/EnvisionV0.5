@@ -163,6 +163,7 @@
     <ClInclude Include="include\envision\core\Command.h" />
     <ClInclude Include="include\envision\core\Event.h" />
     <ClInclude Include="include\envision\core\IDGenerator.h" />
+    <ClInclude Include="include\envision\core\KeyCodes.h" />
     <ClInclude Include="include\envision\core\Layer.h" />
     <ClInclude Include="include\envision\core\Time.h" />
     <ClInclude Include="include\envision\envpch.h" />

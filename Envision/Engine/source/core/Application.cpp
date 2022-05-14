@@ -24,6 +24,16 @@ void env::Application::PushLayer(Layer* layer)
 	m_layerStack.back()->OnAttach();
 }
 
+void env::Application::PublishEvent(Event& event)
+{
+	for (auto& l : m_layerStack)
+	{
+		if (event.Handled)
+			break;
+		l->OnEvent(event);
+	}
+}
+
 void env::Application::Run()
 {
 	bool running = true;

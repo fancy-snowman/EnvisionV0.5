@@ -1,6 +1,7 @@
 #pragma once
 #include "envision/envpch.h"
-#include "envision\core\Time.h"
+#include "envision/core/Time.h"
+#include "envision/core/Event.h"
 
 namespace env
 {
@@ -22,6 +23,6 @@ namespace env
 		virtual void OnAttach() {}
 		virtual void OnDetach() {}
 		virtual void OnUpdate(const Duration& delta) {}
-		virtual void OnEvent() {}
+		virtual void OnEvent(env::Event& event) {}
 	};
 }

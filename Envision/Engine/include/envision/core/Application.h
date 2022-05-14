@@ -20,6 +20,10 @@ namespace env
 
 		void PushLayer(Layer* layer);
 
+	public:
+
+		void PublishEvent(Event& event);
+
 	private:
 		
 		void Run();
