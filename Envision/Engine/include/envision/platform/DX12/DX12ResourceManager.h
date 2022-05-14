@@ -6,27 +6,35 @@ namespace env
 {
 	class DX12ResourceManager : public ResourceManager
 	{
-		int m_frameCount;
-		int m_currentFrameIndex;
+		struct FrameData
+		{
+			ID3D12Heap* BufferHeap = nullptr;
+			ID3D12Heap* TextureHeap = nullptr;
+			ID3D12Heap* SamplerHeap = nullptr;
+			ID3D12Resource* UploadBuffer = nullptr;
+			
+			ID3D12Fence* Fence = nullptr;
+			UINT64 FenceValue = 0;
+			HANDLE FanceHandle = NULL;
+		};
 
-		IDX12Heap* m_staticBufferHeap;
-		IDX12Heap* m_staticTextureHeap;
-		IDX12Heap* m_staticSamplerHeap;
+		int m_numFrames = 0;
+		int m_currentFrameIndex = 0;
 
-		IDX12Heap** m_frameBufferHeaps;
-		IDX12Heap** m_frameTextureHeaps;
-		IDX12Heap** m_frameSamplerHeaps;
+		ID3D12Heap* m_staticBufferHeap = nullptr;
+		ID3D12Heap* m_staticTextureHeap = nullptr;
+		ID3D12Heap* m_staticSamplerHeap = nullptr;
 
-		IDX12Resource** m_frameUploadBuffers;
+		FrameData* m_frameData = nullptr;
 
 	public:
 
-		DX12ResourceManager(EventBusObject eventBus);
+		DX12ResourceManager();
 		~DX12ResourceManager() final = default;
 
 	public:
 
-		void Initialize(IDX12Device* device);
+		void Initialize(ID3D12Device* device);
 		void Finalize();
 
 	public:

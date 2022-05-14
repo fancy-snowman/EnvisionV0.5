@@ -1,6 +1,6 @@
 #include "envision\resource\ResourceManager.h"
 
-env::ResourceManager::ResourceManager(EventBusObject eventBus) : m_eventBus(eventBus)
+env::ResourceManager::ResourceManager()
 {
 	//
 }
@@ -50,7 +50,7 @@ env::Texture2DArray* env::ResourceManager::GetTexture2DArray(ID resourceID)
 	return m_texture2DArrays.at(resourceID);
 }
 
-env::Window* env::ResourceManager::GetWindow(ID resourceID)
+env::WindowTarget* env::ResourceManager::GetWindow(ID resourceID)
 {
 	return nullptr;
 }

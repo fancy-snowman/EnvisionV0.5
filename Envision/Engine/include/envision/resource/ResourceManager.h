@@ -15,14 +15,11 @@ namespace env
 		std::unordered_map<ID, Shader*> m_shaders;
 		std::unordered_map<ID, Texture2D*> m_texture2Ds;
 		std::unordered_map<ID, Texture2DArray*> m_texture2DArrays;
-		std::unordered_map<ID, Window*> m_windows;
-
-		// Has to be passed to window objects
-		EventBusObject m_eventBus;
+		std::unordered_map<ID, WindowTarget*> m_windows;
 
 	public:
 
-		ResourceManager(EventBusObject eventBus);
+		ResourceManager();
 		virtual ~ResourceManager() = default;
 
 	public:
@@ -32,7 +29,7 @@ namespace env
 		Shader* GetShader(ID resourceID);
 		Texture2D* GetTexture2D(ID resourceID);
 		Texture2DArray* GetTexture2DArray(ID resourceID);
-		Window* GetWindow(ID resourceID);
+		WindowTarget* GetWindow(ID resourceID);
 	
 	public:
 
@@ -45,5 +42,5 @@ namespace env
 	};
 
 	// Defined in PlatformAdapter.cpp
-	ResourceManager* CreateResourceManager(EventBusObject eventBus);
+	ResourceManager* CreateResourceManager();
 }

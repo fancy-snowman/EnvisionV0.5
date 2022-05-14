@@ -5,7 +5,10 @@
 #include <unordered_map>
 #include <queue>
 #include <chrono>
+#include <assert.h>
 
+typedef long long ID;
+#define ID_ERROR 0;
 
 #define PLATFORM_DIRECT3D_12
 
@@ -16,25 +19,21 @@
 #pragma comment(lib, "d3d12")
 #pragma comment(lib, "dxgi")
 #pragma comment(lib, "d3dcompiler")
-typedef ID3D12Device IDX12Device;
-typedef ID3D12CommandAllocator IDX12CommandAllocator;
-typedef ID3D12CommandList IDX12CommandList;
-typedef ID3D12CommandQueue IDX12CommandQueue;
-typedef ID3D12Fence IDX12Fence;
-typedef ID3D12GraphicsCommandList IDX12GraphicsCommandList;
-typedef ID3D12Heap IDX12Heap;
-typedef ID3D12PipelineState IDX12PipelineState;
-typedef ID3D12Resource IDX12Resource;
-typedef ID3D12RootSignature IDX12RootSignature;
-typedef IDXGIAdapter IDXAdapter;
-typedef IDXGIDevice IDXDevice;
-typedef IDXGIFactory IDXFactory;
-typedef IDXGIResource IDXResource;
-typedef IDXGISwapChain IDXSwapChain;
+
+//#define ASSERT_HR(hr) assert(SUCCEEDED(hr))
+
+#define ASSERT_HR(hr, caption) if (FAILED(hr))\
+	MessageBoxA(NULL,\
+	("Failure in file " + std::string(__FILE__) + ", line" +\
+	std::to_string(__LINE__) + "\n\n" + std::string(caption)).c_str(),\
+	"HRESULT failure",\
+	MB_OK)
+
+#define ASSERT(condition, caption) if (!condition)\
+	MessageBoxA(NULL,\
+	("Failure in file " + std::string(__FILE__) + ", line" +\
+	std::to_string(__LINE__) + "\n\n" + std::string(caption)).c_str(),\
+	"Failure",\
+	MB_OK)
+
 #endif
-
-typedef long long ID;
-#define ID_ERROR 0;
-
-#include <assert.h>
-#define ASSERT_HR(hr) assert(SUCCEEDED(hr))

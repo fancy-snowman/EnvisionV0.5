@@ -77,11 +77,11 @@ namespace env
 	{
 		EVENT_TYPE(KeyDownEvent, KeyDown)
 			KeyDownEvent(KeyCode key, KeyInfo info = KeyInfo()) :
-			PKey(key),
+			Code(key),
 			Info(info),
 			Event(EventType::KeyDown) {}
 
-		const KeyCode PKey;
+		const KeyCode Code;
 		const KeyInfo Info;
 	};
 

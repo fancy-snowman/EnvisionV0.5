@@ -24,7 +24,7 @@
     <ClCompile Include="source\core\IDGenerator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\platform\DX12ResourceManager.cpp">
+    <ClCompile Include="source\platform\DX12\DX12ResourceManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\resource\ResourceManager.cpp">
@@ -33,10 +33,10 @@
     <ClCompile Include="source\core\Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="include\envision\core\EventBusObject.cpp">
+    <ClCompile Include="include\envision\platform\PlatformAdapter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="include\envision\platform\PlatformAdapter.cpp">
+    <ClCompile Include="source\platform\Windows\WindowsWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -80,7 +80,10 @@
     <ClInclude Include="include\envision\core\KeyCodes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\envision\core\EventBusObject.h">
+    <ClInclude Include="include\envision\platform\Windows\WindowsWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\envision\core\Window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

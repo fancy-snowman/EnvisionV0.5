@@ -45,7 +45,7 @@ namespace env
 		friend class env::DX12ResourceManager;
 	};
 
-	struct DX12Window : public env::Window
+	struct DX12Window : public env::WindowTarget
 	{
 		IDXSwapChain* SwapChain;
 		IDX12CommandQueue* PresentQueue;

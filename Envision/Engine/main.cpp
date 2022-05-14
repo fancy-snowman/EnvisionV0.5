@@ -31,12 +31,12 @@ public:
 
 	void OnEvent(env::Event& event)
 	{
-		std::cout << "New event: " << event.GetTypeName() << std::endl;
+		//std::cout << "New event: " << event.GetTypeName() << std::endl;
 
-		//event.CallIf<env::KeyDownEvent>([](auto& e) {
-		//	std::cout << "New key down event" << std::endl;
-		//	return false;
-		//});
+		event.CallIf<env::KeyDownEvent>([](env::KeyDownEvent& e) {
+			std::cout << "Key down: " << (int)e.Code << std::endl;
+			return false;
+		});
 	}
 
 };
@@ -49,6 +49,7 @@ public:
 		env::Application(argc, argv, "TestApplication")
 	{
 		PushLayer(new TestLayer);
+		PushWindow(env::CreateAppWindow(1200, 800, "Envision", *this));
 	}
 
 	~TestApplication() override = default;

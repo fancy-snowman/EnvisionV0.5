@@ -5,8 +5,7 @@
 env::Application::Application(int argc, char** argv, const std::string& name) :
 	m_name(name)
 {
-	EventBusObject eventBus(*this);
-	m_resourceManger = CreateResourceManager(eventBus);
+	//
 }
 
 env::Application::~Application()
@@ -23,6 +22,12 @@ void env::Application::PushLayer(Layer* layer)
 {
 	m_layerStack.push_back(layer);
 	m_layerStack.back()->OnAttach();
+}
+
+void env::Application::PushWindow(Window* window)
+{
+	m_windows.push_back(window);
+	m_windows.back()->OnAttach();
 }
 
 void env::Application::PublishEvent(Event& event)
@@ -42,6 +47,11 @@ void env::Application::Run()
 
 	while (running)
 	{
+		for (auto& w : m_windows)
+		{
+			w->OnUpdate();
+		}
+
 		Timepoint now = Time::Now();
 		Duration delta = now - past;
 		past = now;

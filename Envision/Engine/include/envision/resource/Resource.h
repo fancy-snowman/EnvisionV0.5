@@ -1,6 +1,5 @@
 #pragma once
 #include "envision\envpch.h"
-#include "envision\core\EventBusObject.h"
  
 namespace env
 {
@@ -25,7 +24,7 @@ namespace env
 		SHADER,
 		TEXTURE2D,
 		TEXTURE2D_ARRAY,
-		WINDOW,
+		WINDOW_TARGET,
 	};
 
 	enum class ShaderType
@@ -56,23 +55,53 @@ namespace env
 		GPU_READ_MULTIPLE = 64,
 	};
 
+	enum class UpdatePattern
+	{
+		UNKNOWN = 0,
+
+		NEVER,
+		ONCE,
+		MULTIPLE,
+	};
+
+	enum class AccessPattern
+	{
+		UNKNOWN = 0,
+
+		CPU_READ    = 1 << 0,
+		CPU_WRITE   = 1 << 1,
+		GPU_READ    = 1 << 2,
+		GPU_WRITE   = 1 << 3,
+
+		CPU_READ_WRITE = (int)CPU_READ | (int)CPU_WRITE,
+		GPU_READ_WRITE = (int)GPU_READ | (int)GPU_WRITE,
+
+		CPU_WRITE_GPU_READ = (int)CPU_WRITE | (int)GPU_READ,
+		CPU_READ_GPU_WRITE = (int)CPU_READ | (int)GPU_WRITE,
+
+		CPU_AND_GPU_READ_WRITE = (int)CPU_READ_WRITE | (int)GPU_READ_WRITE,
+	};
+
 	class ResourceManager;
 
 	struct Resource
 	{
 		const ID ResourceID = ID_ERROR;
 		const std::string Name = "Unknown";
-		const FrameRWPatternType FrameRWPattern;
+		const UpdatePattern Update;
+		const AccessPattern Access;
 		const ResourceType Type = ResourceType::UNKNOWN;
 
 	protected:
 		Resource(const ID resourceID,
 			const std::string& name,
-			const FrameRWPatternType frameRWPattern,
+			const UpdatePattern update,
+			const AccessPattern access,
 			const ResourceType type) :
 			ResourceID(resourceID),
 			Name(name),
-			FrameRWPattern(frameRWPattern),
+			Update(update),
+			Access(access),
 			Type(type)  {}
 		friend class env::ResourceManager;
 	};
@@ -84,10 +113,11 @@ namespace env
 	protected:
 		Buffer(const ID resourceID,
 			const std::string& name,
-			const FrameRWPatternType frameRWPattern,
+			const UpdatePattern update,
+			const AccessPattern access,
 			const size_t byteWidth) :
 			ByteWidth(byteWidth),
-			Resource(resourceID, name, frameRWPattern, ResourceType::BUFFER) {}
+			Resource(resourceID, name, update, access, ResourceType::BUFFER) {}
 		friend class env::ResourceManager;
 	};
 
@@ -100,14 +130,15 @@ namespace env
 	protected:
 		BufferArray(const ID resourceID,
 			const std::string& name,
-			const FrameRWPatternType frameRWPattern,
+			const UpdatePattern update,
+			const AccessPattern access,
 			const size_t byteWidth,
 			const size_t elementStride,
 			const int elementCount) :
 			ByteWidth(byteWidth),
 			ElementStride(elementStride),
 			ElementCount(elementCount),
-			Resource(resourceID, name, frameRWPattern, ResourceType::BUFFER_ARRAY) {}
+			Resource(resourceID, name, update, access, ResourceType::BUFFER_ARRAY) {}
 	};
 
 	struct Shader : public Resource
@@ -118,12 +149,11 @@ namespace env
 	protected:
 		Shader(const ID resourceID,
 			const std::string& name,
-			const FrameRWPatternType frameRWPattern,
 			const std::string& filePath,
 			const ShaderType shaderType) :
 			FilePath(filePath),
 			Type(shaderType),
-			Resource(resourceID, name, frameRWPattern, ResourceType::SHADER) {}
+			Resource(resourceID, name, UpdatePattern::UNKNOWN, AccessPattern::UNKNOWN, ResourceType::SHADER) {}
 		friend class env::ResourceManager;
 	};
 
@@ -136,14 +166,15 @@ namespace env
 	protected:
 		Texture2D(const ID resourceID,
 			const std::string& name,
-			const FrameRWPatternType frameRWPattern,
+			const UpdatePattern update,
+			const AccessPattern access,
 			const int width,
 			const int height,
 			const ElementFormatType elementFormat) :
 			Width(width),
 			Height(height),
 			ElementFormat(elementFormat),
-			Resource(resourceID, name, frameRWPattern, ResourceType::TEXTURE2D) {}
+			Resource(resourceID, name, update, access, ResourceType::TEXTURE2D) {}
 		friend class env::ResourceManager;
 	};
 
@@ -157,7 +188,8 @@ namespace env
 	protected:
 		Texture2DArray(const ID resourceID,
 			const std::string& name,
-			const FrameRWPatternType frameRWPattern,
+			const UpdatePattern update,
+			const AccessPattern access,
 			const int width,
 			const int height,
 			const ElementFormatType elementFormat,
@@ -166,24 +198,16 @@ namespace env
 			Height(height),
 			ElementFormat(elementFormat),
 			TextureCount(textureCount),
-			Resource(resourceID, name, frameRWPattern, ResourceType::TEXTURE2D_ARRAY) {}
+			Resource(resourceID, name, update, access, ResourceType::TEXTURE2D_ARRAY) {}
 		friend class env::ResourceManager;
 	};
 
-	struct Window : public Resource
+	struct WindowTarget : public Resource
 	{
-		virtual void GetWidth() = 0;
-		virtual void GetHeight() = 0;
-		virtual void Update() = 0;
-		EventBusObject EventBus;
-
 	protected:
-		Window(const ID resourceID,
-			const std::string& name,
-			const FrameRWPatternType frameRWPattern,
-			EventBusObject eventBus) :
-			EventBus(eventBus),
-			Resource(resourceID, name, frameRWPattern, ResourceType::WINDOW) {}
+		WindowTarget(const ID resourceID,
+			const std::string& name) :
+			Resource(resourceID, name, UpdatePattern::UNKNOWN, AccessPattern::GPU_WRITE, ResourceType::WINDOW_TARGET) {}
 		friend class env::ResourceManager;
 	};
 }

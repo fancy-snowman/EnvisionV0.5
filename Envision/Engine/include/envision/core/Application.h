@@ -1,7 +1,7 @@
 #pragma once
-#include "envision\envpch.h"
-#include "envision\core\Layer.h"
-#include "envision\resource\ResourceManager.h"
+#include "envision/envpch.h"
+#include "envision/core/Layer.h"
+#include "envision/core/Window.h"
 
 int main(int argc, char** argv);
 
@@ -11,10 +11,7 @@ namespace env
 	{
 		std::string m_name;
 		std::vector<Layer*> m_layerStack;
-
-	protected:
-
-		ResourceManager* m_resourceManger;
+		std::vector<Window*> m_windows;
 
 	public:
 
@@ -24,6 +21,7 @@ namespace env
 	public:
 
 		void PushLayer(Layer* layer);
+		void PushWindow(Window* window);
 
 	public:
 
