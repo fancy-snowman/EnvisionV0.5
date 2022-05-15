@@ -1,6 +1,6 @@
 #pragma once
-#include "envision\core\idGenerator.h"
-#include "envision\resource\resource.h"
+#include "envision/core/idGenerator.h"
+#include "envision/resource/resource.h"
 
 namespace env
 {

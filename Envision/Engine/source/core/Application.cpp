@@ -1,6 +1,6 @@
-#include "envision\envpch.h"
-#include "envision\core\Application.h"
-#include "envision\core\Time.h"
+#include "envision/envpch.h"
+#include "envision/core/Application.h"
+#include "envision/core/Time.h"
 
 env::Application::Application(int argc, char** argv, const std::string& name) :
 	m_name(name)

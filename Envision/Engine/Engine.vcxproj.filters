@@ -86,5 +86,8 @@
     <ClInclude Include="include\envision\core\Window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\envision\graphics\Renderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,5 +1,5 @@
 #pragma once
-#include "envision\resource\Resource.h"
+#include "envision/resource/Resource.h"
 
 namespace env
 {

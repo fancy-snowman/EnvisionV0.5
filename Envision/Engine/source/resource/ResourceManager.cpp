@@ -1,4 +1,4 @@
-#include "envision\resource\ResourceManager.h"
+#include "envision/resource/ResourceManager.h"
 
 env::ResourceManager::ResourceManager()
 {

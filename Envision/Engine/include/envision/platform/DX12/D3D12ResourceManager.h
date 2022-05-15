@@ -1,6 +1,6 @@
 #pragma once
-#include "envision\envpch.h"
-#include "envision\resource\ResourceManager.h"
+#include "envision/envpch.h"
+#include "envision/resource/ResourceManager.h"
 
 namespace env
 {

@@ -1,8 +1,8 @@
-#include "envision\envpch.h"
-#include "envision\platform\Windows\WindowsWindow.h"
+#include "envision/envpch.h"
+#include "envision/platform/Windows/WindowsWindow.h"
 
-#include "envision\core\Event.h"
-#include "envision\core\Application.h"
+#include "envision/core/Event.h"
+#include "envision/core/Application.h"
 
 WNDCLASS env::WindowsWindow::s_windowClass = { 0 };
 const WCHAR* env::WindowsWindow::s_WINDOW_CLASS_NAME = L"ENV_WINDOW_CLASS";
