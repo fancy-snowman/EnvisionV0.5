@@ -48,8 +48,18 @@ public:
 	TestApplication(int argc, char** argv) :
 		env::Application(argc, argv, "TestApplication")
 	{
+		env::Window* window = env::CreateAppWindow(1200, 800, "Envision", *this);
+
 		PushLayer(new TestLayer);
-		PushWindow(env::CreateAppWindow(1200, 800, "Envision", *this));
+		PushWindow(window);
+
+		ID target = m_resourceManager->CreateWindowTarget("MainTarget", window);
+		ID mesh = m_assetManager.CreateMesh("DefaultMesh");
+		ID material = m_assetManager.CreatePhongMaterial("DefaultMaterial");
+
+		m_renderer.BeginFrame(target);
+		m_renderer.Submit(mesh, material);
+		m_renderer.EndFrame();
 	}
 
 	~TestApplication() override = default;

@@ -29,7 +29,7 @@ namespace env
 
 		int GetWidth() final;
 		int GetHeight() final;
-		int GetAspectRatio() final;
+		float GetAspectRatio() final;
 
 	public:
 

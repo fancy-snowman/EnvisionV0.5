@@ -3,9 +3,12 @@
 #include "envision/core/Time.h"
 
 env::Application::Application(int argc, char** argv, const std::string& name) :
-	m_name(name)
+	m_name(name),
+	m_resourceManager(CreateResourceManager())
 {
-	//
+	m_resourceManager->Initialize(&m_IDGenerator);
+	m_assetManager.Initialize(&m_IDGenerator, m_resourceManager);
+	m_renderer.Initialize(&m_assetManager, m_resourceManager);
 }
 
 env::Application::~Application()

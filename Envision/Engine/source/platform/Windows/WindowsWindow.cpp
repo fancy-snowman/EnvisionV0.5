@@ -97,15 +97,25 @@ void env::WindowsWindow::OnUpdate()
 
 int env::WindowsWindow::GetWidth()
 {
-	return 0;
+	RECT rect;
+	GetWindowRect(m_handle, &rect);
+	int width = (int)(rect.right - rect.left);
+	return width;
 }
 
 int env::WindowsWindow::GetHeight()
 {
-	return 0;
+	RECT rect;
+	GetWindowRect(m_handle, &rect);
+	int height = (int)(rect.bottom - rect.top);
+	return height;
 }
 
-int env::WindowsWindow::GetAspectRatio()
+float env::WindowsWindow::GetAspectRatio()
 {
-	return 0;
+	RECT rect;
+	GetWindowRect(m_handle, &rect);
+	float height = (float)(rect.bottom - rect.top);
+	float width = (float)(rect.right - rect.left);
+	return width / height;
 }

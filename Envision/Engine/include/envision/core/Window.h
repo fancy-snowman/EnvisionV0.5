@@ -27,7 +27,7 @@ namespace env
 
 		virtual int GetWidth() = 0;
 		virtual int GetHeight() = 0;
-		virtual int GetAspectRatio() = 0;
+		virtual float GetAspectRatio() = 0;
 	};
 
 	// Defined in PlatformAdapter.cpp

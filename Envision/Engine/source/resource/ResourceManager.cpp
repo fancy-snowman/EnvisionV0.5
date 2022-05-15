@@ -1,5 +1,10 @@
 #include "envision/resource/ResourceManager.h"
 
+void env::ResourceManager::Initialize(env::IDGenerator* idGenerator)
+{
+	m_IDGenerator = idGenerator;
+}
+
 env::ResourceManager::ResourceManager()
 {
 	//
@@ -50,7 +55,7 @@ env::Texture2DArray* env::ResourceManager::GetTexture2DArray(ID resourceID)
 	return m_texture2DArrays.at(resourceID);
 }
 
-env::WindowTarget* env::ResourceManager::GetWindow(ID resourceID)
+env::WindowTarget* env::ResourceManager::GetWindowTarget(ID resourceID)
 {
 	return nullptr;
 }

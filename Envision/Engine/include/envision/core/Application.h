@@ -2,6 +2,9 @@
 #include "envision/envpch.h"
 #include "envision/core/Layer.h"
 #include "envision/core/Window.h"
+#include "envision/graphics/Renderer.h"
+#include "envision/graphics/AssetManager.h"
+#include "envision/resource/ResourceManager.h"
 
 int main(int argc, char** argv);
 
@@ -12,6 +15,14 @@ namespace env
 		std::string m_name;
 		std::vector<Layer*> m_layerStack;
 		std::vector<Window*> m_windows;
+
+		env::IDGenerator m_IDGenerator;
+
+	protected:
+
+		env::Renderer m_renderer;
+		env::AssetManager m_assetManager;
+		env::ResourceManager* m_resourceManager;
 
 	public:
 
