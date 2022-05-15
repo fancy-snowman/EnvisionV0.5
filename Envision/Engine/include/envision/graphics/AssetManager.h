@@ -5,24 +5,17 @@
 
 namespace env
 {
-	class Application;
-
 	class AssetManager
 	{
-		void Initialize(env::IDGenerator* idGenerator, env::ResourceManager* resourceManager);
-		friend class Application;
-
-	protected:
-
-		env::IDGenerator* m_IDGenerator = nullptr;
-		env::ResourceManager* m_resourceManager = nullptr;
+		env::IDGenerator& m_IDGenerator;
+		env::ResourceManager& m_resourceManager;
 
 		std::unordered_map<ID, Mesh*> m_meshes;
 		std::unordered_map<ID, Material*> m_materials;
 
 	public:
 
-		AssetManager();
+		AssetManager(env::IDGenerator& idGenerator, env::ResourceManager& resourceManager);
 		~AssetManager();
 
 	public:

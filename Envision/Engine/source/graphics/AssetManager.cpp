@@ -2,13 +2,8 @@
 #include "envision/graphics/Assets.h"
 #include "envision/graphics/AssetManager.h"
 
-void env::AssetManager::Initialize(env::IDGenerator* idGenerator, env::ResourceManager* resourceManager)
-{
-	m_IDGenerator = idGenerator;
-	m_resourceManager = resourceManager;
-}
-
-env::AssetManager::AssetManager()
+env::AssetManager::AssetManager(env::IDGenerator& idGenerator, env::ResourceManager& resourceManager) :
+	m_IDGenerator(idGenerator), m_resourceManager(resourceManager)
 {
 	//
 }
@@ -50,19 +45,19 @@ ID env::AssetManager::CreateMesh(const std::string& name)
 
 	std::array<int, 3> indices = { 0, 1, 2 };
 
-	ID vertexBuffer = m_resourceManager->CreateBuffer(
+	ID vertexBuffer = m_resourceManager.CreateBuffer(
 		"Vertex buffer",
 		UpdatePattern::NEVER,
 		AccessPattern::GPU_READ,
 		sizeof(vertices));
 
-	ID indexBuffer = m_resourceManager->CreateBuffer(
+	ID indexBuffer = m_resourceManager.CreateBuffer(
 		"Index buffer",
 		UpdatePattern::NEVER,
 		AccessPattern::GPU_READ,
 		sizeof(indices)); 
 
-	ID meshID = m_IDGenerator->GenerateUnique();
+	ID meshID = m_IDGenerator.GenerateUnique();
 	Mesh* mesh = new Mesh(meshID, "Test mesh");
 	mesh->VertexBuffer = vertexBuffer;
 	mesh->NumVertices = (int)vertices.size();
@@ -78,7 +73,7 @@ ID env::AssetManager::CreateMesh(const std::string& name)
 
 ID env::AssetManager::CreatePhongMaterial(const std::string& name)
 {
-	ID materialID = m_IDGenerator->GenerateUnique();
+	ID materialID = m_IDGenerator.GenerateUnique();
 	PhongMaterial* material = new PhongMaterial(materialID, "Test material");
 	material->DiffuseFactor = { 0.8f, 0.4f, 0.4f };
 	material->AmbientFactor = { 0.4f, 0.8f, 0.4f };

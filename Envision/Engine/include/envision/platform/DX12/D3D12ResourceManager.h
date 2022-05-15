@@ -35,12 +35,12 @@ namespace env
 
 	public:
 
-		D3D12ResourceManager();
+		D3D12ResourceManager(env::IDGenerator& idGenerator, ID3D12Device* device);
 		~D3D12ResourceManager() final = default;
 
 	public:
 
-		void Initialize(ID3D12Device* device);
+		void Initialize();
 		void Finalize();
 
 	public:

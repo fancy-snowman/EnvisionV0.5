@@ -3,68 +3,14 @@
 #include "envision/platform/DX12/D3D12ResourceManager.h"
 #include "envision/platform/Windows/WindowsWindow.h"
 
-env::D3D12ResourceManager::D3D12ResourceManager()
-{
-	IDXGIFactory7* factory = nullptr;
-	IDXGIAdapter1* adapter = nullptr;
-	ID3D12Debug* debugController = nullptr;
-
-	HRESULT hr = S_OK;
-
-#ifdef _DEBUG 
-	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
-	{
-		debugController->EnableDebugLayer();
-		debugController->Release();
-	}
-	hr = CreateDXGIFactory2(DXGI_CREATE_FACTORY_DEBUG, IID_PPV_ARGS(&factory));
-#else
-	hr = CreateDXGIFactory(IID_PPV_ARGS(&factory));
-#endif
-
-	ASSERT_HR(hr, "Could not create DXGIFactory");
-
-
-	// Enumerate all available adapters. Find the first one that supports
-	// the target feature level and create a device with it.
-	for (UINT adapterIndex = 0;; adapterIndex++)
-	{
-		adapter = nullptr;
-		if (factory->EnumAdapters1(adapterIndex, &adapter) == DXGI_ERROR_NOT_FOUND)
-		{
-			break; // No more adapters to enumerate
-		}
-
-		// Check if the adapter supports the target feature level. Don't
-		// create the device yet.
-		if (SUCCEEDED(D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_12_1, __uuidof(m_device), nullptr)))
-		{
-			break;
-		}
-		adapter->Release();
-		adapter = nullptr;
-	}
-
-	if (adapter)
-	{
-		hr = D3D12CreateDevice(adapter, D3D_FEATURE_LEVEL_12_1, IID_PPV_ARGS(&m_device));
-		if (FAILED(hr))
-		{
-			adapter->Release();
-			factory->Release();
-		}
-		ASSERT_HR(hr, "Could not create device");
-		adapter->Release();
-	}
-	factory->Release();
-	
-	Initialize(m_device);
+env::D3D12ResourceManager::D3D12ResourceManager(env::IDGenerator& idGenerator, ID3D12Device* device) :
+	m_device(device), env::ResourceManager(idGenerator)
+{	
+	Initialize();
 }
 
-void env::D3D12ResourceManager::Initialize(ID3D12Device* device)
+void env::D3D12ResourceManager::Initialize()
 {
-	//m_device = device;
-
 	m_numFrames = 3;
 	m_currentFrameIndex = 0;
 
@@ -310,7 +256,7 @@ ID env::D3D12ResourceManager::CreateWindowTarget(const std::string& name, env::W
 		ASSERT_HR(hr, "Could not create present descriptor heap");
 	}
 
-	ID targetID = m_IDGenerator->GenerateUnique();
+	ID targetID = m_IDGenerator.GenerateUnique();
 	D3D12WindowTarget* target = new D3D12WindowTarget(name, targetID);
 
 	target->PresentQueue = commandQueue;

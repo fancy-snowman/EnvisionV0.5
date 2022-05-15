@@ -20,8 +20,8 @@ namespace env
 
 	protected:
 
-		env::Renderer m_renderer;
-		env::AssetManager m_assetManager;
+		env::Renderer* m_renderer;
+		env::AssetManager* m_assetManager;
 		env::ResourceManager* m_resourceManager;
 
 	public:

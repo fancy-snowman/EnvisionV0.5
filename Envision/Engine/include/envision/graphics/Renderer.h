@@ -5,27 +5,30 @@
 
 namespace env
 {
-	class Application;
-
 	class Renderer
 	{
-		void Initialize(env::AssetManager* assetManager, env::ResourceManager* resourceManager);
-		friend class Application;
+	protected:
 
+		env::IDGenerator m_IDGenerator;
+
+		// Renderer is responsible for creating and freeing these
 		env::AssetManager* m_assetManager = nullptr;
 		env::ResourceManager* m_resourceManager = nullptr;
-
-		ID m_renderTarget = ID();
 
 	public:
 
 		Renderer();
-		~Renderer();
+		virtual ~Renderer();
 
 	public:
 
-		void BeginFrame(ID target);
-		void Submit(ID mesh, ID material);
-		void EndFrame();
+		virtual void Initialize(env::AssetManager*& assetMgrOut, env::ResourceManager*& resourceMgrOut) = 0;
+
+		virtual void BeginFrame(ID target) = 0;
+		virtual void Submit(ID mesh, ID material) = 0;
+		virtual void EndFrame() = 0;
 	};
+
+	// Defined in PlatformAdapter.cpp
+	Renderer* CreateRenderer();
 }

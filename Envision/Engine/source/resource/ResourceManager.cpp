@@ -1,11 +1,7 @@
 #include "envision/resource/ResourceManager.h"
 
-void env::ResourceManager::Initialize(env::IDGenerator* idGenerator)
-{
-	m_IDGenerator = idGenerator;
-}
-
-env::ResourceManager::ResourceManager()
+env::ResourceManager::ResourceManager(env::IDGenerator& idGenerator) : 
+	m_IDGenerator(idGenerator)
 {
 	//
 }
