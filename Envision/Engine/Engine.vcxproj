@@ -171,8 +171,8 @@
     <ClInclude Include="include\envision\core\Window.h" />
     <ClInclude Include="include\envision\envpch.h" />
     <ClInclude Include="include\envision\core\CommandBuffer.h" />
-    <ClInclude Include="include\envision\platform\DX12\DX12Resource.h" />
-    <ClInclude Include="include\envision\platform\DX12\DX12ResourceManager.h" />
+    <ClInclude Include="include\envision\platform\DX12\D3D12Resource.h" />
+    <ClInclude Include="include\envision\platform\DX12\D3D12ResourceManager.h" />
     <ClInclude Include="include\envision\platform\Windows\WindowsWindow.h" />
     <ClInclude Include="include\envision\resource\Resource.h" />
     <ClInclude Include="include\envision\resource\ResourceManager.h" />

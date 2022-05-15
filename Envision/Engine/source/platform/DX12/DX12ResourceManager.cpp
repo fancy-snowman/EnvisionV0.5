@@ -1,12 +1,12 @@
 #include "envision\envpch.h"
-#include "..\..\include\envision\platform\DX12\DX12ResourceManager.h"
+#include "..\..\include\envision\platform\DX12\D3D12ResourceManager.h"
 
-env::DX12ResourceManager::DX12ResourceManager()
+env::D3D12ResourceManager::D3D12ResourceManager()
 {
 	//
 }
 
-void env::DX12ResourceManager::Initialize(ID3D12Device* device)
+void env::D3D12ResourceManager::Initialize(ID3D12Device* device)
 {
 	m_numFrames = 3;
 	m_currentFrameIndex = 0;
@@ -147,36 +147,36 @@ void env::DX12ResourceManager::Initialize(ID3D12Device* device)
 	}
 }
 
-void env::DX12ResourceManager::Finalize()
+void env::D3D12ResourceManager::Finalize()
 {
 }
 
-ID env::DX12ResourceManager::CreateBuffer(const std::string& name, const FrameRWPatternType frameRWPattern, const size_t byteWidth)
-{
-	return ID();
-}
-
-ID env::DX12ResourceManager::CreateBufferArray(const std::string& name, const FrameRWPatternType frameRWPattern, const size_t byteWidth, const size_t elementStride, const int elementCount)
+ID env::D3D12ResourceManager::CreateBuffer(const std::string& name, const UpdatePattern update, const AccessPattern access, const size_t byteWidth)
 {
 	return ID();
 }
 
-ID env::DX12ResourceManager::CreateShader(const std::string& name, const std::string& FilePath, const ShaderType type)
+ID env::D3D12ResourceManager::CreateBufferArray(const std::string& name, const UpdatePattern update, const AccessPattern access, const size_t byteWidth, const size_t elementStride, const int elementCount)
 {
 	return ID();
 }
 
-ID env::DX12ResourceManager::CreateTexture2D(const std::string& name, const FrameRWPatternType frameRWPattern, const int width, const int height, const ElementFormatType elementFormat)
+ID env::D3D12ResourceManager::CreateShader(const std::string& name, const std::string& FilePath, const ShaderType type)
 {
 	return ID();
 }
 
-ID env::DX12ResourceManager::CreateTexture2DArray(const std::string& name, const FrameRWPatternType frameRWPattern, const int width, const int height, const ElementFormatType elementFormat, const int textureCount)
+ID env::D3D12ResourceManager::CreateTexture2D(const std::string& name, const UpdatePattern update, const AccessPattern access, const int width, const int height, const ElementFormatType elementFormat)
 {
 	return ID();
 }
 
-ID env::DX12ResourceManager::CreateAppWindow(const std::string& name, const int width, const int height)
+ID env::D3D12ResourceManager::CreateTexture2DArray(const std::string& name, const UpdatePattern update, const AccessPattern access, const int width, const int height, const ElementFormatType elementFormat, const int textureCount)
+{
+	return ID();
+}
+
+ID env::D3D12ResourceManager::CreateAppWindow(const std::string& name, const int width, const int height)
 {
 	return ID();
 }

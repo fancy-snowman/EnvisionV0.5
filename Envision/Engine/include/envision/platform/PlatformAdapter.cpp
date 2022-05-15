@@ -1,10 +1,10 @@
 #include "envision\envpch.h"
 
 #ifdef PLATFORM_DIRECT3D_12
-#include "envision\platform\DX12\DX12ResourceManager.h"
+#include "envision\platform\DX12\D3D12ResourceManager.h"
 env::ResourceManager* env::CreateResourceManager()
 {
-	return new env::DX12ResourceManager();
+	return new env::D3D12ResourceManager();
 }
 
 #include "envision\platform\Windows\WindowsWindow.h"

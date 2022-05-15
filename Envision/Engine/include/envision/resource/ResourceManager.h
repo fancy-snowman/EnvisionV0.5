@@ -33,11 +33,11 @@ namespace env
 	
 	public:
 
-		virtual ID CreateBuffer(const std::string& name, const FrameRWPatternType frameRWPattern, const size_t byteWidth) = 0;
-		virtual ID CreateBufferArray(const std::string& name, const FrameRWPatternType frameRWPattern, const size_t byteWidth, const size_t elementStride, const int elementCount) = 0;
+		virtual ID CreateBuffer(const std::string& name, const UpdatePattern update, const AccessPattern access, const size_t byteWidth) = 0;
+		virtual ID CreateBufferArray(const std::string& name, const UpdatePattern update, const AccessPattern access, const size_t byteWidth, const size_t elementStride, const int elementCount) = 0;
 		virtual ID CreateShader(const std::string& name, const std::string& FilePath, const ShaderType type) = 0;
-		virtual ID CreateTexture2D(const std::string& name, const FrameRWPatternType frameRWPattern, const int width, const int height, const ElementFormatType elementFormat) = 0;
-		virtual ID CreateTexture2DArray(const std::string& name, const FrameRWPatternType frameRWPattern, const int width, const int height, const ElementFormatType elementFormat, const int textureCount) = 0;
+		virtual ID CreateTexture2D(const std::string& name, const UpdatePattern update, const AccessPattern access, const int width, const int height, const ElementFormatType elementFormat) = 0;
+		virtual ID CreateTexture2DArray(const std::string& name, const UpdatePattern update, const AccessPattern access, const int width, const int height, const ElementFormatType elementFormat, const int textureCount) = 0;
 		virtual ID CreateAppWindow(const std::string& name, const int width, const int height) = 0;
 	};
 

@@ -32,27 +32,14 @@ namespace env
 		UNKNOWN = 0,
 
 		// Vertex pipeline
-		Vertex = 1,
-		Hull = 2,
-		Domain = 4,
-		Geometry = 8,
-		Pixel = 16,
+		Vertex      = 1 << 0,
+		Hull        = 1 << 1,
+		Domain      = 1 << 2,
+		Geometry    = 1 << 3,
+		Pixel       = 1 << 4,
 
 		// Compute pipeline
-		Compute = 32,
-	};
-
-	enum class FrameRWPatternType
-	{
-		UNKNOWN = 0,
-
-		CPU_READ_NEVER = 1,
-		CPU_READ_ONCE = 2,
-		CPU_READ_MULTIPLE = 4,
-
-		GPU_READ_NEVER = 16,
-		GPU_READ_ONCE = 32,
-		GPU_READ_MULTIPLE = 64,
+		Compute     = 1 << 5,
 	};
 
 	enum class UpdatePattern
@@ -60,8 +47,9 @@ namespace env
 		UNKNOWN = 0,
 
 		NEVER,
-		ONCE,
-		MULTIPLE,
+		PER_FRAME,
+		PER_PASS,
+		PER_OBJECT,
 	};
 
 	enum class AccessPattern

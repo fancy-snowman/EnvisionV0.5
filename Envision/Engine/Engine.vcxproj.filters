@@ -59,10 +59,10 @@
     <ClInclude Include="include\envision\core\Command.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\envision\platform\DX12\DX12ResourceManager.h">
+    <ClInclude Include="include\envision\platform\DX12\D3D12ResourceManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\envision\platform\DX12\DX12Resource.h">
+    <ClInclude Include="include\envision\platform\DX12\D3D12Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\envision\core\Application.h">
