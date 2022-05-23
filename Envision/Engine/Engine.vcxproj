@@ -154,19 +154,37 @@
     <ClCompile Include="include\envision\platform\PlatformAdapter.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="source\core\Application.cpp" />
+    <ClCompile Include="source\core\GPU.cpp" />
     <ClCompile Include="source\envpch.cpp" />
     <ClCompile Include="source\core\IDGenerator.cpp" />
     <ClCompile Include="source\graphics\AssetManager.cpp" />
     <ClCompile Include="source\graphics\Renderer.cpp" />
-    <ClCompile Include="source\platform\DX12\D3D12Renderer.cpp" />
-    <ClCompile Include="source\platform\DX12\DX12ResourceManager.cpp" />
+    <ClCompile Include="source\platform\DX12\DX12ResourceManager.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="source\platform\Windows\WindowsWindow.cpp" />
-    <ClCompile Include="source\resource\ResourceManager.cpp" />
+    <ClCompile Include="source\resource\BufferLayout.cpp" />
+    <ClCompile Include="source\resource\ResourceManager.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="source\resource\ShaderDataType.cpp" />
+    <ClCompile Include="source\resource\TextureLayout.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\envision\core\Application.h" />
     <ClInclude Include="include\envision\core\Command.h" />
     <ClInclude Include="include\envision\core\Event.h" />
+    <ClInclude Include="include\envision\core\GPU.h" />
     <ClInclude Include="include\envision\core\IDGenerator.h" />
     <ClInclude Include="include\envision\core\KeyCodes.h" />
     <ClInclude Include="include\envision\core\Layer.h" />
@@ -177,14 +195,14 @@
     <ClInclude Include="include\envision\graphics\AssetManager.h" />
     <ClInclude Include="include\envision\graphics\Assets.h" />
     <ClInclude Include="include\envision\graphics\Renderer.h" />
-    <ClInclude Include="include\envision\platform\DX12\D3D12Renderer.h" />
-    <ClInclude Include="include\envision\platform\DX12\D3D12Resource.h" />
-    <ClInclude Include="include\envision\platform\DX12\D3D12ResourceManager.h" />
     <ClInclude Include="include\envision\platform\Windows\WindowsWindow.h" />
+    <ClInclude Include="include\envision\resource\BufferLayout.h" />
     <ClInclude Include="include\envision\resource\PipelineState.h" />
     <ClInclude Include="include\envision\resource\Resource.h" />
+    <ClInclude Include="include\envision\resource\ResourceManager.h" />
     <ClInclude Include="include\envision\resource\Resource_old.h" />
-    <ClInclude Include="include\envision\resource\ResourceManager_old.h" />
+    <ClInclude Include="include\envision\resource\ShaderDataType.h" />
+    <ClInclude Include="include\envision\resource\TextureLayout.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

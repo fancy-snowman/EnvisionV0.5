@@ -53,13 +53,13 @@ public:
 		PushLayer(new TestLayer);
 		PushWindow(window);
 
-		ID target = m_resourceManager->CreateWindowTarget("MainTarget", window);
-		ID mesh = m_assetManager->CreateMesh("DefaultMesh");
-		ID material = m_assetManager->CreatePhongMaterial("DefaultMaterial");
+		//ID target = m_resourceManager->CreateWindowTarget("MainTarget", window);
+		//ID mesh = m_assetManager->CreateMesh("DefaultMesh");
+		//ID material = m_assetManager->CreatePhongMaterial("DefaultMaterial");
 
-		m_renderer->BeginFrame(target);
-		m_renderer->Submit(mesh, material);
-		m_renderer->EndFrame();
+		//m_renderer->BeginFrame(target);
+		//m_renderer->Submit(mesh, material);
+		//m_renderer->EndFrame();
 	}
 
 	~TestApplication() override = default;

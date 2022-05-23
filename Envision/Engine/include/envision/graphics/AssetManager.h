@@ -7,15 +7,14 @@ namespace env
 {
 	class AssetManager
 	{
-		env::IDGenerator& m_IDGenerator;
-		env::ResourceManager& m_resourceManager;
+		env::IDGenerator& m_commonIDGenerator;
 
 		std::unordered_map<ID, Mesh*> m_meshes;
 		std::unordered_map<ID, Material*> m_materials;
 
 	public:
 
-		AssetManager(env::IDGenerator& idGenerator, env::ResourceManager& resourceManager);
+		AssetManager(env::IDGenerator& commonIDGenerator);
 		~AssetManager();
 
 	public:

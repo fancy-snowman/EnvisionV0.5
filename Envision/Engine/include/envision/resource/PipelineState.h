@@ -30,6 +30,8 @@ namespace env
 	struct PipelineState
 	{
 		ID3D12PipelineState* State;
-		
+		ID3D12RootSignature* RootSignature;
 	};
+
+
 }

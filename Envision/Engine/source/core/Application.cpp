@@ -1,12 +1,14 @@
 #include "envision/envpch.h"
 #include "envision/core/Application.h"
 #include "envision/core/Time.h"
+#include "envision/resource/ResourceManager.h"
 
 env::Application::Application(int argc, char** argv, const std::string& name) :
 	m_name(name)
 {
-	m_renderer = env::CreateRenderer();
-	m_renderer->Initialize(m_assetManager, m_resourceManager);
+	ResourceManager::Initialize(m_IDGenerator);
+	// TODO: AssetManager
+	// TODO: Renderer
 }
 
 env::Application::~Application()

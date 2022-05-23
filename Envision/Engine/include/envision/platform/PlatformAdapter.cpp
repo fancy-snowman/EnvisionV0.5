@@ -7,9 +7,4 @@ env::Window* env::CreateAppWindow(int width, int height, const std::string& titl
 	return new env::WindowsWindow(width, height, title, application);
 }
 
-#include "envision/platform/DX12/D3D12Renderer.h"
-env::Renderer* env::CreateRenderer()
-{
-	return new env::D3D12Renderer();
-}
 #endif

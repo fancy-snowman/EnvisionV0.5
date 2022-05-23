@@ -9,20 +9,16 @@ namespace env
 	{
 	protected:
 
-		env::IDGenerator m_IDGenerator;
-
-		// Renderer is responsible for creating and freeing these
-		env::AssetManager* m_assetManager = nullptr;
-		env::ResourceManager* m_resourceManager = nullptr;
+		env::IDGenerator& m_commonIDGenerator;
 
 	public:
 
-		Renderer();
+		Renderer(env::IDGenerator& commonIDGenerator);
 		virtual ~Renderer();
 
 	public:
 
-		virtual void Initialize(env::AssetManager*& assetMgrOut, env::ResourceManager*& resourceMgrOut) = 0;
+		virtual void Initialize() = 0;
 
 		virtual void BeginFrame(ID target) = 0;
 		virtual void Submit(ID mesh, ID material) = 0;
