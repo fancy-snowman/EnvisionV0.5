@@ -34,3 +34,31 @@ void env::CommandList::TransitionResource(Resource* resource, D3D12_RESOURCE_STA
 		resource->State = newState;
 	}
 }
+
+void env::DirectList::SetIndexBuffer(IndexBuffer* buffer, UINT slot)
+{
+}
+
+void env::DirectList::SetVertexBuffer(VertexBuffer* buffer, UINT slot)
+{
+}
+
+void env::DirectList::SetPipelineState(PipelineState* state)
+{
+}
+
+void env::DirectList::Draw(UINT vertexCount, UINT vertexOffset)
+{
+}
+
+void env::DirectList::DrawIndexed(UINT indexCount, UINT indexOffset, UINT vertexOffset)
+{
+}
+
+void env::DirectList::DrawInstanced(UINT vertexCountPerInstance, UINT instanceCount)
+{
+}
+
+void env::DirectList::DrawIndexedInstanced(UINT indexCountPerInstance, UINT instanceCount, UINT indexOffset, INT vertexOffset, UINT startOffset)
+{
+}

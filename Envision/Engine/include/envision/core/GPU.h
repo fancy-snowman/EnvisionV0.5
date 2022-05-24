@@ -1,6 +1,7 @@
 #pragma once
 #include "envision/envpch.h"
 #include "envision/core/CommandQueue.h"
+#include "envision/core/CommandList.h"
 
 namespace env
 {
@@ -35,6 +36,10 @@ namespace env
 		GPU(const GPU&& other) = delete;
 		GPU& operator=(const GPU& other) = delete;
 		GPU& operator=(const GPU&& other) = delete;
+
+	public:
+
+		//static CommandList* 
 
 	public:
 
