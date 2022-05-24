@@ -23,7 +23,6 @@ namespace env
 		friend class env::GPU;
 
 		CommandQueue(D3D12_COMMAND_LIST_TYPE type);
-
 		void Initialize(ID3D12Device* device);
 
 		CommandQueue(CommandQueue&& other) = delete;
