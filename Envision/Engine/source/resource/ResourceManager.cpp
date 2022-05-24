@@ -6,7 +6,9 @@ env::ResourceManager* env::ResourceManager::s_instance = nullptr;
 
 env::ResourceManager* env::ResourceManager::Initialize(IDGenerator& commonIDGenerator)
 {
-	return new ResourceManager(commonIDGenerator);
+	if (!s_instance)
+		s_instance = new ResourceManager(commonIDGenerator);
+	return s_instance;
 }
 
 env::ResourceManager* env::ResourceManager::Get()
@@ -24,7 +26,40 @@ void env::ResourceManager::Finalize()
 env::ResourceManager::ResourceManager(IDGenerator& commonIDGenerator) :
 	m_commonIDGenerator(commonIDGenerator)
 {
-	// TODO: Allocate memory
+	HRESULT hr = S_OK;
+
+	m_uploadBuffer.Name = "UploadBuffer";
+	m_uploadBuffer.State = D3D12_RESOURCE_STATE_GENERIC_READ;
+	m_uploadBuffer.Layout = { BufferElement("Data", ShaderDataType::Float, 0, 0, 1000000000) };
+
+	{
+		D3D12_HEAP_PROPERTIES heapProperties;
+		ZeroMemory(&heapProperties, sizeof(heapProperties));
+		heapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;
+		heapProperties.CreationNodeMask = 1;
+		heapProperties.VisibleNodeMask = 1;
+
+		D3D12_RESOURCE_DESC resourceDescription;
+		ZeroMemory(&resourceDescription, sizeof(resourceDescription));
+		resourceDescription.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+		resourceDescription.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+		resourceDescription.Width = (UINT64)m_uploadBuffer.Layout.GetByteWidth();
+		resourceDescription.Height = 1;
+		resourceDescription.DepthOrArraySize = 1;
+		resourceDescription.MipLevels = 1;
+		resourceDescription.Format = DXGI_FORMAT_UNKNOWN;
+		resourceDescription.SampleDesc.Count = 1;
+		resourceDescription.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+		hr = GPU::GetDevice()->CreateCommittedResource(&heapProperties,
+			D3D12_HEAP_FLAG_NONE,
+			&resourceDescription,
+			m_uploadBuffer.State,
+			NULL,
+			IID_PPV_ARGS(&m_uploadBuffer.Native));
+
+		ASSERT_HR(hr, "Could not create upload buffer");
+	}
 }
 
 env::ResourceManager::~ResourceManager()
@@ -98,7 +133,9 @@ ID env::ResourceManager::CreateConstantBuffer(const std::string& name, const Buf
 		ASSERT_HR(hr, "Could not create constant buffer");
 	}
 
-	// TODO: Upload data if provided
+	{
+
+	}
 
 	ID resourceID = m_commonIDGenerator.GenerateUnique();
 	m_constantBuffers[resourceID] = new ConstantBuffer(std::move(buffer));

@@ -21,6 +21,8 @@ namespace env
 		std::unordered_map<ID, PipelineState*> m_pipelineStates;
 		std::unordered_map<ID, WindowTarget*> m_windowTargets;
 
+		ConstantBuffer m_uploadBuffer;
+
 	public:
 
 		static ResourceManager* Initialize(IDGenerator& commonIDGenerator);

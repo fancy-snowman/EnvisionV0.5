@@ -2,10 +2,12 @@
 #include "envision/core/Application.h"
 #include "envision/core/Time.h"
 #include "envision/resource/ResourceManager.h"
+#include "envision/core/GPU.h"
 
 env::Application::Application(int argc, char** argv, const std::string& name) :
 	m_name(name)
 {
+	GPU::Initialize();
 	ResourceManager::Initialize(m_IDGenerator);
 	// TODO: AssetManager
 	// TODO: Renderer
