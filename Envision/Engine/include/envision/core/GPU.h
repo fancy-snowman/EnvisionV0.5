@@ -1,5 +1,6 @@
 #pragma once
 #include "envision/envpch.h"
+#include "envision/core/CommandQueue.h"
 
 namespace env
 {
@@ -13,17 +14,9 @@ namespace env
 		std::string m_name;
 		size_t m_maxVideoMemory;
 
-		struct QueueData
-		{
-			ID3D12CommandQueue* Queue;
-			ID3D12Fence* Fence;
-			UINT64 FenceValue;
-			HANDLE FenceEvent;
-		};
-
-		QueueData m_direct;
-		QueueData m_compute;
-		QueueData m_copy;
+		CommandQueue m_directQueue;
+		CommandQueue m_computeQueue;
+		CommandQueue m_copyQueue;
 
 	public:
 
@@ -46,10 +39,12 @@ namespace env
 	public:
 
 		static ID3D12Device* GetDevice();
+		static CommandQueue& GetDirectQueue();
+		static CommandQueue& GetComputeQueue();
+		static CommandQueue& GetCopyQueue();
 
 	private:
 
 		void InitDevice();
-		void InitQueue(QueueData queue, D3D12_COMMAND_LIST_TYPE type, UINT64 initialFenceValue = 0);
 	};
 }

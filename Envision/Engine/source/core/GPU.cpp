@@ -22,12 +22,17 @@ void env::GPU::Finalize()
 	s_instance = nullptr;
 }
 
-env::GPU::GPU() : m_device(nullptr), m_name("Not initialized"), m_maxVideoMemory(0)
+env::GPU::GPU() : m_device(nullptr),
+	m_name("Not initialized"),
+	m_maxVideoMemory(0),
+	m_directQueue(D3D12_COMMAND_LIST_TYPE_DIRECT),
+	m_computeQueue(D3D12_COMMAND_LIST_TYPE_COMPUTE),
+	m_copyQueue(D3D12_COMMAND_LIST_TYPE_COPY)
 {
 	InitDevice();
-	InitQueue(m_direct, D3D12_COMMAND_LIST_TYPE_DIRECT);
-	InitQueue(m_compute, D3D12_COMMAND_LIST_TYPE_COMPUTE);
-	InitQueue(m_copy, D3D12_COMMAND_LIST_TYPE_COPY);
+	m_directQueue.Initialize(m_device);
+	m_computeQueue.Initialize(m_device);
+	m_copyQueue.Initialize(m_device);
 }
 
 env::GPU::~GPU()
@@ -37,6 +42,21 @@ env::GPU::~GPU()
 ID3D12Device* env::GPU::GetDevice()
 {
 	return Get()->m_device;
+}
+
+env::CommandQueue& env::GPU::GetDirectQueue()
+{
+	return Get()->m_directQueue;
+}
+
+env::CommandQueue& env::GPU::GetComputeQueue()
+{
+	return Get()->m_computeQueue;
+}
+
+env::CommandQueue& env::GPU::GetCopyQueue()
+{
+	return Get()->m_copyQueue;
 }
 
 void env::GPU::InitDevice()
@@ -102,31 +122,4 @@ void env::GPU::InitDevice()
 		adapter->Release();
 	}
 	factory->Release();
-}
-
-void env::GPU::InitQueue(QueueData queue, D3D12_COMMAND_LIST_TYPE type, UINT64 initialFenceValue)
-{
-	HRESULT hr = S_OK;
-
-	{ // Queue
-		D3D12_COMMAND_QUEUE_DESC desc;
-		ZeroMemory(&desc, sizeof(desc));
-		desc.Type = type;
-		desc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_HIGH;
-		desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-
-		hr = m_device->CreateCommandQueue(&desc, IID_PPV_ARGS(&queue.Queue));
-		ASSERT_HR(hr, "Could not create command queue");
-	}
-
-	{ // Fence
-		queue.FenceValue = initialFenceValue;
-
-		hr = m_device->CreateFence(queue.FenceValue,
-			D3D12_FENCE_FLAG_NONE,
-			IID_PPV_ARGS(&queue.Fence));
-		ASSERT_HR(hr, "Could not create fence for command queue");
-
-		queue.FenceEvent = CreateEventA(0, FALSE, FALSE, NULL);
-	}
 }

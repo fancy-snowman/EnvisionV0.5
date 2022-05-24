@@ -151,9 +151,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="include\envision\core\CommandQueue.cpp" />
     <ClCompile Include="include\envision\platform\PlatformAdapter.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="source\core\Application.cpp" />
+    <ClCompile Include="source\core\CommandList.cpp" />
     <ClCompile Include="source\core\GPU.cpp" />
     <ClCompile Include="source\envpch.cpp" />
     <ClCompile Include="source\core\IDGenerator.cpp" />
@@ -183,6 +185,7 @@
   <ItemGroup>
     <ClInclude Include="include\envision\core\Application.h" />
     <ClInclude Include="include\envision\core\Command.h" />
+    <ClInclude Include="include\envision\core\CommandQueue.h" />
     <ClInclude Include="include\envision\core\Event.h" />
     <ClInclude Include="include\envision\core\GPU.h" />
     <ClInclude Include="include\envision\core\IDGenerator.h" />
@@ -191,7 +194,6 @@
     <ClInclude Include="include\envision\core\Time.h" />
     <ClInclude Include="include\envision\core\Window.h" />
     <ClInclude Include="include\envision\envpch.h" />
-    <ClInclude Include="include\envision\core\CommandBuffer.h" />
     <ClInclude Include="include\envision\graphics\AssetManager.h" />
     <ClInclude Include="include\envision\graphics\Assets.h" />
     <ClInclude Include="include\envision\graphics\Renderer.h" />
