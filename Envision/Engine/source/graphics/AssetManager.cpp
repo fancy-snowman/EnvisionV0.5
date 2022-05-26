@@ -2,6 +2,27 @@
 #include "envision/graphics/Assets.h"
 #include "envision/graphics/AssetManager.h"
 
+env::AssetManager* env::AssetManager::s_instance = nullptr;
+
+env::AssetManager* env::AssetManager::Initialize(IDGenerator& commonIDGenerator)
+{
+	if (!s_instance)
+		s_instance = new AssetManager(commonIDGenerator);
+	return s_instance;
+}
+
+env::AssetManager* env::AssetManager::Get()
+{
+	assert(s_instance);
+	return s_instance;
+}
+
+void env::AssetManager::Finalize()
+{
+	delete s_instance;
+	s_instance = nullptr;
+}
+
 env::AssetManager::AssetManager(env::IDGenerator& commonIDGenerator) :
 	m_commonIDGenerator(commonIDGenerator)
 {
@@ -45,31 +66,27 @@ ID env::AssetManager::CreateMesh(const std::string& name)
 
 	std::array<int, 3> indices = { 0, 1, 2 };
 
-	//ID vertexBuffer = m_resourceManager.CreateBuffer(
-	//	"Vertex buffer",
-	//	UpdatePattern::NEVER,
-	//	AccessPattern::GPU_READ,
-	//	sizeof(vertices));
+	ID vertexBuffer = ResourceManager::Get()->CreateVertexBuffer("VertexBuffer",
+		vertices.size(),
+		{
+			{ "position", ShaderDataType::Float2 },
+			{ "color", ShaderDataType::Float3 },
+		},
+		vertices.data());
 
-	//ID indexBuffer = m_resourceManager.CreateBuffer(
-	//	"Index buffer",
-	//	UpdatePattern::NEVER,
-	//	AccessPattern::GPU_READ,
-	//	sizeof(indices)); 
+	ID indexBuffer = ResourceManager::Get()->CreateIndexBuffer("IndexBuffer",
+		indices.size(),
+		indices.data());
 
-	//ID meshID = m_IDGenerator.GenerateUnique();
-	//Mesh* mesh = new Mesh(meshID, "Test mesh");
-	//mesh->VertexBuffer = vertexBuffer;
-	//mesh->NumVertices = (int)vertices.size();
-	//mesh->IndexBuffer = indexBuffer;
-	//mesh->NumIndices = (int)indices.size();
+	ID meshID = m_commonIDGenerator.GenerateUnique();
+	Mesh* mesh = new Mesh(meshID, "TestMesh");
+	mesh->VertexBuffer = vertexBuffer;
+	mesh->NumVertices = (int)vertices.size();
+	mesh->IndexBuffer = indexBuffer;
+	mesh->NumIndices = (int)indices.size();
+	m_meshes[meshID] = mesh;
 
-	//m_meshes[meshID] = mesh;
-
-	// TODO: Upload vertices and indices to the GPU using the resource manager
-
-	//return meshID;
-	return 0;
+	return meshID;
 }
 
 ID env::AssetManager::CreatePhongMaterial(const std::string& name)

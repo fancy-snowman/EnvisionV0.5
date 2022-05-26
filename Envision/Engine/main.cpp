@@ -2,6 +2,7 @@
 #include "envision/core/Application.h"
 
 #include "envision/resource/ResourceManager.h"
+#include "envision/graphics/AssetManager.h"
 
 class TestLayer : public env::Layer
 {
@@ -75,9 +76,9 @@ public:
 		PushWindow(m_window);
 
 		ID target = env::ResourceManager::Get()->CreateWindowTarget("TargetWindow", m_window);
+		ID mesh = env::AssetManager::Get()->CreateMesh("DefaultMesh");
 
 
-		//ID mesh = m_assetManager->CreateMesh("DefaultMesh");
 		//ID material = m_assetManager->CreatePhongMaterial("DefaultMaterial");
 
 		//m_renderer->BeginFrame(target);

@@ -5,8 +5,11 @@
 
 namespace env
 {
+	// Singleton
 	class AssetManager
 	{
+	private:
+
 		env::IDGenerator& m_commonIDGenerator;
 
 		std::unordered_map<ID, Mesh*> m_meshes;
@@ -14,8 +17,21 @@ namespace env
 
 	public:
 
+		static AssetManager* Initialize(IDGenerator& commonIDGenerator);
+		static AssetManager* Get();
+		static void Finalize();
+
+	private:
+
+		static AssetManager* s_instance;
+
 		AssetManager(env::IDGenerator& commonIDGenerator);
 		~AssetManager();
+
+		AssetManager(const AssetManager& other) = delete;
+		AssetManager(const AssetManager&& other) = delete;
+		AssetManager& operator=(const AssetManager& other) = delete;
+		AssetManager& operator=(const AssetManager&& other) = delete;
 
 	public:
 
