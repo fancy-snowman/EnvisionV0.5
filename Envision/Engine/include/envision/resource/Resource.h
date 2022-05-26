@@ -44,24 +44,42 @@ namespace env
 	{
 		RESOURCE_TYPE(BufferArray)
 		BufferLayout Layout;
+
+		struct {
+			D3D12_CPU_DESCRIPTOR_HANDLE ShaderResource = { 0 };
+		} Views;
 	};
 
 	struct ConstantBuffer : public Resource
 	{
 		RESOURCE_TYPE(ConstantBuffer)
 		BufferLayout Layout;
+
+		struct {
+			D3D12_CPU_DESCRIPTOR_HANDLE ConstantBuffer = { 0 };
+			D3D12_CPU_DESCRIPTOR_HANDLE ShaderResource = { 0 };
+			D3D12_CPU_DESCRIPTOR_HANDLE UnorderedAccess = { 0 };
+		} Views;
 	};
 
 	struct IndexBuffer : public Resource
 	{
 		RESOURCE_TYPE(IndexBuffer)
 		BufferLayout Layout;
+
+		struct {
+			D3D12_INDEX_BUFFER_VIEW IndexBuffer = { 0 };
+		} Views;
 	};
 
 	struct VertexBuffer : public Resource
 	{
 		RESOURCE_TYPE(VertexBuffer)
 		BufferLayout Layout;
+
+		struct {
+			D3D12_VERTEX_BUFFER_VIEW VertexBuffer = { 0 };
+		} Views;
 	};
 
 	struct Texture2D : public Resource
@@ -72,6 +90,12 @@ namespace env
 		int ByteWidth;
 		int RowPitch;
 		TextureLayout Layout;
+
+		struct {
+			D3D12_CPU_DESCRIPTOR_HANDLE RenderTarget = { 0 };
+			D3D12_CPU_DESCRIPTOR_HANDLE ShaderResource = { 0 };
+			D3D12_CPU_DESCRIPTOR_HANDLE UnorderedAccess = { 0 };
+		} Views;
 	};
 
 	struct Texture2DArray : public Resource
@@ -83,6 +107,10 @@ namespace env
 		int ByteWidth;
 		int RowPitch;
 		TextureLayout Layout;
+
+		struct {
+			D3D12_CPU_DESCRIPTOR_HANDLE ShaderResource = { 0 };
+		} Views;
 	};
 
 	struct PipelineState : public Resource

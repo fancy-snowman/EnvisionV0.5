@@ -47,13 +47,13 @@ namespace env
 
 	public:
 
-		void SetIndexBuffer(IndexBuffer* buffer, UINT slot);
+		void SetIndexBuffer(IndexBuffer* buffer);
 		void SetVertexBuffer(VertexBuffer* buffer, UINT slot);
 		void SetPipelineState(PipelineState* state);
 
-		void Draw(UINT vertexCount, UINT vertexOffset);
-		void DrawIndexed(UINT indexCount, UINT indexOffset, UINT vertexOffset);
-		void DrawInstanced(UINT vertexCountPerInstance, UINT instanceCount);
-		void DrawIndexedInstanced(UINT indexCountPerInstance, UINT instanceCount, UINT indexOffset, INT vertexOffset, UINT startOffset);
+		void Draw(UINT numVertices, UINT vertexOffset);
+		void DrawIndexed(UINT numIndices, UINT indexOffset, UINT vertexOffset);
+		void DrawInstanced(UINT numVertices, UINT numInstanes, UINT vertexOffset, UINT instanceOffset);
+		void DrawIndexedInstanced(UINT numIndices, UINT numInstances, UINT indexOffset, INT vertexOffset, UINT instanceOffset);
 	};
 }

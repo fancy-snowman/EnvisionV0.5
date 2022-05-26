@@ -2,6 +2,7 @@
 #include "envision/envpch.h"
 #include "envision/resource/Resource.h"
 #include "envision/core/IDGenerator.h"
+#include "envision/core/DescriptorAllocator.h"
 
 namespace env
 {
@@ -22,6 +23,13 @@ namespace env
 		std::unordered_map<ID, WindowTarget*> m_windowTargets;
 
 		ConstantBuffer m_uploadBuffer;
+
+		DescriptorAllocator m_CBVAllocator;
+		DescriptorAllocator m_SRVAllocator;
+		DescriptorAllocator m_UAVAllocator;
+		DescriptorAllocator m_SamplerAllocator;
+		DescriptorAllocator m_RTVAllocator;
+		DescriptorAllocator m_DSVAllocator;
 
 	public:
 

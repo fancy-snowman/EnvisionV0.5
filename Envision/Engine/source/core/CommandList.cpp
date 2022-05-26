@@ -35,30 +35,39 @@ void env::CommandList::TransitionResource(Resource* resource, D3D12_RESOURCE_STA
 	}
 }
 
-void env::DirectList::SetIndexBuffer(IndexBuffer* buffer, UINT slot)
+void env::DirectList::SetIndexBuffer(IndexBuffer* buffer)
 {
+	TransitionResource(buffer, D3D12_RESOURCE_STATE_INDEX_BUFFER);
+	m_list->IASetIndexBuffer(&buffer->Views.IndexBuffer);
 }
 
 void env::DirectList::SetVertexBuffer(VertexBuffer* buffer, UINT slot)
 {
+	TransitionResource(buffer, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+	m_list->IASetVertexBuffers(slot, 1, &buffer->Views.VertexBuffer);
 }
 
 void env::DirectList::SetPipelineState(PipelineState* state)
 {
+	m_list->SetPipelineState(state->State);
 }
 
-void env::DirectList::Draw(UINT vertexCount, UINT vertexOffset)
+void env::DirectList::Draw(UINT numVertices, UINT vertexOffset)
 {
+	m_list->DrawInstanced(numVertices, 1, vertexOffset, 0);
 }
 
-void env::DirectList::DrawIndexed(UINT indexCount, UINT indexOffset, UINT vertexOffset)
+void env::DirectList::DrawIndexed(UINT numIndices, UINT indexOffset, UINT vertexOffset)
 {
+	m_list->DrawIndexedInstanced(numIndices, 1, indexOffset, vertexOffset, 0);
 }
 
-void env::DirectList::DrawInstanced(UINT vertexCountPerInstance, UINT instanceCount)
+void env::DirectList::DrawInstanced(UINT numVertices, UINT numInstanes, UINT vertexOffset, UINT instanceOffset)
 {
+	m_list->DrawInstanced(numVertices, numInstanes, vertexOffset, instanceOffset);
 }
 
-void env::DirectList::DrawIndexedInstanced(UINT indexCountPerInstance, UINT instanceCount, UINT indexOffset, INT vertexOffset, UINT startOffset)
+void env::DirectList::DrawIndexedInstanced(UINT numIndices, UINT numInstances, UINT indexOffset, INT vertexOffset, UINT instanceOffset)
 {
+	m_list->DrawIndexedInstanced(numIndices, numInstances, indexOffset, vertexOffset, instanceOffset);
 }

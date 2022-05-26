@@ -24,7 +24,13 @@ void env::ResourceManager::Finalize()
 }
 
 env::ResourceManager::ResourceManager(IDGenerator& commonIDGenerator) :
-	m_commonIDGenerator(commonIDGenerator)
+	m_commonIDGenerator(commonIDGenerator),
+	m_CBVAllocator(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 100, false),
+	m_SRVAllocator(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 100, false),
+	m_UAVAllocator(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 100, false),
+	m_SamplerAllocator(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, 10, false),
+	m_RTVAllocator(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 20, false),
+	m_DSVAllocator(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 20, false)
 {
 	HRESULT hr = S_OK;
 
