@@ -6,6 +6,7 @@
 #include <array>
 #include <chrono>
 #include <assert.h>
+#include <algorithm>
 
 typedef long long ID;
 #define ID_ERROR 0;

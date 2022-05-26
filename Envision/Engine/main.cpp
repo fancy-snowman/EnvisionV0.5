@@ -1,6 +1,8 @@
 #include "envision/envpch.h"
 #include "envision/core/Application.h"
 
+#include "envision/resource/ResourceManager.h"
+
 class TestLayer : public env::Layer
 {
 public:
@@ -13,6 +15,23 @@ public:
 	void OnAttach() final
 	{
 		std::cout << "Attached" << std::endl;
+
+		struct BufferDataStruct
+		{
+			float a = 5;
+			float b = 2;
+			bool c = true;
+			int d = 42;
+		} data;
+
+		env::BufferLayout layout = {
+			env::BufferElement("a", env::ShaderDataType::Float),
+			env::BufferElement("b", env::ShaderDataType::Float),
+			env::BufferElement("c", env::ShaderDataType::Bool),
+			env::BufferElement("d", env::ShaderDataType::Int),
+		};
+
+		ID buffer = env::ResourceManager::Get()->CreateConstantBuffer("CBuffer", layout, &data);
 	}
 
 	void OnDetach() final
@@ -43,17 +62,21 @@ public:
 
 class TestApplication : public env::Application
 {
+	env::Window* m_window;
+
 public:
 
 	TestApplication(int argc, char** argv) :
 		env::Application(argc, argv, "TestApplication")
 	{
-		env::Window* window = env::CreateAppWindow(1200, 800, "Envision", *this);
+		m_window = new env::Window(1200, 800, "Envision", *this);
 
 		PushLayer(new TestLayer);
-		PushWindow(window);
+		PushWindow(m_window);
 
-		//ID target = m_resourceManager->CreateWindowTarget("MainTarget", window);
+		ID target = env::ResourceManager::Get()->CreateWindowTarget("TargetWindow", m_window);
+
+
 		//ID mesh = m_assetManager->CreateMesh("DefaultMesh");
 		//ID material = m_assetManager->CreatePhongMaterial("DefaultMaterial");
 

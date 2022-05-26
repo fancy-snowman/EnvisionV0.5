@@ -1,5 +1,6 @@
 #pragma once
 #include "envision/envpch.h"
+#include "envision/core/CommandList.h"
 
 namespace env
 {
@@ -16,6 +17,8 @@ namespace env
 		ID3D12Fence* m_fence;
 		UINT64 m_fenceValue;
 		HANDLE m_fenceEvent;
+
+		std::vector<CommandList*> m_queuedLists;
 
 	private:
 
@@ -44,5 +47,8 @@ namespace env
 		UINT64 GetFenceValue() const;
 		UINT64 GetNextFenceValue() const;
 		ID3D12CommandQueue* GetCommandQueue();
+
+		void QueueList(CommandList* list);
+		void Execute();
 	};
 }

@@ -54,6 +54,7 @@ void env::Application::Run()
 	{
 		for (auto& w : m_windows)
 		{
+			w->OnEventUpdate();
 			w->OnUpdate();
 		}
 

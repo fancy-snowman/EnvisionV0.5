@@ -18,6 +18,7 @@ namespace env
 		CommandQueue m_directQueue;
 		CommandQueue m_computeQueue;
 		CommandQueue m_copyQueue;
+		CommandQueue m_presentQueue;
 
 	public:
 
@@ -47,6 +48,11 @@ namespace env
 		static CommandQueue& GetDirectQueue();
 		static CommandQueue& GetComputeQueue();
 		static CommandQueue& GetCopyQueue();
+		static CommandQueue& GetPresentQueue();
+
+		static DirectList* CreateDirectCommandList(bool recordDirectly = false);
+		static ComputeList* CreateComputeCommandList(bool recordDirectly = false);
+		static CopyList* CreateCopyCommandList(bool recordDirectly = false);
 
 	private:
 

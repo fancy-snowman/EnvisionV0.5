@@ -43,6 +43,6 @@ D3D12_CPU_DESCRIPTOR_HANDLE env::DescriptorAllocator::Allocate(Resource* resourc
 void env::DescriptorAllocator::Free(D3D12_CPU_DESCRIPTOR_HANDLE handle)
 {
     // TODO: Check if handle is actually allocated
-    UINT index = (handle.ptr - m_begin.ptr) / m_stride;
+    UINT index = (UINT)((handle.ptr - m_begin.ptr) / m_stride);
     m_freeList.push_back(index);
 }

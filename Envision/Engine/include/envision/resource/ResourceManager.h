@@ -1,8 +1,10 @@
 #pragma once
 #include "envision/envpch.h"
 #include "envision/resource/Resource.h"
+#include "envision/core/Window.h"
 #include "envision/core/IDGenerator.h"
 #include "envision/core/DescriptorAllocator.h"
+#include "envision/core/CommandList.h"
 
 namespace env
 {
@@ -20,9 +22,7 @@ namespace env
 		std::unordered_map<ID, Texture2D*> m_texture2Ds;
 		std::unordered_map<ID, Texture2DArray*> m_texture2DArrays;
 		std::unordered_map<ID, PipelineState*> m_pipelineStates;
-		std::unordered_map<ID, WindowTarget*> m_windowTargets;
-
-		ConstantBuffer m_uploadBuffer;
+		std::unordered_map<ID, WindowTarget*> m_windowTargets;	
 
 		DescriptorAllocator m_CBVAllocator;
 		DescriptorAllocator m_SRVAllocator;
@@ -30,6 +30,11 @@ namespace env
 		DescriptorAllocator m_SamplerAllocator;
 		DescriptorAllocator m_RTVAllocator;
 		DescriptorAllocator m_DSVAllocator;
+
+		DirectList* m_transitionList;
+		CopyList* m_copyList;
+
+		ConstantBuffer m_uploadBuffer;
 
 	public:
 
@@ -49,6 +54,9 @@ namespace env
 		ResourceManager& operator=(const ResourceManager& other) = delete;
 		ResourceManager& operator=(const ResourceManager&& other) = delete;
 
+		Resource* GetResourceNonConst(ID resourceID);
+		void AdjustViewportAndScissorRect(WindowTarget& target);
+
 	public:
 
 		ID CreateBufferArray(const std::string& name, int numBuffers, const BufferLayout& layout, void* initialData = nullptr);
@@ -58,7 +66,7 @@ namespace env
 		ID CreateTexture2D(const std::string& name, int width, int height, TextureLayout layout, void* initialData = nullptr);
 		ID CreateTexture2DArray(const std::string& name, int numTextures, int width, int height, TextureLayout layout, void* initialData = nullptr);
 		ID CreatePipelineState(const std::string& name, const std::string& shaderPath);
-		ID CreateWindowTarget(const std::string& name, HWND window, float startXFactor = 0.f, float startYFactor = 0.f, float widthFactor = 1.f, float heightFactor = 1.f);
+		ID CreateWindowTarget(const std::string& name, Window* window, float startXFactor = 0.f, float startYFactor = 0.f, float widthFactor = 1.f, float heightFactor = 1.f);
 
 		const BufferArray* GetBufferArray(ID resourceID);
 		const ConstantBuffer* GetConstantBuffer(ID resourceID);
@@ -68,5 +76,8 @@ namespace env
 		const Texture2DArray* GetTexture2DArray(ID resourceID);
 		const PipelineState* GetPipelineState(ID resourceID);
 		const WindowTarget* GetWindowTarget(ID resourceID);
+		const Resource* GetResource(ID resourceID);
+
+		void UploadBufferData(ID resourceID, void* data, UINT numBytes = 0, UINT destinationOffset = 0);
 	};
 }

@@ -8,28 +8,36 @@ namespace env
 
 	class Window
 	{
-	protected:
+	private:
+
+		static WNDCLASS s_windowClass;
+		static const WCHAR* s_WINDOW_CLASS_NAME;
 
 		Application& m_application;
+		HWND m_handle = NULL;	
+
+		void InitWindowClass();
+		static void SetWindowObject(HWND handle, Window* window);
+		static Window* GetWindowObject(HWND handle);
 
 	public:
 
-		Window(Application& application) : m_application(application) {}
-		virtual ~Window() {}
+		Window(int width, int height, const std::string& title, Application& application);
+		virtual ~Window();
+
+	public:
+
+		HWND GetHandle();
+		int GetWidth();
+		int GetHeight();
+		float GetAspectRatio();
+
+		void OnEventUpdate();
 
 	public:
 
 		virtual void OnAttach() {}
 		virtual void OnUpdate() {}
 		virtual void OnDetach() {}
-
-	public:
-
-		virtual int GetWidth() = 0;
-		virtual int GetHeight() = 0;
-		virtual float GetAspectRatio() = 0;
 	};
-
-	// Defined in PlatformAdapter.cpp
-	Window* CreateAppWindow(int width, int height, const std::string& title, Application& application);
 }

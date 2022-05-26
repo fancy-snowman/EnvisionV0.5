@@ -34,15 +34,18 @@ namespace env
 		Resource(env::Resource && other) = default;
 
 		virtual ResourceType GetType() = 0;
+		virtual UINT GetByteWidth() { return 0; };
 
 		std::string Name;
-		ID3D12Resource* Native;
+		ID3D12Resource* Native = nullptr;
 		D3D12_RESOURCE_STATES State = D3D12_RESOURCE_STATE_COMMON;
 	};
 
 	struct BufferArray : public Resource
 	{
 		RESOURCE_TYPE(BufferArray)
+		UINT GetByteWidth() final { return (UINT)Layout.GetByteWidth(); }
+			
 		BufferLayout Layout;
 
 		struct {
@@ -53,6 +56,8 @@ namespace env
 	struct ConstantBuffer : public Resource
 	{
 		RESOURCE_TYPE(ConstantBuffer)
+		UINT GetByteWidth() final { return (UINT)Layout.GetByteWidth(); }
+
 		BufferLayout Layout;
 
 		struct {
@@ -65,7 +70,9 @@ namespace env
 	struct IndexBuffer : public Resource
 	{
 		RESOURCE_TYPE(IndexBuffer)
-		BufferLayout Layout;
+		UINT GetByteWidth() final { return sizeof(UINT) * NumIndices; }
+
+		UINT NumIndices = 0;
 
 		struct {
 			D3D12_INDEX_BUFFER_VIEW IndexBuffer = { 0 };
@@ -75,6 +82,8 @@ namespace env
 	struct VertexBuffer : public Resource
 	{
 		RESOURCE_TYPE(VertexBuffer)
+		UINT GetByteWidth() final { return (UINT)Layout.GetByteWidth(); }
+
 		BufferLayout Layout;
 
 		struct {
@@ -85,6 +94,8 @@ namespace env
 	struct Texture2D : public Resource
 	{
 		RESOURCE_TYPE(Texture2D)
+		UINT GetByteWidth() final { return (UINT)(RowPitch * GetTextureLayoutTypeStride(Layout) * Height); }
+
 		int Width;
 		int Height;
 		int ByteWidth;
@@ -101,6 +112,8 @@ namespace env
 	struct Texture2DArray : public Resource
 	{
 		RESOURCE_TYPE(Texture2DArray)
+		UINT GetByteWidth() final { return (UINT)(RowPitch * GetTextureLayoutTypeStride(Layout) * Height * NumTextures); }
+
 		int NumTextures;
 		int Width;
 		int Height;
@@ -116,20 +129,29 @@ namespace env
 	struct PipelineState : public Resource
 	{
 		RESOURCE_TYPE(PipelineState)
+
 		ID3D12PipelineState* State;
 	};
 
+	// Defined in Window.h
+	class Window;
 	struct WindowTarget : public Resource
 	{
 		RESOURCE_TYPE(WindowTarget)
+
 		int Width;
 		int Height;
 		float startXFactor;
 		float startYFactor;
 		float widthFactor;
 		float heightFactor;
-		HWND Window;
+		env::Window* AppWindow;
 		RECT ScissorRect;
-		D3D12_VIEWPORT ViewPort;
+		D3D12_VIEWPORT Viewport;
+		IDXGISwapChain1* SwapChain;
+
+		struct {
+			D3D12_CPU_DESCRIPTOR_HANDLE RenderTarget = { 0 };
+		} Views;
 	};
 }

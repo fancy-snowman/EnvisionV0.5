@@ -9,7 +9,6 @@ namespace env
 		static WNDCLASS s_windowClass;
 		static const WCHAR* s_WINDOW_CLASS_NAME;
 
-
 		HWND m_handle = NULL;
 
 		void InitWindowClass();

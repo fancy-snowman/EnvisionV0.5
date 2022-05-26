@@ -66,6 +66,9 @@ env::ResourceManager::ResourceManager(IDGenerator& commonIDGenerator) :
 
 		ASSERT_HR(hr, "Could not create upload buffer");
 	}
+
+	m_transitionList = GPU::CreateDirectCommandList();
+	m_copyList = GPU::CreateCopyCommandList();
 }
 
 env::ResourceManager::~ResourceManager()
@@ -95,6 +98,44 @@ env::ResourceManager::~ResourceManager()
 	m_windowTargets.clear();
 }
 
+env::Resource* env::ResourceManager::GetResourceNonConst(ID resourceID)
+{
+	if (m_buffersArrays.count(resourceID) > 0)
+		return m_buffersArrays[resourceID];
+	else if (m_constantBuffers.count(resourceID) > 0)
+		return m_constantBuffers[resourceID];
+	else if (m_indexBuffers.count(resourceID) > 0)
+		return m_indexBuffers[resourceID];
+	else if (m_vertexBuffers.count(resourceID) > 0)
+		return m_vertexBuffers[resourceID];
+	else if (m_texture2Ds.count(resourceID) > 0)
+		return m_texture2Ds[resourceID];
+	else if (m_texture2DArrays.count(resourceID) > 0)
+		return m_texture2DArrays[resourceID];
+	else if (m_pipelineStates.count(resourceID) > 0)
+		return m_pipelineStates[resourceID];
+	else if (m_windowTargets.count(resourceID) > 0)
+		return m_windowTargets[resourceID];
+	return nullptr;
+}
+
+void env::ResourceManager::AdjustViewportAndScissorRect(WindowTarget& target)
+{
+	int windowWidth = target.AppWindow->GetWidth();
+	int windowHeight = target.AppWindow->GetHeight();
+	target.Viewport.TopLeftX = windowWidth * target.startXFactor;
+	target.Viewport.TopLeftY = windowHeight * target.startYFactor;
+	target.Viewport.Width = windowWidth * target.widthFactor;
+	target.Viewport.Height = windowHeight * target.heightFactor;
+	target.Viewport.MinDepth = 0.0f;
+	target.Viewport.MaxDepth = 0.0f;
+
+	target.ScissorRect.left = target.Viewport.TopLeftX;
+	target.ScissorRect.top = target.Viewport.TopLeftY;
+	target.ScissorRect.right = target.Viewport.TopLeftX + target.Viewport.Width;
+	target.ScissorRect.bottom = target.Viewport.TopLeftY + target.Viewport.Height;
+}
+
 ID env::ResourceManager::CreateBufferArray(const std::string& name, int numBuffers, const BufferLayout& layout, void* initialData)
 {
 	return ID();
@@ -104,13 +145,15 @@ ID env::ResourceManager::CreateConstantBuffer(const std::string& name, const Buf
 {
 	HRESULT hr = S_OK;
 
-	ConstantBuffer buffer;
+	ConstantBuffer bufferDesc;
 
-	buffer.Name = name;
-	buffer.State = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
-	buffer.Layout = layout;
+	bufferDesc.Name = name;
+	bufferDesc.State = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+	bufferDesc.Layout = layout;
 
-	{
+	UINT bufferWidth = (UINT)bufferDesc.Layout.GetByteWidth();
+
+	{ // Create the resource
 		D3D12_HEAP_PROPERTIES heapProperties;
 		ZeroMemory(&heapProperties, sizeof(heapProperties));
 		heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
@@ -121,7 +164,7 @@ ID env::ResourceManager::CreateConstantBuffer(const std::string& name, const Buf
 		ZeroMemory(&resourceDescription, sizeof(resourceDescription));
 		resourceDescription.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
 		resourceDescription.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
-		resourceDescription.Width = (UINT64)layout.GetByteWidth();
+		resourceDescription.Width = (UINT64)bufferWidth;
 		resourceDescription.Height = 1;
 		resourceDescription.DepthOrArraySize = 1;
 		resourceDescription.MipLevels = 1;
@@ -132,31 +175,129 @@ ID env::ResourceManager::CreateConstantBuffer(const std::string& name, const Buf
 		hr = GPU::GetDevice()->CreateCommittedResource(&heapProperties,
 			D3D12_HEAP_FLAG_NONE,
 			&resourceDescription,
-			buffer.State,
+			bufferDesc.State,
 			NULL,
-			IID_PPV_ARGS(&buffer.Native));
+			IID_PPV_ARGS(&bufferDesc.Native));
 
 		ASSERT_HR(hr, "Could not create constant buffer");
 	}
 
-	{
-
-	}
-
 	ID resourceID = m_commonIDGenerator.GenerateUnique();
-	m_constantBuffers[resourceID] = new ConstantBuffer(std::move(buffer));
+	ConstantBuffer* buffer = new ConstantBuffer(std::move(bufferDesc));
+	m_constantBuffers[resourceID] = buffer;
+
+	if (initialData)
+	{
+		UploadBufferData(resourceID, initialData, bufferWidth);
+	}
 
 	return resourceID;
 }
 
 ID env::ResourceManager::CreateIndexBuffer(const std::string& name, int numIndices, void* initialData)
 {
-	return ID();
+	HRESULT hr = S_OK;
+
+	IndexBuffer bufferDesc;
+
+	bufferDesc.Name = name;
+	bufferDesc.State = D3D12_RESOURCE_STATE_INDEX_BUFFER;
+	bufferDesc.NumIndices = numIndices;
+
+	UINT bufferWidth = bufferDesc.GetByteWidth();
+
+	{ // Create the resource
+		D3D12_HEAP_PROPERTIES heapProperties;
+		ZeroMemory(&heapProperties, sizeof(heapProperties));
+		heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
+		heapProperties.CreationNodeMask = 1;
+		heapProperties.VisibleNodeMask = 1;
+
+		D3D12_RESOURCE_DESC resourceDescription;
+		ZeroMemory(&resourceDescription, sizeof(resourceDescription));
+		resourceDescription.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+		resourceDescription.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+		resourceDescription.Width = (UINT64)bufferWidth;
+		resourceDescription.Height = 1;
+		resourceDescription.DepthOrArraySize = 1;
+		resourceDescription.MipLevels = 1;
+		resourceDescription.Format = DXGI_FORMAT_UNKNOWN;
+		resourceDescription.SampleDesc.Count = 1;
+		resourceDescription.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+		hr = GPU::GetDevice()->CreateCommittedResource(&heapProperties,
+			D3D12_HEAP_FLAG_NONE,
+			&resourceDescription,
+			bufferDesc.State,
+			NULL,
+			IID_PPV_ARGS(&bufferDesc.Native));
+
+		ASSERT_HR(hr, "Could not create index buffer");
+	}
+
+	ID resourceID = m_commonIDGenerator.GenerateUnique();
+	IndexBuffer* buffer = new IndexBuffer(std::move(bufferDesc));
+	m_indexBuffers[resourceID] = buffer;
+
+	if (initialData)
+	{
+		UploadBufferData(resourceID, initialData, bufferWidth);
+	}
+
+	return resourceID;
 }
 
 ID env::ResourceManager::CreateVertexBuffer(const std::string& name, int numVertices, const BufferLayout& layout, void* initialData)
 {
-	return ID();
+	HRESULT hr = S_OK;
+
+	VertexBuffer bufferDesc;
+
+	bufferDesc.Name = name;
+	bufferDesc.State = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+	bufferDesc.Layout = layout;
+
+	UINT bufferWidth = (UINT)bufferDesc.Layout.GetByteWidth();
+
+	{ // Create the resource
+		D3D12_HEAP_PROPERTIES heapProperties;
+		ZeroMemory(&heapProperties, sizeof(heapProperties));
+		heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
+		heapProperties.CreationNodeMask = 1;
+		heapProperties.VisibleNodeMask = 1;
+
+		D3D12_RESOURCE_DESC resourceDescription;
+		ZeroMemory(&resourceDescription, sizeof(resourceDescription));
+		resourceDescription.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+		resourceDescription.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+		resourceDescription.Width = (UINT64)bufferWidth;
+		resourceDescription.Height = 1;
+		resourceDescription.DepthOrArraySize = 1;
+		resourceDescription.MipLevels = 1;
+		resourceDescription.Format = DXGI_FORMAT_UNKNOWN;
+		resourceDescription.SampleDesc.Count = 1;
+		resourceDescription.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+		hr = GPU::GetDevice()->CreateCommittedResource(&heapProperties,
+			D3D12_HEAP_FLAG_NONE,
+			&resourceDescription,
+			bufferDesc.State,
+			NULL,
+			IID_PPV_ARGS(&bufferDesc.Native));
+
+		ASSERT_HR(hr, "Could not create vertex buffer");
+	}
+
+	ID resourceID = m_commonIDGenerator.GenerateUnique();
+	VertexBuffer* buffer = new VertexBuffer(std::move(bufferDesc));
+	m_vertexBuffers[resourceID] = buffer;
+
+	if (initialData)
+	{
+		UploadBufferData(resourceID, initialData, bufferWidth);
+	}
+
+	return resourceID;
 }
 
 ID env::ResourceManager::CreateTexture2D(const std::string& name, int width, int height, TextureLayout layout, void* initialData)
@@ -174,9 +315,70 @@ ID env::ResourceManager::CreatePipelineState(const std::string& name, const std:
 	return ID();
 }
 
-ID env::ResourceManager::CreateWindowTarget(const std::string& name, HWND window, float startXFactor, float startYFactor, float widthFactor, float heightFactor)
+ID env::ResourceManager::CreateWindowTarget(const std::string& name, Window* window, float startXFactor, float startYFactor, float widthFactor, float heightFactor)
 {
-	return ID();
+	HRESULT hr = S_OK;
+
+	WindowTarget targetDesc;	
+
+	{ // Init base values
+		targetDesc.AppWindow = window;
+
+		UINT windowWidth = (UINT)window->GetWidth();
+		UINT windiwHeight = (UINT)window->GetHeight();
+
+		targetDesc.Name = name;
+		targetDesc.State = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+		targetDesc.startXFactor = startXFactor;
+		targetDesc.startYFactor = startYFactor;
+		targetDesc.startYFactor = startYFactor;
+		targetDesc.widthFactor = widthFactor;
+		targetDesc.heightFactor = heightFactor;
+
+		// TODO: Adjust these to factors?
+		targetDesc.Width = windowWidth;
+		targetDesc.Height = windiwHeight;
+
+		AdjustViewportAndScissorRect(targetDesc);
+	}
+
+	{ // Create swap chain
+		DXGI_SWAP_CHAIN_DESC1 swapChainDesc = { 0 };
+		ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
+		swapChainDesc.Width = targetDesc.Width;
+		swapChainDesc.Height = targetDesc.Height;
+		swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		swapChainDesc.SampleDesc.Count = 1;
+		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		swapChainDesc.BufferCount = 2;
+		swapChainDesc.Scaling = DXGI_SCALING_NONE;
+		//swapChainDesc.Windowed = true;
+		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+
+		IDXGIFactory7* factory = nullptr;
+
+#ifdef _DEBUG
+		hr = CreateDXGIFactory2(DXGI_CREATE_FACTORY_DEBUG, IID_PPV_ARGS(&factory));
+#else
+		hr = CreateDXGIFactory(IID_PPV_ARGS(&g_factory));
+#endif
+		ASSERT_HR(hr, "Could not create DXGIFactory");
+
+		hr = factory->CreateSwapChainForHwnd(GPU::GetPresentQueue().GetCommandQueue(),
+			window->GetHandle(),
+			&swapChainDesc,
+			NULL,
+			NULL,
+			&targetDesc.SwapChain);
+
+		ASSERT_HR(hr, "Could not create swap chain");
+	}
+
+	ID resourceID = m_commonIDGenerator.GenerateUnique();
+	WindowTarget* target = new WindowTarget(std::move(targetDesc));
+	m_windowTargets[resourceID] = target;
+
+	return resourceID;
 }
 
 const env::BufferArray* env::ResourceManager::GetBufferArray(ID resourceID)
@@ -233,4 +435,77 @@ const env::WindowTarget* env::ResourceManager::GetWindowTarget(ID resourceID)
 	if (m_windowTargets.count(resourceID) == 0)
 		return nullptr;
 	return m_windowTargets[resourceID];
+}
+
+const env::Resource* env::ResourceManager::GetResource(ID resourceID)
+{
+	return (const env::Resource*)GetResourceNonConst(resourceID);
+}
+
+void env::ResourceManager::UploadBufferData(ID resourceID, void* data, UINT numBytes, UINT destinationOffset)
+{
+	Resource* buffer = GetResourceNonConst(resourceID);
+	assert(buffer);
+
+	if (numBytes == 0)
+		numBytes = buffer->GetByteWidth();
+
+	{ // Upload data
+		void* destination = nullptr;
+		D3D12_RANGE readRange = { 0,0 };
+
+		HRESULT hr = S_OK;
+		hr = m_uploadBuffer.Native->Map(0, &readRange, &destination);
+		ASSERT_HR(hr, "Could not map constant buffer");
+
+		destination = ((char*)destination) + destinationOffset;
+		memcpy(destination, data, numBytes);
+
+		m_uploadBuffer.Native->Unmap(0, NULL);
+	}
+
+	{ // Copy data to the actual buffer
+
+		CommandQueue& directQueue = GPU::GetDirectQueue();
+
+		D3D12_RESOURCE_STATES initialState = buffer->State;
+
+		{
+			m_transitionList->Reset();
+			m_transitionList->TransitionResource(buffer, D3D12_RESOURCE_STATE_COPY_DEST);
+			m_transitionList->CopyBufferRegion(buffer, 0, &m_uploadBuffer, 0, numBytes);
+			m_transitionList->TransitionResource(buffer, initialState);
+			m_transitionList->Close();
+			directQueue.QueueList(m_transitionList);
+			directQueue.Execute();
+			directQueue.WaitForIdle();
+		}
+
+		//{
+			//CommandQueue& copyQueue = GPU::GetCopyQueue();
+
+			//m_transitionList->Reset();
+			//m_transitionList->TransitionResource(buffer, D3D12_RESOURCE_STATE_COPY_DEST);
+			//m_transitionList->Close();
+			//directQueue.QueueList(m_transitionList);
+			//directQueue.Execute();
+			//directQueue.IncrementFence();
+
+			//m_copyList->Reset();
+			//m_copyList->CopyBufferRegion(buffer, 0, &m_uploadBuffer, 0, numBytes);
+			//m_copyList->Close();
+			//copyQueue.WaitForQueue(&directQueue, directQueue.GetFenceValue());
+			//copyQueue.QueueList(m_copyList);
+			//copyQueue.Execute();
+			//copyQueue.IncrementFence();
+
+			//m_transitionList->Reset();
+			//m_transitionList->TransitionResource(buffer, initialState);
+			//m_transitionList->Close();
+			//directQueue.WaitForQueue(&copyQueue, copyQueue.GetFenceValue());
+			//directQueue.QueueList(m_transitionList);
+			//directQueue.Execute();
+			//directQueue.WaitForIdle();
+		//}
+	}
 }

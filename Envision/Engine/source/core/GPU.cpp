@@ -27,16 +27,19 @@ env::GPU::GPU() : m_device(nullptr),
 	m_maxVideoMemory(0),
 	m_directQueue(D3D12_COMMAND_LIST_TYPE_DIRECT),
 	m_computeQueue(D3D12_COMMAND_LIST_TYPE_COMPUTE),
-	m_copyQueue(D3D12_COMMAND_LIST_TYPE_COPY)
+	m_copyQueue(D3D12_COMMAND_LIST_TYPE_COPY),
+	m_presentQueue(D3D12_COMMAND_LIST_TYPE_DIRECT)
 {
 	InitDevice();
 	m_directQueue.Initialize(m_device);
 	m_computeQueue.Initialize(m_device);
 	m_copyQueue.Initialize(m_device);
+	m_presentQueue.Initialize(m_device);
 }
 
 env::GPU::~GPU()
 {
+	m_device->Release();
 }
 
 ID3D12Device* env::GPU::GetDevice()
@@ -57,6 +60,44 @@ env::CommandQueue& env::GPU::GetComputeQueue()
 env::CommandQueue& env::GPU::GetCopyQueue()
 {
 	return Get()->m_copyQueue;
+}
+
+env::CommandQueue& env::GPU::GetPresentQueue()
+{
+	return Get()->m_presentQueue;
+}
+
+env::DirectList* env::GPU::CreateDirectCommandList(bool recordDirectly)
+{
+	DirectList* list = new DirectList();
+	list->Initialize(Get()->m_device);
+
+	if (!recordDirectly)
+		list->Close();
+
+	return list;
+}
+
+env::ComputeList* env::GPU::CreateComputeCommandList(bool recordDirectly)
+{
+	ComputeList* list = new ComputeList();
+	list->Initialize(Get()->m_device);
+
+	if (!recordDirectly)
+		list->Close();
+
+	return list;
+}
+
+env::CopyList* env::GPU::CreateCopyCommandList(bool recordDirectly)
+{
+	CopyList* list = new CopyList();
+	list->Initialize(Get()->m_device);
+
+	if (!recordDirectly)
+		list->Close();
+
+	return list;
 }
 
 void env::GPU::InitDevice()

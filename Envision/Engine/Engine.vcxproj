@@ -152,12 +152,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="include\envision\core\CommandQueue.cpp" />
-    <ClCompile Include="include\envision\platform\PlatformAdapter.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="source\core\Application.cpp" />
     <ClCompile Include="source\core\CommandList.cpp" />
     <ClCompile Include="source\core\DescriptorAllocator.cpp" />
     <ClCompile Include="source\core\GPU.cpp" />
+    <ClCompile Include="source\core\Window.cpp" />
     <ClCompile Include="source\envpch.cpp" />
     <ClCompile Include="source\core\IDGenerator.cpp" />
     <ClCompile Include="source\graphics\AssetManager.cpp" />
@@ -168,7 +168,12 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="source\platform\Windows\WindowsWindow.cpp" />
+    <ClCompile Include="source\platform\Windows\WindowsWindow.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="source\resource\BufferLayout.cpp" />
     <ClCompile Include="source\resource\ResourceManager.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -200,7 +205,12 @@
     <ClInclude Include="include\envision\graphics\AssetManager.h" />
     <ClInclude Include="include\envision\graphics\Assets.h" />
     <ClInclude Include="include\envision\graphics\Renderer.h" />
-    <ClInclude Include="include\envision\platform\Windows\WindowsWindow.h" />
+    <ClInclude Include="include\envision\platform\Windows\WindowsWindow.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="include\envision\resource\BufferLayout.h" />
     <ClInclude Include="include\envision\resource\PipelineState.h" />
     <ClInclude Include="include\envision\resource\Resource.h" />

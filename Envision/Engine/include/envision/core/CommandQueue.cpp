@@ -1,3 +1,4 @@
+#include "envision/envpch.h"
 #include "CommandQueue.h"
 
 env::CommandQueue::CommandQueue(D3D12_COMMAND_LIST_TYPE type) :
@@ -89,4 +90,32 @@ UINT64 env::CommandQueue::GetNextFenceValue() const
 ID3D12CommandQueue* env::CommandQueue::GetCommandQueue()
 {
     return m_queue;
+}
+
+void env::CommandQueue::QueueList(CommandList* list)
+{
+    assert(list->GetType() >= m_type);
+    assert(list->GetState() == ListState::Closed);
+
+    m_queuedLists.push_back(list);
+    list->m_state = ListState::Queued;
+}
+
+void env::CommandQueue::Execute()
+{
+    std::vector<ID3D12CommandList*> lists;
+
+    // Copy only the native list pointers
+    std::for_each(m_queuedLists.begin(),
+        m_queuedLists.end(),
+        [&lists](CommandList*& list) { lists.push_back(list->m_list); });
+
+    m_queue->ExecuteCommandLists((UINT)lists.size(), lists.data());
+
+    // Return the state of each list to normal, so that the are
+    // not "queued" anymore.
+    std::for_each(m_queuedLists.begin(),
+        m_queuedLists.end(),
+        [](CommandList*& list) { list->m_state = ListState::Closed; });
+    m_queuedLists.clear();
 }
