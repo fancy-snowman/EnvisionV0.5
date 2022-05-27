@@ -63,7 +63,7 @@ namespace env
 		ID CreateConstantBuffer(const std::string& name, const BufferLayout& layout, void* initialData = nullptr);
 		ID CreateIndexBuffer(const std::string& name, int numIndices, void* initialData = nullptr);
 		ID CreateVertexBuffer(const std::string& name, int numVertices, const BufferLayout& layout, void* initialData = nullptr);
-		ID CreateTexture2D(const std::string& name, int width, int height, TextureLayout layout, void* initialData = nullptr);
+		ID CreateTexture2D(const std::string& name, int width, int height, TextureLayout layout, BindType bindType = BindType::RenderTarget | BindType::ShaderResource | BindType::UnorderedAccess, void* initialData = nullptr);
 		ID CreateTexture2DArray(const std::string& name, int numTextures, int width, int height, TextureLayout layout, void* initialData = nullptr);
 		ID CreatePipelineState(const std::string& name, const std::string& shaderPath);
 		ID CreateWindowTarget(const std::string& name, Window* window, float startXFactor = 0.f, float startYFactor = 0.f, float widthFactor = 1.f, float heightFactor = 1.f);

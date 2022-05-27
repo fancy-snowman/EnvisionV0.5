@@ -300,9 +300,79 @@ ID env::ResourceManager::CreateVertexBuffer(const std::string& name, int numVert
 	return resourceID;
 }
 
-ID env::ResourceManager::CreateTexture2D(const std::string& name, int width, int height, TextureLayout layout, void* initialData)
+ID env::ResourceManager::CreateTexture2D(const std::string& name, int width, int height, TextureLayout layout, BindType bindType, void* initialData)
 {
-	return ID();
+	HRESULT hr = S_OK;
+
+	Texture2D textureDesc;
+
+	textureDesc.Name = name;
+	textureDesc.State = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+
+	textureDesc.Width = width;
+	textureDesc.Height = height;
+	textureDesc.Layout = layout;
+
+	{ // Create the resource
+		D3D12_HEAP_PROPERTIES heapProperties;
+		ZeroMemory(&heapProperties, sizeof(heapProperties));
+		heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
+		heapProperties.CreationNodeMask = 1;
+		heapProperties.VisibleNodeMask = 1;
+
+		D3D12_RESOURCE_DESC resourceDescription;
+		ZeroMemory(&resourceDescription, sizeof(resourceDescription));
+		resourceDescription.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		resourceDescription.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+		resourceDescription.Width = (UINT64)textureDesc.Width;
+		resourceDescription.Height = textureDesc.Height;
+		resourceDescription.DepthOrArraySize = 1;
+		resourceDescription.MipLevels = 1;
+		resourceDescription.Format = GetDXGIFormat(layout);
+		resourceDescription.SampleDesc.Count = 1;
+		resourceDescription.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+
+		D3D12_PLACED_SUBRESOURCE_FOOTPRINT footprint = { 0 };
+		UINT numRows = 0;
+		GPU::GetDevice()->GetCopyableFootprints(&resourceDescription,
+			0,
+			1,
+			0,
+			&footprint,
+			&numRows,
+			&textureDesc.RowPitch,
+			&textureDesc.ByteWidth);
+
+		hr = GPU::GetDevice()->CreateCommittedResource(&heapProperties,
+			D3D12_HEAP_FLAG_NONE,
+			&resourceDescription,
+			textureDesc.State,
+			NULL,
+			IID_PPV_ARGS(&textureDesc.Native));
+
+		ASSERT_HR(hr, "Could not create texture 2D buffer");
+	}
+
+	ID resourceID = m_commonIDGenerator.GenerateUnique();
+	Texture2D* texture = new Texture2D(std::move(textureDesc));
+	m_texture2Ds[resourceID] = texture;
+
+	{
+		if (any(bindType & BindType::RenderTarget))
+			texture->Views.RenderTarget = m_RTVAllocator.Allocate(texture);
+		if (any(bindType & BindType::ShaderResource))
+			texture->Views.ShaderResource = m_SRVAllocator.Allocate(texture);
+		if (any(bindType & BindType::UnorderedAccess))
+			texture->Views.UnorderedAccess = m_UAVAllocator.Allocate(texture);
+	}
+
+	if (initialData)
+	{
+		// TODO: UploadTextureData
+		//UploadBufferData(resourceID, initialData, bufferWidth);
+	}
+
+	return resourceID;
 }
 
 ID env::ResourceManager::CreateTexture2DArray(const std::string& name, int numTextures, int width, int height, TextureLayout layout, void* initialData)

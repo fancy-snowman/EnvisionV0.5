@@ -163,6 +163,7 @@
     <ClCompile Include="source\graphics\AssetManager.cpp" />
     <ClCompile Include="source\graphics\Renderer.cpp" />
     <ClCompile Include="source\resource\BufferLayout.cpp" />
+    <ClCompile Include="source\resource\Resource.cpp" />
     <ClCompile Include="source\resource\ResourceManager.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ExcludedFromBuild>

@@ -3,6 +3,7 @@
 #include "envision/core/GPU.h"
 #include "envision/core/Time.h"
 #include "envision/graphics/AssetManager.h"
+#include "envision/graphics/Renderer.h"
 #include "envision/resource/ResourceManager.h"
 
 env::Application::Application(int argc, char** argv, const std::string& name) :
@@ -11,7 +12,7 @@ env::Application::Application(int argc, char** argv, const std::string& name) :
 	GPU::Initialize();
 	ResourceManager::Initialize(m_IDGenerator);
 	AssetManager::Initialize(m_IDGenerator);
-	// TODO: Renderer
+	Renderer::Initialize(m_IDGenerator);
 }
 
 env::Application::~Application()

@@ -11,5 +11,6 @@ namespace env
 		RGBA_FLOAT,
 	};
 
-	size_t GetTextureLayoutTypeStride(TextureLayout type);
+	size_t GetTextureLayoutTypeStride(TextureLayout layout);
+	DXGI_FORMAT GetDXGIFormat(TextureLayout layout);
 }

@@ -1,30 +1,45 @@
 #pragma once
 #include "envision/envpch.h"
-#include "envision/graphics/AssetManager.h"
-#include "envision/resource/ResourceManager.h"
+#include "envision/core/IDGenerator.h"
+#include "envision/graphics/Assets.h"
+#include "envision/resource/Resource.h"
 
 namespace env
 {
+	// Singleton
 	class Renderer
 	{
-	protected:
+	private:
 
 		env::IDGenerator& m_commonIDGenerator;
 
+		ID m_intermediateTarget;
+		ID m_phongBuffer;
+
 	public:
+
+		static Renderer* Initialize(IDGenerator& commonIDGenerator);
+		static Renderer* Get();
+		static void Finalize();
+
+	private:
+
+		static Renderer* s_instance;
 
 		Renderer(env::IDGenerator& commonIDGenerator);
-		virtual ~Renderer();
+		~Renderer();
+
+		Renderer(const Renderer& other) = delete;
+		Renderer(const Renderer&& other) = delete;
+		Renderer& operator=(const Renderer& other) = delete;
+		Renderer& operator=(const Renderer&& other) = delete;
 
 	public:
 
-		virtual void Initialize() = 0;
+		void Initialize();
 
-		virtual void BeginFrame(ID target) = 0;
-		virtual void Submit(ID mesh, ID material) = 0;
-		virtual void EndFrame() = 0;
+		void BeginFrame(ID target);
+		void Submit(ID mesh, ID material);
+		void EndFrame();
 	};
-
-	// Defined in PlatformAdapter.cpp
-	Renderer* CreateRenderer();
 }

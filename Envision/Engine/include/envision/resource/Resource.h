@@ -28,6 +28,18 @@ namespace env
 		WindowTarget,
 	};
 
+	enum class BindType
+	{
+		Unknown = 0,
+
+		RenderTarget = 1 << 0,
+		ShaderResource = 1 << 1,
+		UnorderedAccess = 1 << 2,
+	};
+	BindType operator|(BindType a, BindType b);
+	BindType operator&(BindType a, BindType b);
+	bool any(BindType type);
+
 	struct Resource
 	{
 		Resource() = default;
@@ -98,8 +110,8 @@ namespace env
 
 		int Width;
 		int Height;
-		int ByteWidth;
-		int RowPitch;
+		UINT64 RowPitch;
+		UINT64 ByteWidth;
 		TextureLayout Layout;
 
 		struct {
@@ -148,7 +160,10 @@ namespace env
 		env::Window* AppWindow;
 		RECT ScissorRect;
 		D3D12_VIEWPORT Viewport;
+
 		IDXGISwapChain1* SwapChain;
+		int ActiveBackBufferIndex;
+		D3D12_CPU_DESCRIPTOR_HANDLE RTVs[2];
 
 		struct {
 			D3D12_CPU_DESCRIPTOR_HANDLE RenderTarget = { 0 };
