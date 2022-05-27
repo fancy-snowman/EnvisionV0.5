@@ -91,14 +91,23 @@ ID env::AssetManager::CreateMesh(const std::string& name)
 
 ID env::AssetManager::CreatePhongMaterial(const std::string& name)
 {
-	//ID materialID = m_IDGenerator.GenerateUnique();
-	//PhongMaterial* material = new PhongMaterial(materialID, "Test material");
-	//material->DiffuseFactor = { 0.8f, 0.4f, 0.4f };
-	//material->AmbientFactor = { 0.4f, 0.8f, 0.4f };
-	//material->SpecularFactor = { 0.4f, 0.4f, 0.8f };
+	ID materialID = m_commonIDGenerator.GenerateUnique();
+	PhongMaterial* material = new PhongMaterial(materialID, "TestMaterial");
+	material->PerInstanceData.DiffuseFactor = { 0.8f, 0.4f, 0.4f };
+	material->PerInstanceData.AmbientFactor = { 0.4f, 0.8f, 0.4f };
+	material->PerInstanceData.SpecularFactor = { 0.4f, 0.4f, 0.8f };
+	material->PerInstanceData.SpecularExponent = 5.0f;
 
-	//m_materials[materialID] = material;
+	material->PerInstanceBufferLayout = {
+		{ "DiffuseFactor", ShaderDataType::Float3 },
+		{ "Padding1", ShaderDataType::Float },
+		{ "AmbientFactor", ShaderDataType::Float3 },
+		{ "Padding2", ShaderDataType::Float },
+		{ "SpecularFactor", ShaderDataType::Float3 },
+		{ "SpecularExponent", ShaderDataType::Float },
+	};
 
-	//return materialID;
-	return 0;
+	m_materials[materialID] = material;
+
+	return materialID;
 }

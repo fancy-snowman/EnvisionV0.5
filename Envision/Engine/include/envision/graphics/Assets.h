@@ -1,5 +1,6 @@
 #pragma once
 #include "envision/envpch.h"
+#include "envision/resource/BufferLayout.h"
 
 namespace env
 {
@@ -39,6 +40,9 @@ namespace env
 		// TODO: Is this needed?
 		// Surely for custom materials?
 
+		BufferLayout AllInstanceBufferLayout;
+		BufferLayout PerInstanceBufferLayout;
+
 		Material(const ID resourceID, const std::string& name) :
 			Asset(resourceID, name, AssetType::Material) {}
 	};
@@ -49,26 +53,29 @@ namespace env
 		ID AmbientMap = ID_ERROR;
 		ID SpecularMap = ID_ERROR;
 
-		float SpecularExponent = 0;
-
 		// TODO: Change to float3
 		struct {
-			float X = 0;
-			float Y = 0;
-			float Z = 0;
-		} DiffuseFactor;
+			struct {
+				float X = 0;
+				float Y = 0;
+				float Z = 0;
+			} DiffuseFactor;
+			float Padding1 = 0;
 
-		struct {
-			float X = 0;
-			float Y = 0;
-			float Z = 0;
-		} AmbientFactor;
+			struct {
+				float X = 0;
+				float Y = 0;
+				float Z = 0;
+			} AmbientFactor;
+			float Padding2 = 0;
 
-		struct {
-			float X = 0;
-			float Y = 0;
-			float Z = 0;
-		} SpecularFactor;
+			struct {
+				float X = 0;
+				float Y = 0;
+				float Z = 0;
+			} SpecularFactor;
+			float SpecularExponent = 0;
+		} PerInstanceData;
 
 		PhongMaterial(const ID resourceID, const std::string& name) :
 			Material(resourceID, name) {}

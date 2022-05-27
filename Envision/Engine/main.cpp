@@ -77,9 +77,7 @@ public:
 
 		ID target = env::ResourceManager::Get()->CreateWindowTarget("TargetWindow", m_window);
 		ID mesh = env::AssetManager::Get()->CreateMesh("DefaultMesh");
-
-
-		//ID material = m_assetManager->CreatePhongMaterial("DefaultMaterial");
+		ID material = env::AssetManager::Get()->CreatePhongMaterial("DefaultMaterial");
 
 		//m_renderer->BeginFrame(target);
 		//m_renderer->Submit(mesh, material);
