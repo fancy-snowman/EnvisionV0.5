@@ -178,6 +178,7 @@ void env::DirectList::SetPrimitiveTopology(D3D12_PRIMITIVE_TOPOLOGY topology)
 
 void env::DirectList::SetPipelineState(PipelineState* state)
 {
+	m_list->SetGraphicsRootSignature(state->RootSignature);
 	m_list->SetPipelineState(state->State);
 }
 
@@ -185,7 +186,11 @@ void env::DirectList::SetWindowTarget(WindowTarget* target)
 {
 	m_list->RSSetViewports(1, &target->Viewport);
 	m_list->RSSetScissorRects(1, &target->ScissorRect);
-	m_list->OMSetRenderTargets(1, &target->Views.RenderTarget, FALSE, NULL);
+
+	Texture2D* backbuffer = target->GetActiveBackbuffer();
+
+	TransitionResource(backbuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	m_list->OMSetRenderTargets(1, &backbuffer->Views.RenderTarget, FALSE, NULL);
 }
 
 void env::DirectList::SetIndexBuffer(IndexBuffer* buffer)
@@ -198,4 +203,5 @@ void env::DirectList::SetVertexBuffer(VertexBuffer* buffer, UINT slot)
 {
 	TransitionResource(buffer, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 	m_list->IASetVertexBuffers(slot, 1, &buffer->Views.VertexBuffer);
+	m_list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // Define this in vertex buffer
 }

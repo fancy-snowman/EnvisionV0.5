@@ -1,7 +1,7 @@
 #pragma once
 #include "envision/envpch.h"
+#include "envision/graphics/Shader.h"
 #include "envision/resource/BufferLayout.h"
-#include "envision/resource/TextureLayout.h"
 
 #define RESOURCE_TYPE(type)\
 	static ResourceType GetStaticType() { return ResourceType::type; }\
@@ -56,9 +56,10 @@ namespace env
 	struct BufferArray : public Resource
 	{
 		RESOURCE_TYPE(BufferArray)
-		UINT GetByteWidth() final { return (UINT)Layout.GetByteWidth(); }
+		UINT GetByteWidth() final { return (UINT)Layout.GetByteWidth() * NumBuffers; }
 			
 		BufferLayout Layout;
+		UINT NumBuffers;
 
 		struct {
 			D3D12_CPU_DESCRIPTOR_HANDLE ShaderResource = { 0 };
@@ -68,13 +69,12 @@ namespace env
 	struct ConstantBuffer : public Resource
 	{
 		RESOURCE_TYPE(ConstantBuffer)
-		UINT GetByteWidth() final { return (UINT)Layout.GetByteWidth(); }
+		UINT GetByteWidth() final { return (UINT)(Layout.GetByteWidth() + 255) & ~255; }
 
 		BufferLayout Layout;
 
 		struct {
 			D3D12_CPU_DESCRIPTOR_HANDLE ConstantBuffer = { 0 };
-			D3D12_CPU_DESCRIPTOR_HANDLE ShaderResource = { 0 };
 			D3D12_CPU_DESCRIPTOR_HANDLE UnorderedAccess = { 0 };
 		} Views;
 	};
@@ -106,13 +106,13 @@ namespace env
 	struct Texture2D : public Resource
 	{
 		RESOURCE_TYPE(Texture2D)
-		UINT GetByteWidth() final { return (UINT)(RowPitch * GetTextureLayoutTypeStride(Layout) * Height); }
+		UINT GetByteWidth() final { return (UINT)(ByteWidth); }
 
 		int Width;
 		int Height;
 		UINT64 RowPitch;
 		UINT64 ByteWidth;
-		TextureLayout Layout;
+		DXGI_FORMAT Format;
 
 		struct {
 			D3D12_CPU_DESCRIPTOR_HANDLE RenderTarget = { 0 };
@@ -124,14 +124,14 @@ namespace env
 	struct Texture2DArray : public Resource
 	{
 		RESOURCE_TYPE(Texture2DArray)
-		UINT GetByteWidth() final { return (UINT)(RowPitch * GetTextureLayoutTypeStride(Layout) * Height * NumTextures); }
+		UINT GetByteWidth() final { return (UINT)(ByteWidth); }
 
 		int NumTextures;
 		int Width;
 		int Height;
 		int ByteWidth;
 		int RowPitch;
-		TextureLayout Layout;
+		DXGI_FORMAT Format;
 
 		struct {
 			D3D12_CPU_DESCRIPTOR_HANDLE ShaderResource = { 0 };
@@ -142,6 +142,8 @@ namespace env
 	{
 		RESOURCE_TYPE(PipelineState)
 
+		ShaderStage ShaderStages;
+		ID3D12RootSignature* RootSignature;
 		ID3D12PipelineState* State;
 	};
 
@@ -150,6 +152,8 @@ namespace env
 	struct WindowTarget : public Resource
 	{
 		RESOURCE_TYPE(WindowTarget)
+
+		static const int NUM_BACK_BUFFERS = 2;
 
 		int Width;
 		int Height;
@@ -162,11 +166,12 @@ namespace env
 		D3D12_VIEWPORT Viewport;
 
 		IDXGISwapChain1* SwapChain;
-		int ActiveBackBufferIndex;
-		D3D12_CPU_DESCRIPTOR_HANDLE RTVs[2];
+		int ActiveBackBufferIndex = 0;
 
-		struct {
-			D3D12_CPU_DESCRIPTOR_HANDLE RenderTarget = { 0 };
-		} Views;
+		Texture2D* Backbuffers[NUM_BACK_BUFFERS];
+		inline Texture2D* GetActiveBackbuffer()
+		{
+			return Backbuffers[ActiveBackBufferIndex];
+		}
 	};
 }

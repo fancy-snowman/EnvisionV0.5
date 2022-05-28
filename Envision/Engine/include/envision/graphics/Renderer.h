@@ -1,5 +1,6 @@
 #pragma once
 #include "envision/envpch.h"
+#include "envision/core/GPU.h"
 #include "envision/core/IDGenerator.h"
 #include "envision/graphics/Assets.h"
 #include "envision/resource/Resource.h"
@@ -13,8 +14,16 @@ namespace env
 
 		env::IDGenerator& m_commonIDGenerator;
 
+		DirectList* m_directList;
+
+		ID m_pipelineState;
+
 		ID m_intermediateTarget;
 		ID m_phongBuffer;
+
+		struct {
+			Resource* Target;
+		} m_frameInfo;
 
 	public:
 

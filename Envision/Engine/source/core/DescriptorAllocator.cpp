@@ -29,15 +29,18 @@ env::DescriptorAllocator::~DescriptorAllocator()
 
 D3D12_CPU_DESCRIPTOR_HANDLE env::DescriptorAllocator::Allocate(Resource* resource)
 {
-    if (m_freeList.size() > 0)
-    {
+    D3D12_CPU_DESCRIPTOR_HANDLE handle = { 0 };
+
+    if (m_freeList.size() > 0) {
         UINT freeIndex = m_freeList.back();
         m_freeList.pop_back();
-        return { m_begin.ptr + m_stride * freeIndex };
+        handle = { m_begin.ptr + m_stride * freeIndex };
     }
 
     assert(m_nextIndex != m_endIndex); // TODO: Increase heap size
-    return { m_begin.ptr + m_stride * m_nextIndex++ };
+    handle = { m_begin.ptr + m_stride * m_nextIndex++ };
+
+    return handle;
 }
 
 void env::DescriptorAllocator::Free(D3D12_CPU_DESCRIPTOR_HANDLE handle)

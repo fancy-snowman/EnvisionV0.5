@@ -64,6 +64,9 @@ void env::Application::Run()
 		Duration delta = now - past;
 		past = now;
 
+		// Update application before its layers
+		this->OnUpdate(delta);
+
 		for (auto& l : m_layerStack)
 		{
 			l->OnUpdate(delta);

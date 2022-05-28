@@ -1,10 +1,11 @@
 #pragma once
 #include "envision/envpch.h"
-#include "envision/resource/Resource.h"
 #include "envision/core/Window.h"
 #include "envision/core/IDGenerator.h"
 #include "envision/core/DescriptorAllocator.h"
 #include "envision/core/CommandList.h"
+#include "envision/graphics/Shader.h"
+#include "envision/resource/Resource.h"
 
 namespace env
 {
@@ -57,26 +58,34 @@ namespace env
 		Resource* GetResourceNonConst(ID resourceID);
 		void AdjustViewportAndScissorRect(WindowTarget& target);
 
+		D3D12_CPU_DESCRIPTOR_HANDLE CreateCBV(Resource* resource);
+		D3D12_CPU_DESCRIPTOR_HANDLE CreateSRV(Resource* resource);
+		D3D12_CPU_DESCRIPTOR_HANDLE CreateUAV(Resource* resource);
+		D3D12_CPU_DESCRIPTOR_HANDLE CreateSampler(Resource* resource);
+		D3D12_CPU_DESCRIPTOR_HANDLE CreateRTV(Resource* resource);
+		D3D12_CPU_DESCRIPTOR_HANDLE CreateDSV(Resource* resource);
+
 	public:
 
 		ID CreateBufferArray(const std::string& name, int numBuffers, const BufferLayout& layout, void* initialData = nullptr);
 		ID CreateConstantBuffer(const std::string& name, const BufferLayout& layout, void* initialData = nullptr);
 		ID CreateIndexBuffer(const std::string& name, int numIndices, void* initialData = nullptr);
 		ID CreateVertexBuffer(const std::string& name, int numVertices, const BufferLayout& layout, void* initialData = nullptr);
-		ID CreateTexture2D(const std::string& name, int width, int height, TextureLayout layout, BindType bindType = BindType::RenderTarget | BindType::ShaderResource | BindType::UnorderedAccess, void* initialData = nullptr);
-		ID CreateTexture2DArray(const std::string& name, int numTextures, int width, int height, TextureLayout layout, void* initialData = nullptr);
-		ID CreatePipelineState(const std::string& name, const std::string& shaderPath);
+		ID CreateTexture2D(const std::string& name, int width, int height, DXGI_FORMAT format, BindType bindType = BindType::RenderTarget | BindType::ShaderResource | BindType::UnorderedAccess, void* initialData = nullptr);
+		ID CreateTexture2D(const std::string& name, BindType bindType, ID3D12Resource* existingTexture);
+		ID CreateTexture2DArray(const std::string& name, int numTextures, int width, int height, DXGI_FORMAT format, void* initialData = nullptr);
+		ID CreatePipelineState(const std::string& name, std::initializer_list<ShaderDesc> shaderDescs);
 		ID CreateWindowTarget(const std::string& name, Window* window, float startXFactor = 0.f, float startYFactor = 0.f, float widthFactor = 1.f, float heightFactor = 1.f);
 
-		const BufferArray* GetBufferArray(ID resourceID);
-		const ConstantBuffer* GetConstantBuffer(ID resourceID);
-		const IndexBuffer* GetIndexBuffer(ID resourceID);
-		const VertexBuffer* GetVertexBuffer(ID resourceID);
-		const Texture2D* GetTexture2D(ID resourceID);
-		const Texture2DArray* GetTexture2DArray(ID resourceID);
-		const PipelineState* GetPipelineState(ID resourceID);
-		const WindowTarget* GetWindowTarget(ID resourceID);
-		const Resource* GetResource(ID resourceID);
+		BufferArray* GetBufferArray(ID resourceID);
+		ConstantBuffer* GetConstantBuffer(ID resourceID);
+		IndexBuffer* GetIndexBuffer(ID resourceID);
+		VertexBuffer* GetVertexBuffer(ID resourceID);
+		Texture2D* GetTexture2D(ID resourceID);
+		Texture2DArray* GetTexture2DArray(ID resourceID);
+		PipelineState* GetPipelineState(ID resourceID);
+		WindowTarget* GetWindowTarget(ID resourceID);
+		Resource* GetResource(ID resourceID);
 
 		void UploadBufferData(ID resourceID, void* data, UINT numBytes = 0, UINT destinationOffset = 0);
 	};

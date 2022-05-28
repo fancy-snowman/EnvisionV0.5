@@ -162,6 +162,7 @@
     <ClCompile Include="source\core\IDGenerator.cpp" />
     <ClCompile Include="source\graphics\AssetManager.cpp" />
     <ClCompile Include="source\graphics\Renderer.cpp" />
+    <ClCompile Include="source\graphics\Shader.cpp" />
     <ClCompile Include="source\resource\BufferLayout.cpp" />
     <ClCompile Include="source\resource\Resource.cpp" />
     <ClCompile Include="source\resource\ResourceManager.cpp">
@@ -175,7 +176,6 @@
       </ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="source\resource\ShaderDataType.cpp" />
-    <ClCompile Include="source\resource\TextureLayout.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\envision\core\Application.h" />
@@ -194,13 +194,13 @@
     <ClInclude Include="include\envision\graphics\AssetManager.h" />
     <ClInclude Include="include\envision\graphics\Assets.h" />
     <ClInclude Include="include\envision\graphics\Renderer.h" />
+    <ClInclude Include="include\envision\graphics\Shader.h" />
     <ClInclude Include="include\envision\resource\BufferLayout.h" />
     <ClInclude Include="include\envision\resource\PipelineState.h" />
     <ClInclude Include="include\envision\resource\Resource.h" />
     <ClInclude Include="include\envision\resource\ResourceManager.h" />
     <ClInclude Include="include\envision\resource\Resource_old.h" />
     <ClInclude Include="include\envision\resource\ShaderDataType.h" />
-    <ClInclude Include="include\envision\resource\TextureLayout.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

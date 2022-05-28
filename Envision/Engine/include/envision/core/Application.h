@@ -1,8 +1,9 @@
 #pragma once
 #include "envision/envpch.h"
-#include "envision/core/Layer.h"
-#include "envision/core/Window.h"
 #include "envision/core/IDGenerator.h"
+#include "envision/core/Layer.h"
+#include "envision/core/Time.h"
+#include "envision/core/Window.h"
 
 int main(int argc, char** argv);
 
@@ -20,6 +21,10 @@ namespace env
 
 		Application(int argc, char** argv, const std::string& name);
 		virtual ~Application();
+
+	public:
+
+		virtual void OnUpdate(const Duration& delta) {};
 
 	public:
 
