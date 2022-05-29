@@ -5,6 +5,7 @@
 #include "envision/core/DescriptorAllocator.h"
 #include "envision/core/CommandList.h"
 #include "envision/graphics/Shader.h"
+#include "envision/graphics/RootSignature.h"
 #include "envision/resource/Resource.h"
 
 namespace env
@@ -74,7 +75,7 @@ namespace env
 		ID CreateTexture2D(const std::string& name, int width, int height, DXGI_FORMAT format, BindType bindType = BindType::RenderTarget | BindType::ShaderResource | BindType::UnorderedAccess, void* initialData = nullptr);
 		ID CreateTexture2D(const std::string& name, BindType bindType, ID3D12Resource* existingTexture);
 		ID CreateTexture2DArray(const std::string& name, int numTextures, int width, int height, DXGI_FORMAT format, void* initialData = nullptr);
-		ID CreatePipelineState(const std::string& name, std::initializer_list<ShaderDesc> shaderDescs);
+		ID CreatePipelineState(const std::string& name, std::initializer_list<ShaderDesc> shaderDescs, bool useInputLayout, const RootSignature& rootSignature);
 		ID CreateWindowTarget(const std::string& name, Window* window, float startXFactor = 0.f, float startYFactor = 0.f, float widthFactor = 1.f, float heightFactor = 1.f);
 
 		BufferArray* GetBufferArray(ID resourceID);

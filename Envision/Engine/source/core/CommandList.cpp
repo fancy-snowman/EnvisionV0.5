@@ -52,6 +52,11 @@ env::ListState env::CommandList::GetState()
 	return m_state;
 }
 
+ID3D12GraphicsCommandList* env::CommandList::GetNative()
+{
+	return m_list;
+}
+
 void env::CommandList::TransitionResource(Resource* resource, D3D12_RESOURCE_STATES newState)
 {
 	if (resource->State != newState)

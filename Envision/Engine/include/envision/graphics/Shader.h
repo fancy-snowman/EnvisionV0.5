@@ -14,10 +14,13 @@ namespace env
 		Pixel		= 1 << 4,
 
 		Compute		= 1 << 5,
+		
+		AllVertex = Vertex | Hull | Domain | Geometry | Pixel,
 	};
 	ShaderStage operator|(ShaderStage a, ShaderStage b);
 	ShaderStage operator&(ShaderStage a, ShaderStage b);
 	bool any(ShaderStage stage);
+	D3D12_SHADER_VISIBILITY GetD3D12Visibility(const ShaderStage& stages);
 
 	enum class ShaderModel
 	{

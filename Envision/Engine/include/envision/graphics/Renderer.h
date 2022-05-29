@@ -1,6 +1,7 @@
 #pragma once
 #include "envision/envpch.h"
 #include "envision/core/GPU.h"
+#include "envision/core/DescriptorAllocator.h"
 #include "envision/core/IDGenerator.h"
 #include "envision/graphics/Assets.h"
 #include "envision/resource/Resource.h"
@@ -17,12 +18,16 @@ namespace env
 		DirectList* m_directList;
 
 		ID m_pipelineState;
-
+		
 		ID m_intermediateTarget;
-		ID m_phongBuffer;
 
+		ID m_cameraBuffer;
+		ID m_objectBuffer;
+		ID m_phongBuffer;
+		
 		struct {
 			Resource* Target;
+			DescriptorAllocator FrameDescriptorAllocator;
 		} m_frameInfo;
 
 	public:

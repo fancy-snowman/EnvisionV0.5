@@ -3,6 +3,8 @@
 #include "envision/graphics/AssetManager.h"
 #include "envision/resource/ResourceManager.h"
 
+#include "DirectXMath.h"
+
 env::Renderer* env::Renderer::s_instance = nullptr;
 
 env::Renderer* env::Renderer::Initialize(IDGenerator& commonIDGenerator)
@@ -29,9 +31,16 @@ env::Renderer::Renderer(env::IDGenerator& commonIDGenerator) :
 {
 	m_directList = GPU::CreateDirectCommandList();
 
-	m_pipelineState = ResourceManager::Get()->CreatePipelineState("PipelineState", {
-		{ ShaderStage::Vertex, ShaderModel::V5_0, "shader.hlsl", "VS_main" },
-		{ ShaderStage::Pixel, ShaderModel::V5_0, "shader.hlsl", "PS_main" } });
+	m_pipelineState = ResourceManager::Get()->CreatePipelineState("PipelineState",
+		{
+			{ ShaderStage::Vertex, ShaderModel::V5_0, "shader.hlsl", "VS_main" },
+			{ ShaderStage::Pixel, ShaderModel::V5_0, "shader.hlsl", "PS_main" }
+		},
+		true,
+		{
+			{ ParameterType::CBV, ShaderStage::Vertex, D3D12_ROOT_DESCRIPTOR{0, 0} },
+			{ ParameterType::CBV, ShaderStage::Vertex, D3D12_ROOT_DESCRIPTOR{1, 0} },
+		});
 
 	m_intermediateTarget = ResourceManager::Get()->CreateTexture2D("IntermediateTarget",
 		1200,
@@ -39,13 +48,43 @@ env::Renderer::Renderer(env::IDGenerator& commonIDGenerator) :
 		DXGI_FORMAT_R8G8B8A8_UNORM,
 		BindType::RenderTarget);
 
-	m_phongBuffer = ResourceManager::Get()->CreateConstantBuffer("PhongBuffer", {
-		{ "DiffuseFactor", ShaderDataType::Float3 },
-		{ "Padding1", ShaderDataType::Float },
-		{ "AmbientFactor", ShaderDataType::Float3 },
-		{ "Padding2", ShaderDataType::Float },
-		{ "SpecularFactor", ShaderDataType::Float3 },
-		{ "SpecularExponent", ShaderDataType::Float } });
+	using namespace DirectX;
+
+	{
+		XMMATRIX view = XMMatrixLookAtLH({ 0.0f, 0.0f, -2.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f });
+		XMMATRIX projection = XMMatrixPerspectiveFovLH(3.14f / 2.0f, 1200.f / 800.f, 1.0f, 10.f);
+
+		XMFLOAT4X4 viewProjection;
+		XMStoreFloat4x4(&viewProjection, XMMatrixTranspose(view * projection));
+
+		m_cameraBuffer = ResourceManager::Get()->CreateConstantBuffer("CameraBuffer", {
+			{ "ViewProjectionMatrix", ShaderDataType::Float4x4} },
+			&viewProjection);
+	}
+
+	{
+		XMMATRIX translation = XMMatrixTranslation(0.1f, 0.5f, 0.0f);
+		XMMATRIX rotation = XMMatrixRotationRollPitchYaw(0.785f, 1.0f, 0.0f);
+		XMMATRIX scale = XMMatrixScaling(2.0f, 2.0f, 2.0f);
+
+		XMFLOAT4X4 transform;
+		XMStoreFloat4x4(&transform, XMMatrixTranspose(scale * rotation * translation));
+
+		m_objectBuffer = ResourceManager::Get()->CreateConstantBuffer("ObjectBuffer", {
+			{ "WorldMatrix", ShaderDataType::Float4x4 } },
+			&transform);
+
+	}
+
+	//m_phongBuffer = ResourceManager::Get()->CreateConstantBuffer("PhongBuffer", {
+	//	{ "DiffuseFactor", ShaderDataType::Float3 },
+	//	{ "Padding1", ShaderDataType::Float },
+	//	{ "AmbientFactor", ShaderDataType::Float3 },
+	//	{ "Padding2", ShaderDataType::Float },
+	//	{ "SpecularFactor", ShaderDataType::Float3 },
+	//	{ "SpecularExponent", ShaderDataType::Float } });
+
+	m_frameInfo.FrameDescriptorAllocator.Initialize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 32, true);
 }
 
 env::Renderer::~Renderer()
@@ -63,10 +102,38 @@ void env::Renderer::BeginFrame(ID target)
 	PipelineState* pipeline = ResourceManager::Get()->GetPipelineState(m_pipelineState);
 
 	m_frameInfo.Target = targetWindow;
+	m_frameInfo.FrameDescriptorAllocator.Clear();
 
 	m_directList->Reset();
 	m_directList->SetWindowTarget(targetWindow);
 	m_directList->SetPipelineState(pipeline);
+
+	ID3D12DescriptorHeap* descriptorHeap = m_frameInfo.FrameDescriptorAllocator.GetHeap();
+	m_directList->SetDescriptorHeaps(1, &descriptorHeap);
+
+	{ // Set up camera
+		ConstantBuffer* cameraBuffer = ResourceManager::Get()->GetConstantBuffer(m_cameraBuffer);
+		D3D12_CPU_DESCRIPTOR_HANDLE cameraBufferSource = cameraBuffer->Views.ConstantBuffer;
+		D3D12_CPU_DESCRIPTOR_HANDLE cameraBufferDest = m_frameInfo.FrameDescriptorAllocator.Allocate();
+		GPU::GetDevice()->CopyDescriptorsSimple(1,
+			cameraBufferDest,
+			cameraBufferSource,
+			D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+		m_directList->GetNative()->SetGraphicsRootConstantBufferView(0, cameraBuffer->Native->GetGPUVirtualAddress());
+	}
+
+	{ // Set up object
+		ConstantBuffer* objectBuffer = ResourceManager::Get()->GetConstantBuffer(m_objectBuffer);
+		D3D12_CPU_DESCRIPTOR_HANDLE objectBufferSource = objectBuffer->Views.ConstantBuffer;
+		D3D12_CPU_DESCRIPTOR_HANDLE objectBufferDest = m_frameInfo.FrameDescriptorAllocator.Allocate();
+		GPU::GetDevice()->CopyDescriptorsSimple(1,
+			objectBufferDest,
+			objectBufferSource,
+			D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+		m_directList->GetNative()->SetGraphicsRootConstantBufferView(1, objectBuffer->Native->GetGPUVirtualAddress());
+	}
 }
 
 void env::Renderer::Submit(ID mesh, ID material)

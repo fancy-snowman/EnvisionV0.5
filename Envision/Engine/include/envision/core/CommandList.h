@@ -56,6 +56,7 @@ namespace env
 		void Reset();
 		void Close();
 		ListState GetState();
+		ID3D12GraphicsCommandList* GetNative();
 
 		void TransitionResource(Resource* resource, D3D12_RESOURCE_STATES newState);
 		void SetDescriptorHeaps(UINT numHeaps, ID3D12DescriptorHeap* const* heaps);

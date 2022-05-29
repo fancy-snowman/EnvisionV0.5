@@ -138,7 +138,7 @@ void env::ResourceManager::AdjustViewportAndScissorRect(WindowTarget& target)
 
 D3D12_CPU_DESCRIPTOR_HANDLE env::ResourceManager::CreateCBV(Resource* resource)
 {
-	D3D12_CPU_DESCRIPTOR_HANDLE handle = m_CBVAllocator.Allocate(resource);
+	D3D12_CPU_DESCRIPTOR_HANDLE handle = m_CBVAllocator.Allocate();
 
 	D3D12_CONSTANT_BUFFER_VIEW_DESC desc;
 	ZeroMemory(&desc, sizeof(desc));
@@ -152,7 +152,7 @@ D3D12_CPU_DESCRIPTOR_HANDLE env::ResourceManager::CreateCBV(Resource* resource)
 
 D3D12_CPU_DESCRIPTOR_HANDLE env::ResourceManager::CreateSRV(Resource* resource)
 {
-	D3D12_CPU_DESCRIPTOR_HANDLE handle = m_SRVAllocator.Allocate(resource);
+	D3D12_CPU_DESCRIPTOR_HANDLE handle = m_SRVAllocator.Allocate();
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC desc;
 	ZeroMemory(&desc, sizeof(desc));
@@ -242,7 +242,7 @@ D3D12_CPU_DESCRIPTOR_HANDLE env::ResourceManager::CreateRTV(Resource* resource)
 		// There exist RTV for buffers, may need to add this later?
 	}
 
-	D3D12_CPU_DESCRIPTOR_HANDLE handle = m_RTVAllocator.Allocate(resource);
+	D3D12_CPU_DESCRIPTOR_HANDLE handle = m_RTVAllocator.Allocate();
 
 	D3D12_RENDER_TARGET_VIEW_DESC desc;
 	ZeroMemory(&desc, sizeof(desc));
@@ -594,7 +594,7 @@ ID env::ResourceManager::CreateTexture2DArray(const std::string& name, int numTe
 	return ID();
 }
 
-ID env::ResourceManager::CreatePipelineState(const std::string& name, std::initializer_list<ShaderDesc> shaderDescs)
+ID env::ResourceManager::CreatePipelineState(const std::string& name, std::initializer_list<ShaderDesc> shaderDescs, bool useInputLayout, const RootSignature& rootSignature)
 {
 	// Sanity check that there's at most one desc per shader stage
 	ShaderStage stages = ShaderStage::Unknown;
@@ -648,9 +648,11 @@ ID env::ResourceManager::CreatePipelineState(const std::string& name, std::initi
 
 		D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc;
 		ZeroMemory(&rootSignatureDesc, sizeof(rootSignatureDesc));
-		rootSignatureDesc.NumParameters = 0;
-		rootSignatureDesc.pParameters = nullptr;
-		rootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+		rootSignatureDesc.NumParameters = rootSignature.GetNumParameters();
+		rootSignatureDesc.pParameters = rootSignature.GetParameterArrayStart();
+
+		if (useInputLayout)
+			rootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 		hr = D3D12SerializeRootSignature(&rootSignatureDesc,
 			D3D_ROOT_SIGNATURE_VERSION_1_0,

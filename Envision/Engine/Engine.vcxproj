@@ -162,6 +162,7 @@
     <ClCompile Include="source\core\IDGenerator.cpp" />
     <ClCompile Include="source\graphics\AssetManager.cpp" />
     <ClCompile Include="source\graphics\Renderer.cpp" />
+    <ClCompile Include="source\graphics\RootSignature.cpp" />
     <ClCompile Include="source\graphics\Shader.cpp" />
     <ClCompile Include="source\resource\BufferLayout.cpp" />
     <ClCompile Include="source\resource\Resource.cpp" />
@@ -194,6 +195,7 @@
     <ClInclude Include="include\envision\graphics\AssetManager.h" />
     <ClInclude Include="include\envision\graphics\Assets.h" />
     <ClInclude Include="include\envision\graphics\Renderer.h" />
+    <ClInclude Include="include\envision\graphics\RootSignature.h" />
     <ClInclude Include="include\envision\graphics\Shader.h" />
     <ClInclude Include="include\envision\resource\BufferLayout.h" />
     <ClInclude Include="include\envision\resource\PipelineState.h" />

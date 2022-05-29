@@ -8,7 +8,7 @@ namespace env
 	{
 	private:
 
-		const D3D12_DESCRIPTOR_HEAP_TYPE m_type;
+		D3D12_DESCRIPTOR_HEAP_TYPE m_type;
 		UINT m_stride;
 
 		ID3D12DescriptorHeap* m_heap;
@@ -21,8 +21,12 @@ namespace env
 
 	public:
 
+		DescriptorAllocator();
 		DescriptorAllocator(D3D12_DESCRIPTOR_HEAP_TYPE type, UINT numDescriptors, bool isShaderVisible);
 		~DescriptorAllocator();
+
+		void Initialize(D3D12_DESCRIPTOR_HEAP_TYPE type, UINT numDescriptors, bool isShaderVisible);
+		ID3D12DescriptorHeap* GetHeap();
 
 		DescriptorAllocator(DescriptorAllocator&& other) = delete;
 		DescriptorAllocator(const DescriptorAllocator& other) = delete;
@@ -31,7 +35,8 @@ namespace env
 
 	public:
 
-		D3D12_CPU_DESCRIPTOR_HANDLE Allocate(Resource* resource);
+		D3D12_CPU_DESCRIPTOR_HANDLE Allocate(UINT numDescriptors = 1);
 		void Free(D3D12_CPU_DESCRIPTOR_HANDLE handle);
+		void Clear();
 	};
 }

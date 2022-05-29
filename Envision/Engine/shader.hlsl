@@ -10,10 +10,22 @@ struct VS_OUT
 	float3 Color : COLOR;
 };
 
+cbuffer CameraBuffer : register(b0)
+{
+	float4x4 ViewProjection;
+}
+
+cbuffer ObjectBuffer : register(b1)
+{
+	float4x4 World;
+}
+
 VS_OUT VS_main(VS_IN input)
 {
 	VS_OUT output;
 	output.Position = float4(input.Position, 0.0f, 1.0f);
+	output.Position = mul(output.Position, World);
+	output.Position = mul(output.Position, ViewProjection);
 	output.Color = input.Color;
 	return output;
 }
