@@ -105,7 +105,10 @@ void env::Renderer::BeginFrame(ID target)
 	m_frameInfo.FrameDescriptorAllocator.Clear();
 
 	m_directList->Reset();
+
 	m_directList->SetWindowTarget(targetWindow);
+	m_directList->ClearRenderTarget(targetWindow->GetActiveBackbuffer(), 0.2f, 0.2f, 0.2f);
+
 	m_directList->SetPipelineState(pipeline);
 
 	ID3D12DescriptorHeap* descriptorHeap = m_frameInfo.FrameDescriptorAllocator.GetHeap();

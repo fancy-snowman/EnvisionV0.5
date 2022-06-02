@@ -156,6 +156,12 @@ env::DirectList::~DirectList()
 	//
 }
 
+void env::DirectList::ClearRenderTarget(Texture2D* target, float red, float green, float blue, float alpha)
+{
+	const FLOAT clearColor[] = {red, green, blue, alpha};
+	m_list->ClearRenderTargetView(target->Views.RenderTarget, clearColor, 0, NULL);
+}
+
 void env::DirectList::Draw(UINT numVertices, UINT vertexOffset)
 {
 	m_list->DrawInstanced(numVertices, 1, vertexOffset, 0);
