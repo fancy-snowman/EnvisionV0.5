@@ -77,3 +77,25 @@ size_t env::GetShaderDataTypeSize(ShaderDataType type)
 	}
 	return 0;
 }
+
+DXGI_FORMAT env::GetDXGIFormat(ShaderDataType type)
+{
+	switch (type)
+	{
+	case ShaderDataType::Int: return DXGI_FORMAT_R32_SINT;
+	case ShaderDataType::Uint: return DXGI_FORMAT_R32_UINT;
+	case ShaderDataType::Float: return DXGI_FORMAT_R32_FLOAT;
+
+	case ShaderDataType::Int2: return DXGI_FORMAT_R32G32_SINT;
+	case ShaderDataType::Int3: return DXGI_FORMAT_R32G32B32_SINT;
+	case ShaderDataType::Int4: return DXGI_FORMAT_R32G32B32A32_SINT;
+
+	case ShaderDataType::Uint2: return DXGI_FORMAT_R32G32_UINT;
+	case ShaderDataType::Uint3: return DXGI_FORMAT_R32G32B32_UINT;
+	case ShaderDataType::Uint4: return DXGI_FORMAT_R32G32B32A32_UINT;
+
+	case ShaderDataType::Float2: return DXGI_FORMAT_R32G32_FLOAT;
+	case ShaderDataType::Float3: return DXGI_FORMAT_R32G32B32_FLOAT;
+	case ShaderDataType::Float4: return DXGI_FORMAT_R32G32B32A32_FLOAT;
+	}
+}

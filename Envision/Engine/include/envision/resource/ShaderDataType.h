@@ -1,4 +1,5 @@
 #pragma once
+#include "envision/envpch.h"
 
 namespace env
 {
@@ -79,4 +80,5 @@ namespace env
 	};
 
 	size_t GetShaderDataTypeSize(ShaderDataType type);
+	DXGI_FORMAT GetDXGIFormat(ShaderDataType type);
 }

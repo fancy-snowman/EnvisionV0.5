@@ -16,7 +16,7 @@ namespace env
 		UNKNOWN = 0,
 
 		BufferArray,
-		ConstantBuffer,
+		Buffer,
 		IndexBuffer,
 		VertexBuffer,
 
@@ -28,17 +28,30 @@ namespace env
 		WindowTarget,
 	};
 
-	enum class BindType
+	enum class BufferBindType
 	{
 		Unknown = 0,
 
-		RenderTarget = 1 << 0,
-		ShaderResource = 1 << 1,
-		UnorderedAccess = 1 << 2,
+		Constant			= 1 << 0,
+		Index				= 1 << 1,
+		Vertex				= 1 << 2,
+		UnorderedAccess		= 1 << 3,
 	};
-	BindType operator|(BindType a, BindType b);
-	BindType operator&(BindType a, BindType b);
-	bool any(BindType type);
+	BufferBindType operator|(BufferBindType a, BufferBindType b);
+	BufferBindType operator&(BufferBindType a, BufferBindType b);
+	bool any(BufferBindType type);
+
+	enum class TextureBindType
+	{
+		Unknown = 0,
+
+		RenderTarget		= 1 << 0,
+		ShaderResource		= 1 << 1,
+		UnorderedAccess		= 1 << 2,
+	};
+	TextureBindType operator|(TextureBindType a, TextureBindType b);
+	TextureBindType operator&(TextureBindType a, TextureBindType b);
+	bool any(TextureBindType type);
 
 	struct Resource
 	{
@@ -66,42 +79,44 @@ namespace env
 		} Views;
 	};
 
-	struct ConstantBuffer : public Resource
+	struct Buffer : public Resource
 	{
-		RESOURCE_TYPE(ConstantBuffer)
+		RESOURCE_TYPE(Buffer)
 		UINT GetByteWidth() final { return (UINT)(Layout.GetByteWidth() + 255) & ~255; }
 
 		BufferLayout Layout;
 
 		struct {
-			D3D12_CPU_DESCRIPTOR_HANDLE ConstantBuffer = { 0 };
+			D3D12_CPU_DESCRIPTOR_HANDLE Constant = { 0 };
+			D3D12_INDEX_BUFFER_VIEW Index = { 0 };
+			D3D12_VERTEX_BUFFER_VIEW Vertex = { 0 };
 			D3D12_CPU_DESCRIPTOR_HANDLE UnorderedAccess = { 0 };
 		} Views;
 	};
 
-	struct IndexBuffer : public Resource
-	{
-		RESOURCE_TYPE(IndexBuffer)
-		UINT GetByteWidth() final { return sizeof(UINT) * NumIndices; }
+	//struct IndexBuffer : public Resource
+	//{
+	//	RESOURCE_TYPE(IndexBuffer)
+	//	UINT GetByteWidth() final { return sizeof(UINT) * NumIndices; }
 
-		UINT NumIndices = 0;
+	//	UINT NumIndices = 0;
 
-		struct {
-			D3D12_INDEX_BUFFER_VIEW IndexBuffer = { 0 };
-		} Views;
-	};
+	//	struct {
+	//		D3D12_INDEX_BUFFER_VIEW IndexBuffer = { 0 };
+	//	} Views;
+	//};
 
-	struct VertexBuffer : public Resource
-	{
-		RESOURCE_TYPE(VertexBuffer)
-		UINT GetByteWidth() final { return (UINT)Layout.GetByteWidth(); }
+	//struct VertexBuffer : public Resource
+	//{
+	//	RESOURCE_TYPE(VertexBuffer)
+	//	UINT GetByteWidth() final { return (UINT)Layout.GetByteWidth(); }
 
-		BufferLayout Layout;
+	//	BufferLayout Layout;
 
-		struct {
-			D3D12_VERTEX_BUFFER_VIEW VertexBuffer = { 0 };
-		} Views;
-	};
+	//	struct {
+	//		D3D12_VERTEX_BUFFER_VIEW VertexBuffer = { 0 };
+	//	} Views;
+	//};
 
 	struct Texture2D : public Resource
 	{

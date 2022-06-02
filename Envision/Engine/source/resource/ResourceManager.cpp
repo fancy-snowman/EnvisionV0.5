@@ -76,14 +76,8 @@ env::ResourceManager::~ResourceManager()
 	for (auto& pair : m_buffersArrays) { delete pair.second; }
 	m_buffersArrays.clear();
 
-	for (auto& pair : m_constantBuffers) { delete pair.second; }
-	m_constantBuffers.clear();
-
-	for (auto& pair : m_indexBuffers) { delete pair.second; }
-	m_indexBuffers.clear();
-
-	for (auto& pair : m_vertexBuffers) { delete pair.second; }
-	m_vertexBuffers.clear();
+	for (auto& pair : m_buffers) { delete pair.second; }
+	m_buffers.clear();
 
 	for (auto& pair : m_texture2Ds) { delete pair.second; }
 	m_texture2Ds.clear();
@@ -102,12 +96,8 @@ env::Resource* env::ResourceManager::GetResourceNonConst(ID resourceID)
 {
 	if (m_buffersArrays.count(resourceID) > 0)
 		return m_buffersArrays[resourceID];
-	else if (m_constantBuffers.count(resourceID) > 0)
-		return m_constantBuffers[resourceID];
-	else if (m_indexBuffers.count(resourceID) > 0)
-		return m_indexBuffers[resourceID];
-	else if (m_vertexBuffers.count(resourceID) > 0)
-		return m_vertexBuffers[resourceID];
+	else if (m_buffers.count(resourceID) > 0)
+		return m_buffers[resourceID];
 	else if (m_texture2Ds.count(resourceID) > 0)
 		return m_texture2Ds[resourceID];
 	else if (m_texture2DArrays.count(resourceID) > 0)
@@ -160,7 +150,7 @@ D3D12_CPU_DESCRIPTOR_HANDLE env::ResourceManager::CreateSRV(Resource* resource)
 	ResourceType type = resource->GetType();
 	switch (type)
 	{
-	case ResourceType::ConstantBuffer:
+	case ResourceType::Buffer:
 	case ResourceType::IndexBuffer:
 	case ResourceType::VertexBuffer:
 	{
@@ -282,18 +272,26 @@ ID env::ResourceManager::CreateBufferArray(const std::string& name, int numBuffe
 	return ID();
 }
 
-ID env::ResourceManager::CreateConstantBuffer(const std::string& name, const BufferLayout& layout, void* initialData)
+ID env::ResourceManager::CreateBuffer(const std::string& name, const BufferLayout& layout, BufferBindType bindType, void* initialData)
 {
 	HRESULT hr = S_OK;
 
-	ConstantBuffer bufferDesc;
+	bool isConstantBuffer = any(bindType & BufferBindType::Constant) || (bindType == BufferBindType::Unknown);
+	bool isIndexBuffer = any(bindType & BufferBindType::Index) || (bindType == BufferBindType::Unknown);
+	bool isVertexBuffer = any(bindType & BufferBindType::Vertex) || (bindType == BufferBindType::Unknown);
+	bool isUnorderedAccess = any(bindType & BufferBindType::UnorderedAccess) || (bindType == BufferBindType::Unknown);
+
+	Buffer bufferDesc;
 
 	bufferDesc.Name = name;
-	bufferDesc.State = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+	bufferDesc.State = D3D12_RESOURCE_STATE_COMMON;
 	bufferDesc.Layout = layout;
 
-	UINT bufferWidth = (UINT)bufferDesc.Layout.GetByteWidth();
-	bufferWidth = (bufferWidth + 255) & ~255;
+	UINT bufferWidth = (UINT)bufferDesc.Layout.GetByteWidth() * bufferDesc.Layout.GetNumRepetitions();
+
+	if (isConstantBuffer) {
+		bufferWidth = (bufferWidth + 255) & ~255;
+	}
 
 	{ // Create the resource
 		D3D12_HEAP_PROPERTIES heapProperties;
@@ -314,62 +312,6 @@ ID env::ResourceManager::CreateConstantBuffer(const std::string& name, const Buf
 		resourceDescription.SampleDesc.Count = 1;
 		resourceDescription.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
-		hr = GPU::GetDevice()->CreateCommittedResource(&heapProperties,
-			D3D12_HEAP_FLAG_NONE,
-			&resourceDescription,
-			bufferDesc.State,
-			NULL,
-			IID_PPV_ARGS(&bufferDesc.Native));
-
-		ASSERT_HR(hr, "Could not create constant buffer");
-	}
-
-	{ // Create views
-		bufferDesc.Views.ConstantBuffer = CreateCBV(&bufferDesc);
-	}
-
-	ID resourceID = m_commonIDGenerator.GenerateUnique();
-	ConstantBuffer* buffer = new ConstantBuffer(std::move(bufferDesc));
-	m_constantBuffers[resourceID] = buffer;
-
-	if (initialData)
-	{
-		UploadBufferData(resourceID, initialData, bufferWidth);
-	}
-
-	return resourceID;
-}
-
-ID env::ResourceManager::CreateIndexBuffer(const std::string& name, int numIndices, void* initialData)
-{
-	HRESULT hr = S_OK;
-
-	IndexBuffer bufferDesc;
-
-	bufferDesc.Name = name;
-	bufferDesc.State = D3D12_RESOURCE_STATE_INDEX_BUFFER;
-	bufferDesc.NumIndices = numIndices;
-
-	UINT bufferWidth = bufferDesc.GetByteWidth();
-
-	{ // Create the resource
-		D3D12_HEAP_PROPERTIES heapProperties;
-		ZeroMemory(&heapProperties, sizeof(heapProperties));
-		heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
-		heapProperties.CreationNodeMask = 1;
-		heapProperties.VisibleNodeMask = 1;
-
-		D3D12_RESOURCE_DESC resourceDescription;
-		ZeroMemory(&resourceDescription, sizeof(resourceDescription));
-		resourceDescription.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-		resourceDescription.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
-		resourceDescription.Width = (UINT64)bufferWidth;
-		resourceDescription.Height = 1;
-		resourceDescription.DepthOrArraySize = 1;
-		resourceDescription.MipLevels = 1;
-		resourceDescription.Format = DXGI_FORMAT_UNKNOWN;
-		resourceDescription.SampleDesc.Count = 1;
-		resourceDescription.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
 		hr = GPU::GetDevice()->CreateCommittedResource(&heapProperties,
 			D3D12_HEAP_FLAG_NONE,
@@ -378,87 +320,158 @@ ID env::ResourceManager::CreateIndexBuffer(const std::string& name, int numIndic
 			NULL,
 			IID_PPV_ARGS(&bufferDesc.Native));
 
-		ASSERT_HR(hr, "Could not create index buffer");
+		ASSERT_HR(hr, "Could not create buffer");
 	}
 
 	{ // Create views
-		bufferDesc.Views.IndexBuffer.BufferLocation = bufferDesc.Native->GetGPUVirtualAddress();
-		bufferDesc.Views.IndexBuffer.SizeInBytes = bufferWidth;
-		bufferDesc.Views.IndexBuffer.Format = DXGI_FORMAT_R32_UINT;
+		if (isConstantBuffer) {
+			bufferDesc.Views.Constant = CreateCBV(&bufferDesc);
+		}
+		if (isIndexBuffer) {
+			bufferDesc.Views.Index.BufferLocation = bufferDesc.Native->GetGPUVirtualAddress();
+			bufferDesc.Views.Index.SizeInBytes = bufferWidth;
+			bufferDesc.Views.Index.Format = layout.GetDXGIFormat();
+		}
+		if (isVertexBuffer) {
+			bufferDesc.Views.Vertex.BufferLocation = bufferDesc.Native->GetGPUVirtualAddress();
+			bufferDesc.Views.Vertex.SizeInBytes = bufferWidth;
+			bufferDesc.Views.Vertex.StrideInBytes = layout.GetByteWidth();
+		}
+		if (isUnorderedAccess) {
+			bufferDesc.Views.UnorderedAccess = CreateUAV(&bufferDesc);
+		}
 	}
 
 	ID resourceID = m_commonIDGenerator.GenerateUnique();
-	IndexBuffer* buffer = new IndexBuffer(std::move(bufferDesc));
-	m_indexBuffers[resourceID] = buffer;
+	Buffer* buffer = new Buffer(std::move(bufferDesc));
+	m_buffers[resourceID] = buffer;
 
-	if (initialData)
-	{
+	if (initialData) {
 		UploadBufferData(resourceID, initialData, bufferWidth);
 	}
 
 	return resourceID;
 }
 
-ID env::ResourceManager::CreateVertexBuffer(const std::string& name, int numVertices, const BufferLayout& layout, void* initialData)
-{
-	HRESULT hr = S_OK;
+//ID env::ResourceManager::CreateIndexBuffer(const std::string& name, int numIndices, void* initialData)
+//{
+//	HRESULT hr = S_OK;
+//
+//	IndexBuffer bufferDesc;
+//
+//	bufferDesc.Name = name;
+//	bufferDesc.State = D3D12_RESOURCE_STATE_INDEX_BUFFER;
+//	bufferDesc.NumIndices = numIndices;
+//
+//	UINT bufferWidth = bufferDesc.GetByteWidth();
+//
+//	{ // Create the resource
+//		D3D12_HEAP_PROPERTIES heapProperties;
+//		ZeroMemory(&heapProperties, sizeof(heapProperties));
+//		heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
+//		heapProperties.CreationNodeMask = 1;
+//		heapProperties.VisibleNodeMask = 1;
+//
+//		D3D12_RESOURCE_DESC resourceDescription;
+//		ZeroMemory(&resourceDescription, sizeof(resourceDescription));
+//		resourceDescription.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+//		resourceDescription.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+//		resourceDescription.Width = (UINT64)bufferWidth;
+//		resourceDescription.Height = 1;
+//		resourceDescription.DepthOrArraySize = 1;
+//		resourceDescription.MipLevels = 1;
+//		resourceDescription.Format = DXGI_FORMAT_UNKNOWN;
+//		resourceDescription.SampleDesc.Count = 1;
+//		resourceDescription.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+//
+//		hr = GPU::GetDevice()->CreateCommittedResource(&heapProperties,
+//			D3D12_HEAP_FLAG_NONE,
+//			&resourceDescription,
+//			bufferDesc.State,
+//			NULL,
+//			IID_PPV_ARGS(&bufferDesc.Native));
+//
+//		ASSERT_HR(hr, "Could not create index buffer");
+//	}
+//
+//	{ // Create views
+//		bufferDesc.Views.IndexBuffer.BufferLocation = bufferDesc.Native->GetGPUVirtualAddress();
+//		bufferDesc.Views.IndexBuffer.SizeInBytes = bufferWidth;
+//		bufferDesc.Views.IndexBuffer.Format = DXGI_FORMAT_R32_UINT;
+//	}
+//
+//	ID resourceID = m_commonIDGenerator.GenerateUnique();
+//	IndexBuffer* buffer = new IndexBuffer(std::move(bufferDesc));
+//	m_indexBuffers[resourceID] = buffer;
+//
+//	if (initialData)
+//	{
+//		UploadBufferData(resourceID, initialData, bufferWidth);
+//	}
+//
+//	return resourceID;
+//}
+//
+//ID env::ResourceManager::CreateVertexBuffer(const std::string& name, int numVertices, const BufferLayout& layout, void* initialData)
+//{
+//	HRESULT hr = S_OK;
+//
+//	VertexBuffer bufferDesc;
+//
+//	bufferDesc.Name = name;
+//	bufferDesc.State = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+//	bufferDesc.Layout = layout;
+//
+//	UINT bufferWidth = (UINT)bufferDesc.Layout.GetByteWidth() * numVertices;
+//
+//	{ // Create the resource
+//		D3D12_HEAP_PROPERTIES heapProperties;
+//		ZeroMemory(&heapProperties, sizeof(heapProperties));
+//		heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
+//		heapProperties.CreationNodeMask = 1;
+//		heapProperties.VisibleNodeMask = 1;
+//
+//		D3D12_RESOURCE_DESC resourceDescription;
+//		ZeroMemory(&resourceDescription, sizeof(resourceDescription));
+//		resourceDescription.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+//		resourceDescription.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+//		resourceDescription.Width = (UINT64)bufferWidth;
+//		resourceDescription.Height = 1;
+//		resourceDescription.DepthOrArraySize = 1;
+//		resourceDescription.MipLevels = 1;
+//		resourceDescription.Format = DXGI_FORMAT_UNKNOWN;
+//		resourceDescription.SampleDesc.Count = 1;
+//		resourceDescription.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+//
+//		hr = GPU::GetDevice()->CreateCommittedResource(&heapProperties,
+//			D3D12_HEAP_FLAG_NONE,
+//			&resourceDescription,
+//			bufferDesc.State,
+//			NULL,
+//			IID_PPV_ARGS(&bufferDesc.Native));
+//
+//		ASSERT_HR(hr, "Could not create vertex buffer");
+//	}
+//
+//	{ // Create views
+//		bufferDesc.Views.VertexBuffer.BufferLocation = bufferDesc.Native->GetGPUVirtualAddress();
+//		bufferDesc.Views.VertexBuffer.SizeInBytes = bufferWidth;
+//		bufferDesc.Views.VertexBuffer.StrideInBytes = bufferDesc.Layout.GetByteWidth();
+//	}
+//
+//	ID resourceID = m_commonIDGenerator.GenerateUnique();
+//	VertexBuffer* buffer = new VertexBuffer(std::move(bufferDesc));
+//	m_vertexBuffers[resourceID] = buffer;
+//
+//	if (initialData)
+//	{
+//		UploadBufferData(resourceID, initialData, bufferWidth);
+//	}
+//
+//	return resourceID;
+//}
 
-	VertexBuffer bufferDesc;
-
-	bufferDesc.Name = name;
-	bufferDesc.State = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
-	bufferDesc.Layout = layout;
-
-	UINT bufferWidth = (UINT)bufferDesc.Layout.GetByteWidth() * numVertices;
-
-	{ // Create the resource
-		D3D12_HEAP_PROPERTIES heapProperties;
-		ZeroMemory(&heapProperties, sizeof(heapProperties));
-		heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
-		heapProperties.CreationNodeMask = 1;
-		heapProperties.VisibleNodeMask = 1;
-
-		D3D12_RESOURCE_DESC resourceDescription;
-		ZeroMemory(&resourceDescription, sizeof(resourceDescription));
-		resourceDescription.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-		resourceDescription.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
-		resourceDescription.Width = (UINT64)bufferWidth;
-		resourceDescription.Height = 1;
-		resourceDescription.DepthOrArraySize = 1;
-		resourceDescription.MipLevels = 1;
-		resourceDescription.Format = DXGI_FORMAT_UNKNOWN;
-		resourceDescription.SampleDesc.Count = 1;
-		resourceDescription.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-
-		hr = GPU::GetDevice()->CreateCommittedResource(&heapProperties,
-			D3D12_HEAP_FLAG_NONE,
-			&resourceDescription,
-			bufferDesc.State,
-			NULL,
-			IID_PPV_ARGS(&bufferDesc.Native));
-
-		ASSERT_HR(hr, "Could not create vertex buffer");
-	}
-
-	{ // Create views
-		bufferDesc.Views.VertexBuffer.BufferLocation = bufferDesc.Native->GetGPUVirtualAddress();
-		bufferDesc.Views.VertexBuffer.SizeInBytes = bufferWidth;
-		bufferDesc.Views.VertexBuffer.StrideInBytes = bufferDesc.Layout.GetByteWidth();
-	}
-
-	ID resourceID = m_commonIDGenerator.GenerateUnique();
-	VertexBuffer* buffer = new VertexBuffer(std::move(bufferDesc));
-	m_vertexBuffers[resourceID] = buffer;
-
-	if (initialData)
-	{
-		UploadBufferData(resourceID, initialData, bufferWidth);
-	}
-
-	return resourceID;
-}
-
-ID env::ResourceManager::CreateTexture2D(const std::string& name, int width, int height, DXGI_FORMAT format, BindType bindType, void* initialData)
+ID env::ResourceManager::CreateTexture2D(const std::string& name, int width, int height, DXGI_FORMAT format, TextureBindType bindType, void* initialData)
 {
 	HRESULT hr = S_OK;
 
@@ -490,11 +503,15 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, int width, int
 		resourceDescription.SampleDesc.Count = 1;
 		resourceDescription.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 
-		if (any(bindType & BindType::RenderTarget))
+		bool isRenderTarget = any(bindType & TextureBindType::RenderTarget) || (bindType == TextureBindType::Unknown);
+		bool isShaderResource = any(bindType & TextureBindType::ShaderResource) || (bindType == TextureBindType::Unknown);
+		bool isUnorderedAccess = any(bindType & TextureBindType::UnorderedAccess) || (bindType == TextureBindType::Unknown);
+
+		if (isRenderTarget)
 			resourceDescription.Flags = resourceDescription.Flags | D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 		//if (!any(bindType & BindType::ShaderResource)) // requires D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL or D3D12_RESOURCE_FLAG_VIDEO_DECODE_REFERENCE_ONLY
 		//	resourceDescription.Flags = resourceDescription.Flags | D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE;
-		if (any(bindType & BindType::UnorderedAccess))
+		if (isUnorderedAccess)
 			resourceDescription.Flags = resourceDescription.Flags | D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 
 		D3D12_PLACED_SUBRESOURCE_FOOTPRINT footprint = { 0 };
@@ -519,11 +536,11 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, int width, int
 	}
 
 	{
-		if (any(bindType & BindType::RenderTarget))
+		if (any(bindType & TextureBindType::RenderTarget))
 			textureDesc.Views.RenderTarget = CreateRTV(&textureDesc);
-		if (any(bindType & BindType::ShaderResource))
+		if (any(bindType & TextureBindType::ShaderResource))
 			textureDesc.Views.ShaderResource = CreateSRV(&textureDesc);
-		if (any(bindType & BindType::UnorderedAccess))
+		if (any(bindType & TextureBindType::UnorderedAccess))
 			textureDesc.Views.UnorderedAccess = CreateUAV(&textureDesc);
 	}
 
@@ -541,7 +558,7 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, int width, int
 	return resourceID;
 }
 
-ID env::ResourceManager::CreateTexture2D(const std::string& name, BindType bindType, ID3D12Resource* existingTexture)
+ID env::ResourceManager::CreateTexture2D(const std::string& name, TextureBindType bindType, ID3D12Resource* existingTexture)
 {
 	D3D12_RESOURCE_DESC existingDesc = existingTexture->GetDesc();
 	Texture2D textureDesc;
@@ -550,11 +567,11 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, BindType bindT
 		textureDesc.Name = name;
 		textureDesc.Native = existingTexture;
 
-		if (any(bindType | BindType::RenderTarget))
+		if (any(bindType | TextureBindType::RenderTarget))
 			textureDesc.State = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		else if (any(bindType | BindType::ShaderResource))
+		else if (any(bindType | TextureBindType::ShaderResource))
 			textureDesc.State = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-		else if (any(bindType | BindType::UnorderedAccess))
+		else if (any(bindType | TextureBindType::UnorderedAccess))
 			textureDesc.State = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
 		else
 			textureDesc.State = D3D12_RESOURCE_STATE_COMMON;
@@ -574,11 +591,11 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, BindType bindT
 	}
 
 	{
-		if (any(bindType & BindType::RenderTarget))
+		if (any(bindType & TextureBindType::RenderTarget))
 			textureDesc.Views.RenderTarget = CreateRTV(&textureDesc);
-		if (any(bindType & BindType::ShaderResource))
+		if (any(bindType & TextureBindType::ShaderResource))
 			textureDesc.Views.ShaderResource = CreateSRV(&textureDesc);
-		if (any(bindType & BindType::UnorderedAccess))
+		if (any(bindType & TextureBindType::UnorderedAccess))
 			textureDesc.Views.UnorderedAccess = CreateUAV(&textureDesc);
 	}
 
@@ -805,7 +822,7 @@ ID env::ResourceManager::CreateWindowTarget(const std::string& name, Window* win
 
 			ID backbufferID = CreateTexture2D(
 				name + "_backbuffer" + std::to_string(i),
-				BindType::RenderTarget,
+				TextureBindType::RenderTarget,
 				buffer);
 
 			targetDesc.Backbuffers[i] = (Texture2D*)GetTexture2D(backbufferID);
@@ -853,25 +870,11 @@ env::BufferArray* env::ResourceManager::GetBufferArray(ID resourceID)
 	return m_buffersArrays[resourceID];
 }
 
-env::ConstantBuffer* env::ResourceManager::GetConstantBuffer(ID resourceID)
+env::Buffer* env::ResourceManager::GetBuffer(ID resourceID)
 {
-	if (m_constantBuffers.count(resourceID) == 0)
+	if (m_buffers.count(resourceID) == 0)
 		return nullptr;
-	return m_constantBuffers[resourceID];
-}
-
-env::IndexBuffer* env::ResourceManager::GetIndexBuffer(ID resourceID)
-{
-	if (m_indexBuffers.count(resourceID) == 0)
-		return nullptr;
-	return m_indexBuffers[resourceID];
-}
-
-env::VertexBuffer* env::ResourceManager::GetVertexBuffer(ID resourceID)
-{
-	if (m_vertexBuffers.count(resourceID) == 0)
-		return nullptr;
-	return m_vertexBuffers[resourceID];
+	return m_buffers[resourceID];
 }
 
 env::Texture2D* env::ResourceManager::GetTexture2D(ID resourceID)

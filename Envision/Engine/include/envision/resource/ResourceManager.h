@@ -18,9 +18,7 @@ namespace env
 		IDGenerator& m_commonIDGenerator;
 
 		std::unordered_map<ID, BufferArray*> m_buffersArrays;
-		std::unordered_map<ID, ConstantBuffer*> m_constantBuffers;
-		std::unordered_map<ID, IndexBuffer*> m_indexBuffers;
-		std::unordered_map<ID, VertexBuffer*> m_vertexBuffers;
+		std::unordered_map<ID, Buffer*> m_buffers;
 		std::unordered_map<ID, Texture2D*> m_texture2Ds;
 		std::unordered_map<ID, Texture2DArray*> m_texture2DArrays;
 		std::unordered_map<ID, PipelineState*> m_pipelineStates;
@@ -36,7 +34,7 @@ namespace env
 		DirectList* m_transitionList;
 		CopyList* m_copyList;
 
-		ConstantBuffer m_uploadBuffer;
+		Buffer m_uploadBuffer;
 
 	public:
 
@@ -69,19 +67,17 @@ namespace env
 	public:
 
 		ID CreateBufferArray(const std::string& name, int numBuffers, const BufferLayout& layout, void* initialData = nullptr);
-		ID CreateConstantBuffer(const std::string& name, const BufferLayout& layout, void* initialData = nullptr);
-		ID CreateIndexBuffer(const std::string& name, int numIndices, void* initialData = nullptr);
-		ID CreateVertexBuffer(const std::string& name, int numVertices, const BufferLayout& layout, void* initialData = nullptr);
-		ID CreateTexture2D(const std::string& name, int width, int height, DXGI_FORMAT format, BindType bindType = BindType::RenderTarget | BindType::ShaderResource | BindType::UnorderedAccess, void* initialData = nullptr);
-		ID CreateTexture2D(const std::string& name, BindType bindType, ID3D12Resource* existingTexture);
+		ID CreateBuffer(const std::string& name, const BufferLayout& layout, BufferBindType bindType = BufferBindType::Unknown, void* initialData = nullptr);
+		//ID CreateIndexBuffer(const std::string& name, int numIndices, void* initialData = nullptr);
+		//ID CreateVertexBuffer(const std::string& name, int numVertices, const BufferLayout& layout, void* initialData = nullptr);
+		ID CreateTexture2D(const std::string& name, int width, int height, DXGI_FORMAT format, TextureBindType bindType = TextureBindType::Unknown, void* initialData = nullptr);
+		ID CreateTexture2D(const std::string& name, TextureBindType bindType, ID3D12Resource* existingTexture);
 		ID CreateTexture2DArray(const std::string& name, int numTextures, int width, int height, DXGI_FORMAT format, void* initialData = nullptr);
 		ID CreatePipelineState(const std::string& name, std::initializer_list<ShaderDesc> shaderDescs, bool useInputLayout, const RootSignature& rootSignature);
 		ID CreateWindowTarget(const std::string& name, Window* window, float startXFactor = 0.f, float startYFactor = 0.f, float widthFactor = 1.f, float heightFactor = 1.f);
 
 		BufferArray* GetBufferArray(ID resourceID);
-		ConstantBuffer* GetConstantBuffer(ID resourceID);
-		IndexBuffer* GetIndexBuffer(ID resourceID);
-		VertexBuffer* GetVertexBuffer(ID resourceID);
+		Buffer* GetBuffer(ID resourceID);
 		Texture2D* GetTexture2D(ID resourceID);
 		Texture2DArray* GetTexture2DArray(ID resourceID);
 		PipelineState* GetPipelineState(ID resourceID);

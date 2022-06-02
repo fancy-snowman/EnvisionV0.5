@@ -64,18 +64,21 @@ ID env::AssetManager::CreateMesh(const std::string& name)
 		Vertex(-0.5f, -0.5f,    0.0f, 0.0f, 1.0f),
 	};
 
-	std::array<int, 3> indices = { 0, 1, 2 };
+	std::array<unsigned int, 3> indices = { 0, 1, 2 };
 
-	ID vertexBuffer = ResourceManager::Get()->CreateVertexBuffer("VertexBuffer",
-		vertices.size(),
-		{
+	ID vertexBuffer = ResourceManager::Get()->CreateBuffer("VertexBuffer",
+		BufferLayout({
 			{ "position", ShaderDataType::Float2 },
 			{ "color", ShaderDataType::Float3 },
-		},
+		}, vertices.size()),
+		BufferBindType::Vertex,
 		vertices.data());
 
-	ID indexBuffer = ResourceManager::Get()->CreateIndexBuffer("IndexBuffer",
-		indices.size(),
+	ID indexBuffer = ResourceManager::Get()->CreateBuffer("IndexBuffer",
+		BufferLayout({
+			{ "index", ShaderDataType::Uint },
+		}, indices.size()),
+		BufferBindType::Index,
 		indices.data());
 
 	ID meshID = m_commonIDGenerator.GenerateUnique();

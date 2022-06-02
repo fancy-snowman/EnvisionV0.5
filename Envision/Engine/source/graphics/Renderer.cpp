@@ -46,7 +46,7 @@ env::Renderer::Renderer(env::IDGenerator& commonIDGenerator) :
 		1200,
 		800,
 		DXGI_FORMAT_R8G8B8A8_UNORM,
-		BindType::RenderTarget);
+		TextureBindType::RenderTarget);
 
 	using namespace DirectX;
 
@@ -57,8 +57,9 @@ env::Renderer::Renderer(env::IDGenerator& commonIDGenerator) :
 		XMFLOAT4X4 viewProjection;
 		XMStoreFloat4x4(&viewProjection, XMMatrixTranspose(view * projection));
 
-		m_cameraBuffer = ResourceManager::Get()->CreateConstantBuffer("CameraBuffer", {
+		m_cameraBuffer = ResourceManager::Get()->CreateBuffer("CameraBuffer", {
 			{ "ViewProjectionMatrix", ShaderDataType::Float4x4} },
+			BufferBindType::Constant,
 			&viewProjection);
 	}
 
@@ -70,8 +71,9 @@ env::Renderer::Renderer(env::IDGenerator& commonIDGenerator) :
 		XMFLOAT4X4 transform;
 		XMStoreFloat4x4(&transform, XMMatrixTranspose(scale * rotation * translation));
 
-		m_objectBuffer = ResourceManager::Get()->CreateConstantBuffer("ObjectBuffer", {
+		m_objectBuffer = ResourceManager::Get()->CreateBuffer("ObjectBuffer", {
 			{ "WorldMatrix", ShaderDataType::Float4x4 } },
+			BufferBindType::Constant,
 			&transform);
 
 	}
@@ -115,8 +117,8 @@ void env::Renderer::BeginFrame(ID target)
 	m_directList->SetDescriptorHeaps(1, &descriptorHeap);
 
 	{ // Set up camera
-		ConstantBuffer* cameraBuffer = ResourceManager::Get()->GetConstantBuffer(m_cameraBuffer);
-		D3D12_CPU_DESCRIPTOR_HANDLE cameraBufferSource = cameraBuffer->Views.ConstantBuffer;
+		Buffer* cameraBuffer = ResourceManager::Get()->GetBuffer(m_cameraBuffer);
+		D3D12_CPU_DESCRIPTOR_HANDLE cameraBufferSource = cameraBuffer->Views.Constant;
 		D3D12_CPU_DESCRIPTOR_HANDLE cameraBufferDest = m_frameInfo.FrameDescriptorAllocator.Allocate();
 		GPU::GetDevice()->CopyDescriptorsSimple(1,
 			cameraBufferDest,
@@ -127,8 +129,8 @@ void env::Renderer::BeginFrame(ID target)
 	}
 
 	{ // Set up object
-		ConstantBuffer* objectBuffer = ResourceManager::Get()->GetConstantBuffer(m_objectBuffer);
-		D3D12_CPU_DESCRIPTOR_HANDLE objectBufferSource = objectBuffer->Views.ConstantBuffer;
+		Buffer* objectBuffer = ResourceManager::Get()->GetBuffer(m_objectBuffer);
+		D3D12_CPU_DESCRIPTOR_HANDLE objectBufferSource = objectBuffer->Views.Constant;
 		D3D12_CPU_DESCRIPTOR_HANDLE objectBufferDest = m_frameInfo.FrameDescriptorAllocator.Allocate();
 		GPU::GetDevice()->CopyDescriptorsSimple(1,
 			objectBufferDest,
@@ -144,13 +146,13 @@ void env::Renderer::Submit(ID mesh, ID material)
 	const Mesh* meshAsset = AssetManager::Get()->GetMesh(mesh);
 	const Material* materialAsset = AssetManager::Get()->GetMaterial(material);
 
-	VertexBuffer* vertexBuffer = ResourceManager::Get()->GetVertexBuffer(meshAsset->VertexBuffer);
-	IndexBuffer* indexBuffer = ResourceManager::Get()->GetIndexBuffer(meshAsset->IndexBuffer);
+	Buffer* vertexBuffer = ResourceManager::Get()->GetBuffer(meshAsset->VertexBuffer);
+	Buffer* indexBuffer = ResourceManager::Get()->GetBuffer(meshAsset->IndexBuffer);
 
 	m_directList->SetVertexBuffer(vertexBuffer, 0);
 	m_directList->SetIndexBuffer(indexBuffer);
 
-	m_directList->DrawIndexed(indexBuffer->NumIndices, 0, 0);
+	m_directList->DrawIndexed(indexBuffer->Layout.GetNumRepetitions(), 0, 0);
 }
 
 void env::Renderer::EndFrame()

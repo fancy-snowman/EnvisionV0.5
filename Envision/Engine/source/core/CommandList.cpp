@@ -204,15 +204,17 @@ void env::DirectList::SetWindowTarget(WindowTarget* target)
 	m_list->OMSetRenderTargets(1, &backbuffer->Views.RenderTarget, FALSE, NULL);
 }
 
-void env::DirectList::SetIndexBuffer(IndexBuffer* buffer)
+void env::DirectList::SetIndexBuffer(Buffer* buffer)
 {
+	assert(buffer->Views.Index.Format != DXGI_FORMAT_UNKNOWN);
 	TransitionResource(buffer, D3D12_RESOURCE_STATE_INDEX_BUFFER);
-	m_list->IASetIndexBuffer(&buffer->Views.IndexBuffer);
+	m_list->IASetIndexBuffer(&buffer->Views.Index);
 }
 
-void env::DirectList::SetVertexBuffer(VertexBuffer* buffer, UINT slot)
+void env::DirectList::SetVertexBuffer(Buffer* buffer, UINT slot)
 {
+	assert(buffer->Views.Vertex.StrideInBytes > 0);
 	TransitionResource(buffer, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
-	m_list->IASetVertexBuffers(slot, 1, &buffer->Views.VertexBuffer);
+	m_list->IASetVertexBuffers(slot, 1, &buffer->Views.Vertex);
 	m_list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // Define this in vertex buffer
 }

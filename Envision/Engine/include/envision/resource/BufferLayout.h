@@ -20,24 +20,29 @@ namespace env
 	{
 	private:
 
-		size_t m_byteWidth;
+		UINT m_numRepetitions;
+		UINT m_repetitionStride;
 		std::vector<BufferElement> m_elements;
 
 	public:
 
-		BufferLayout() : m_byteWidth(0) {};
+		BufferLayout() : m_numRepetitions(0), m_repetitionStride(0) {};
 		~BufferLayout() = default;
 
-		BufferLayout(std::initializer_list<BufferElement> elements);
-		BufferLayout(const std::vector<BufferElement>& elements);
+		BufferLayout(std::initializer_list<BufferElement> elements, UINT repetitions = 1);
+		BufferLayout(const std::vector<BufferElement>& elements, UINT repetitions = 1);
 
 	public:
 
-		void SetElements(const std::vector<BufferElement>& elements);
+		void SetElements(const std::vector<BufferElement>& elements, UINT repetitions = 1);
 		void PushElement(const BufferElement&& element);
+		void SetRepetitions(UINT repetitions);
 
-		inline size_t GetByteWidth() const { return m_byteWidth; }
-		inline size_t GetElementCount() const { return m_elements.size(); }
+		inline UINT GetByteWidth() const { return m_repetitionStride; }
+		inline UINT GetNumElements() const { return m_elements.size(); }
+		inline UINT GetNumRepetitions() const { return m_numRepetitions; }
+
+		DXGI_FORMAT GetDXGIFormat() const;
 
 		std::vector<BufferElement>::const_iterator begin() const { return m_elements.begin(); }
 		std::vector<BufferElement>::const_iterator end() const { return m_elements.end(); }

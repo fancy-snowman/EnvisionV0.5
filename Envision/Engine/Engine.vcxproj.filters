@@ -71,9 +71,6 @@
     <ClInclude Include="include\envision\envpch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\envision\resource\Resource_old.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\envision\core\IDGenerator.h">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -201,7 +201,6 @@
     <ClInclude Include="include\envision\resource\PipelineState.h" />
     <ClInclude Include="include\envision\resource\Resource.h" />
     <ClInclude Include="include\envision\resource\ResourceManager.h" />
-    <ClInclude Include="include\envision\resource\Resource_old.h" />
     <ClInclude Include="include\envision\resource\ShaderDataType.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

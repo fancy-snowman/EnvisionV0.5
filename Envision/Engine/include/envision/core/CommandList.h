@@ -159,7 +159,7 @@ namespace env
 		void SetPrimitiveTopology(D3D12_PRIMITIVE_TOPOLOGY topology);
 		void SetPipelineState(PipelineState* state);
 		void SetWindowTarget(WindowTarget* target);
-		void SetIndexBuffer(IndexBuffer* buffer);
-		void SetVertexBuffer(VertexBuffer* buffer, UINT slot);
+		void SetIndexBuffer(Buffer* buffer);
+		void SetVertexBuffer(Buffer* buffer, UINT slot);
 	};
 }
