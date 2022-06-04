@@ -131,14 +131,18 @@ void env::Renderer::BeginFrame(ID target)
 	{ // Set up object
 		Buffer* objectBuffer = ResourceManager::Get()->GetBuffer(m_objectBuffer);
 
-		static float rotationFactor = 0.f;
-		rotationFactor += 0.001f;
+		static const float factorRoll = 2.0f;
+		static const float factorPitch = -1.0f;
+		static const float factorYaw = -3.0f;
+		static float rotationTime = 0.0f;
+		rotationTime += 0.001f;
 		using namespace DirectX;
 		XMMATRIX translation = XMMatrixTranslation(0.1f, 0.5f, 3.0f);
-		XMMATRIX rotation = XMMatrixRotationZ(rotationFactor) *
-			XMMatrixRotationX(0.785f) *
-			XMMatrixRotationY(1.0f);
-		XMMATRIX scale = XMMatrixScaling(2.0f, 2.0f, 2.0f);
+		XMMATRIX rotation = XMMatrixRotationRollPitchYaw(
+			sin(rotationTime * factorRoll),
+			cos(rotationTime * factorPitch),
+			sin(rotationTime * factorYaw));
+		XMMATRIX scale = XMMatrixScaling(1.5f, 1.5f, 1.5f);
 
 		XMFLOAT4X4 transform;
 		XMStoreFloat4x4(&transform, XMMatrixTranspose(scale * rotation * translation));

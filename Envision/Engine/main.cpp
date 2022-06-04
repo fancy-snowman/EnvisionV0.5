@@ -61,7 +61,87 @@ public:
 		m_window = new env::Window(1200, 800, "Envision", *this);
 
 		m_target = env::ResourceManager::Get()->CreateWindowTarget("TargetWindow", m_window);
-		m_mesh = env::AssetManager::Get()->CreateMesh("DefaultMesh");
+
+		struct Vertex {
+			struct {
+				float x, y, z;
+			} Position;
+
+			struct {
+				float r, g, b;
+			} Color;
+
+			struct {
+				float x, y, z;
+			} Normal;
+		};
+
+		std::vector<Vertex> vertices = {
+			// Front
+			{ {  1.0f, -1.0f,  1.0f }, { 1.0f, 0.0f, 0.0f }, {  0.0f,  0.0f,  1.0f } },
+			{ {  1.0f,  1.0f,  1.0f }, { 1.0f, 0.0f, 0.0f }, {  0.0f,  0.0f,  1.0f } },
+			{ { -1.0f,  1.0f,  1.0f }, { 1.0f, 0.0f, 0.0f }, {  0.0f,  0.0f,  1.0f } },
+			{ {  1.0f, -1.0f,  1.0f }, { 1.0f, 0.0f, 0.0f }, {  0.0f,  0.0f,  1.0f } },
+			{ { -1.0f,  1.0f,  1.0f }, { 1.0f, 0.0f, 0.0f }, {  0.0f,  0.0f,  1.0f } },
+			{ { -1.0f, -1.0f,  1.0f }, { 1.0f, 0.0f, 0.0f }, {  0.0f,  0.0f,  1.0f } },
+
+			// Back
+			{ { -1.0f, -1.0f, -1.0f }, { 0.0f, 1.0f, 0.0f }, {  0.0f,  0.0f, -1.0f } },
+			{ { -1.0f,  1.0f, -1.0f }, { 0.0f, 1.0f, 0.0f }, {  0.0f,  0.0f, -1.0f } },
+			{ {  1.0f,  1.0f, -1.0f }, { 0.0f, 1.0f, 0.0f }, {  0.0f,  0.0f, -1.0f } },
+			{ { -1.0f, -1.0f, -1.0f }, { 0.0f, 1.0f, 0.0f }, {  0.0f,  0.0f, -1.0f } },
+			{ {  1.0f,  1.0f, -1.0f }, { 0.0f, 1.0f, 0.0f }, {  0.0f,  0.0f, -1.0f } },
+			{ {  1.0f, -1.0f, -1.0f }, { 0.0f, 1.0f, 0.0f }, {  0.0f,  0.0f, -1.0f } },
+
+			// Left
+			{ { -1.0f, -1.0f,  1.0f }, { 0.0f, 0.0f, 1.0f }, { -1.0f,  0.0f,  0.0f } },
+			{ { -1.0f,  1.0f,  1.0f }, { 0.0f, 0.0f, 1.0f }, { -1.0f,  0.0f,  0.0f } },
+			{ { -1.0f,  1.0f, -1.0f }, { 0.0f, 0.0f, 1.0f }, { -1.0f,  0.0f,  0.0f } },
+			{ { -1.0f, -1.0f,  1.0f }, { 0.0f, 0.0f, 1.0f }, { -1.0f,  0.0f,  0.0f } },
+			{ { -1.0f,  1.0f, -1.0f }, { 0.0f, 0.0f, 1.0f }, { -1.0f,  0.0f,  0.0f } },
+			{ { -1.0f, -1.0f, -1.0f }, { 0.0f, 0.0f, 1.0f }, { -1.0f,  0.0f,  0.0f } },
+
+			// Right
+			{ {  1.0f, -1.0f, -1.0f }, { 1.0f, 1.0f, 0.0f }, {  1.0f,  0.0f,  0.0f } },
+			{ {  1.0f,  1.0f, -1.0f }, { 1.0f, 1.0f, 0.0f }, {  1.0f,  0.0f,  0.0f } },
+			{ {  1.0f,  1.0f,  1.0f }, { 1.0f, 1.0f, 0.0f }, {  1.0f,  0.0f,  0.0f } },
+			{ {  1.0f, -1.0f, -1.0f }, { 1.0f, 1.0f, 0.0f }, {  1.0f,  0.0f,  0.0f } },
+			{ {  1.0f,  1.0f,  1.0f }, { 1.0f, 1.0f, 0.0f }, {  1.0f,  0.0f,  0.0f } },
+			{ {  1.0f, -1.0f,  1.0f }, { 1.0f, 1.0f, 0.0f }, {  1.0f,  0.0f,  0.0f } },
+
+			// Up
+			{ { -1.0f,  1.0f, -1.0f }, { 1.0f, 0.0f, 1.0f }, {  0.0f,  1.0f,  0.0f } },
+			{ { -1.0f,  1.0f,  1.0f }, { 1.0f, 0.0f, 1.0f }, {  0.0f,  1.0f,  0.0f } },
+			{ {  1.0f,  1.0f,  1.0f }, { 1.0f, 0.0f, 1.0f }, {  0.0f,  1.0f,  0.0f } },
+			{ { -1.0f,  1.0f, -1.0f }, { 1.0f, 0.0f, 1.0f }, {  0.0f,  1.0f,  0.0f } },
+			{ {  1.0f,  1.0f,  1.0f }, { 1.0f, 0.0f, 1.0f }, {  0.0f,  1.0f,  0.0f } },
+			{ {  1.0f,  1.0f, -1.0f }, { 1.0f, 0.0f, 1.0f }, {  0.0f,  1.0f,  0.0f } },
+
+			// Down
+			{ { -1.0f, -1.0f,  1.0f }, { 0.0f, 1.0f, 1.0f }, {  0.0f, -1.0f,  0.0f } },
+			{ { -1.0f, -1.0f, -1.0f }, { 0.0f, 1.0f, 1.0f }, {  0.0f, -1.0f,  0.0f } },
+			{ {  1.0f, -1.0f, -1.0f }, { 0.0f, 1.0f, 1.0f }, {  0.0f, -1.0f,  0.0f } },
+			{ { -1.0f, -1.0f,  1.0f }, { 0.0f, 1.0f, 1.0f }, {  0.0f, -1.0f,  0.0f } },
+			{ {  1.0f, -1.0f, -1.0f }, { 0.0f, 1.0f, 1.0f }, {  0.0f, -1.0f,  0.0f } },
+			{ {  1.0f, -1.0f,  1.0f }, { 0.0f, 1.0f, 1.0f }, {  0.0f, -1.0f,  0.0f } },
+		};
+
+		std::vector<UINT> indices;
+		for (UINT i = 0; i < (UINT)vertices.size(); i++)
+			indices.push_back(i);
+
+		env::BufferLayout vertexLayout({
+			{ "position", env::ShaderDataType::Float3 },
+			{ "color", env::ShaderDataType::Float3 },
+			{ "normal", env::ShaderDataType::Float3 } },
+			vertices.size());
+
+		m_mesh = env::AssetManager::Get()->CreateMesh("Box",
+			vertices.data(),
+			vertexLayout,
+			indices.data(),
+			indices.size());
+
 		m_material = env::AssetManager::Get()->CreatePhongMaterial("DefaultMaterial");
 
 		//PushLayer(new RenderLayer);

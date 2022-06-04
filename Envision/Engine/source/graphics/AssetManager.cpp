@@ -92,6 +92,31 @@ ID env::AssetManager::CreateMesh(const std::string& name)
 	return meshID;
 }
 
+ID env::AssetManager::CreateMesh(const std::string& name, void* vertices, BufferLayout& vertexBufferLayout, void* indices, UINT numIndices)
+{
+	ID vertexBuffer = ResourceManager::Get()->CreateBuffer(name + "_vertexBuffer",
+		vertexBufferLayout,
+		BufferBindType::Vertex,
+		vertices);
+
+	ID indexBuffer = ResourceManager::Get()->CreateBuffer(name + "_indexBuffer",
+		BufferLayout({
+			{ "index", ShaderDataType::Uint },
+			}, numIndices),
+			BufferBindType::Index,
+			indices);
+
+	ID meshID = m_commonIDGenerator.GenerateUnique();
+	Mesh* mesh = new Mesh(meshID, name);
+	mesh->VertexBuffer = vertexBuffer;
+	mesh->NumVertices = vertexBufferLayout.GetNumRepetitions();
+	mesh->IndexBuffer = indexBuffer;
+	mesh->NumIndices = (int)numIndices;
+	m_meshes[meshID] = mesh;
+
+	return meshID;
+}
+
 ID env::AssetManager::CreatePhongMaterial(const std::string& name)
 {
 	ID materialID = m_commonIDGenerator.GenerateUnique();
