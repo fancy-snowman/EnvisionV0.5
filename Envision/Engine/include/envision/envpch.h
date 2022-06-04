@@ -37,4 +37,6 @@ typedef long long ID;
 	"Failure",\
 	MB_OK)
 
+#include <assimp/Importer.hpp>
+
 #endif

@@ -5,8 +5,6 @@
 #include "envision/graphics/AssetManager.h"
 #include "envision/graphics/Renderer.h"
 
-#include <assimp/Importer.hpp>
-
 class RenderLayer : public env::Layer
 {
 public:
