@@ -59,9 +59,9 @@ ID env::AssetManager::CreateMesh(const std::string& name)
 	};
 
 	std::array<Vertex, 3> vertices = {
-		Vertex( 0.0f,  0.5f,    1.0f, 0.0f, 0.0f),
-		Vertex( 0.5f, -0.5f,    0.0f, 1.0f, 0.0f),
-		Vertex(-0.5f, -0.5f,    0.0f, 0.0f, 1.0f),
+		Vertex( 0.0f,   1.0f,     1.0f, 0.0f, 0.0f),
+		Vertex( 0.87f, -0.5f,    0.0f, 1.0f, 0.0f),
+		Vertex(-0.87f, -0.5f,    0.0f, 0.0f, 1.0f),
 	};
 
 	std::array<unsigned int, 3> indices = { 0, 1, 2 };

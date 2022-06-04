@@ -130,6 +130,20 @@ void env::Renderer::BeginFrame(ID target)
 
 	{ // Set up object
 		Buffer* objectBuffer = ResourceManager::Get()->GetBuffer(m_objectBuffer);
+
+		static float rotationFactor = 0.f;
+		rotationFactor += 0.001f;
+		using namespace DirectX;
+		XMMATRIX translation = XMMatrixTranslation(0.1f, 0.5f, 3.0f);
+		XMMATRIX rotation = XMMatrixRotationZ(rotationFactor) *
+			XMMatrixRotationX(0.785f) *
+			XMMatrixRotationY(1.0f);
+		XMMATRIX scale = XMMatrixScaling(2.0f, 2.0f, 2.0f);
+
+		XMFLOAT4X4 transform;
+		XMStoreFloat4x4(&transform, XMMatrixTranspose(scale * rotation * translation));
+		ResourceManager::Get()->UploadBufferData(m_objectBuffer, &transform, sizeof(transform));
+
 		D3D12_CPU_DESCRIPTOR_HANDLE objectBufferSource = objectBuffer->Views.Constant;
 		D3D12_CPU_DESCRIPTOR_HANDLE objectBufferDest = m_frameInfo.FrameDescriptorAllocator.Allocate();
 		GPU::GetDevice()->CopyDescriptorsSimple(1,
