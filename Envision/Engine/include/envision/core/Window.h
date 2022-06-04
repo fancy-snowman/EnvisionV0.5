@@ -1,5 +1,6 @@
 #pragma once
 #include "envision/envpch.h"
+#include "envision/resource/Resource.h"
 
 namespace env
 {
@@ -14,7 +15,16 @@ namespace env
 		static const WCHAR* s_WINDOW_CLASS_NAME;
 
 		Application& m_application;
-		HWND m_handle = NULL;	
+		HWND m_handle = NULL;
+
+		static const UINT NUM_BACK_BUFFERS = 2;
+		UINT m_currentBackbufferindex;
+		IDXGISwapChain1* m_swapchain;
+		Texture2D* m_backbuffers[NUM_BACK_BUFFERS];
+
+		// Not "owned" by the window, but holds a pointer to the current
+		// backbuffer and thus needs to be updated during present.
+		std::vector<WindowTarget*> m_targets;
 
 		void InitWindowClass();
 		static void SetWindowObject(HWND handle, Window* window);
@@ -28,9 +38,13 @@ namespace env
 	public:
 
 		HWND GetHandle();
-		int GetWidth();
-		int GetHeight();
+		int GetWidth() const;
+		int GetHeight() const;
 		float GetAspectRatio();
+		Texture2D* GetCurrentBackbuffer();
+
+		void PushTarget(WindowTarget* target);
+		void Present();
 
 		void OnEventUpdate();
 

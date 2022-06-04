@@ -156,10 +156,10 @@ env::DirectList::~DirectList()
 	//
 }
 
-void env::DirectList::ClearRenderTarget(Texture2D* target, float red, float green, float blue, float alpha)
+void env::DirectList::ClearRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE target, float red, float green, float blue, float alpha)
 {
 	const FLOAT clearColor[] = {red, green, blue, alpha};
-	m_list->ClearRenderTargetView(target->Views.RenderTarget, clearColor, 0, NULL);
+	m_list->ClearRenderTargetView(target, clearColor, 0, NULL);
 }
 
 void env::DirectList::Draw(UINT numVertices, UINT vertexOffset)
@@ -193,15 +193,13 @@ void env::DirectList::SetPipelineState(PipelineState* state)
 	m_list->SetPipelineState(state->State);
 }
 
-void env::DirectList::SetWindowTarget(WindowTarget* target)
+void env::DirectList::SetTarget(WindowTarget* target)
 {
 	m_list->RSSetViewports(1, &target->Viewport);
 	m_list->RSSetScissorRects(1, &target->ScissorRect);
 
-	Texture2D* backbuffer = target->GetActiveBackbuffer();
-
-	TransitionResource(backbuffer, D3D12_RESOURCE_STATE_RENDER_TARGET);
-	m_list->OMSetRenderTargets(1, &backbuffer->Views.RenderTarget, FALSE, NULL);
+	TransitionResource(target, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	m_list->OMSetRenderTargets(1, &target->Views.RenderTarget, FALSE, NULL);
 }
 
 void env::DirectList::SetIndexBuffer(Buffer* buffer)

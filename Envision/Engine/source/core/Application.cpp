@@ -71,5 +71,10 @@ void env::Application::Run()
 		{
 			l->OnUpdate(delta);
 		}
+
+		for (auto& w : m_windows)
+		{
+			w->Present();
+		}
 	}
 }

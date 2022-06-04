@@ -4,6 +4,9 @@
 #include "envision/core/Application.h"
 #include "envision/core/Event.h"
 
+#include "envision/core/GPU.h"
+#include "envision/resource/ResourceManager.h"
+
 WNDCLASS env::Window::s_windowClass = { 0 };
 const WCHAR* env::Window::s_WINDOW_CLASS_NAME = L"ENV_WINDOW_CLASS";
 
@@ -54,30 +57,83 @@ env::Window* env::Window::GetWindowObject(HWND handle)
 env::Window::Window(int width, int height, const std::string& title, Application& application) :
 	m_application(application)
 {
-	if (!s_windowClass.lpfnWndProc)
-	{
-		InitWindowClass();
+	{ // Init Win32
+		if (!s_windowClass.lpfnWndProc)
+		{
+			InitWindowClass();
+		}
+
+		std::wstring wtitle(title.begin(), title.end());
+
+		m_handle = CreateWindow(
+			s_WINDOW_CLASS_NAME,
+			wtitle.c_str(),
+			WS_OVERLAPPEDWINDOW,
+			CW_USEDEFAULT,
+			CW_USEDEFAULT,
+			width,
+			height,
+			NULL,
+			NULL,
+			NULL,
+			NULL);
+
+		ASSERT(m_handle, "Could not create application window");
+
+		SetWindowObject(m_handle, this);
+		ShowWindow(m_handle, SW_SHOW);
 	}
 
-	std::wstring wtitle(title.begin(), title.end());
+	HRESULT hr = S_OK;
 
-	m_handle = CreateWindow(
-		s_WINDOW_CLASS_NAME,
-		wtitle.c_str(),
-		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT,
-		CW_USEDEFAULT,
-		width,
-		height,
-		NULL,
-		NULL,
-		NULL,
-		NULL);
+	{ // Create swap chain
+		DXGI_SWAP_CHAIN_DESC1 swapChainDesc = { 0 };
+		ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
+		swapChainDesc.Width = GetWidth();
+		swapChainDesc.Height = GetHeight();
+		swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		swapChainDesc.SampleDesc.Count = 1;
+		swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		swapChainDesc.BufferCount = 2;
+		swapChainDesc.Scaling = DXGI_SCALING_NONE;
+		//swapChainDesc.Windowed = true;
+		swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 
-	ASSERT(m_handle, "Could not create application window");
+		IDXGIFactory7* factory = nullptr;
 
-	SetWindowObject(m_handle, this);
-	ShowWindow(m_handle, SW_SHOW);
+#ifdef _DEBUG
+		hr = CreateDXGIFactory2(DXGI_CREATE_FACTORY_DEBUG, IID_PPV_ARGS(&factory));
+#else
+		hr = CreateDXGIFactory(IID_PPV_ARGS(&g_factory));
+#endif
+		ASSERT_HR(hr, "Could not create DXGIFactory");
+
+		hr = factory->CreateSwapChainForHwnd(GPU::GetPresentQueue().GetCommandQueue(),
+			m_handle,
+			&swapChainDesc,
+			NULL,
+			NULL,
+			&m_swapchain);
+
+		ASSERT_HR(hr, "Could not create swap chain");
+	}
+
+	{ // Create internal resources, one per backbuffer
+		for (int i = 0; i < NUM_BACK_BUFFERS; i++)
+		{
+			ID3D12Resource* buffer = nullptr;
+			hr = m_swapchain->GetBuffer(i, IID_PPV_ARGS(&buffer));
+			ASSERT_HR(hr, "Could not query backbuffer resource");
+
+			ID backbufferID = ResourceManager::Get()->CreateTexture2D(
+				"window_backbuffer" + std::to_string(i),
+				TextureBindType::RenderTarget,
+				buffer);
+
+			m_backbuffers[i] = (Texture2D*)ResourceManager::Get()->GetTexture2D(backbufferID);
+			m_backbuffers[i]->State = D3D12_RESOURCE_STATE_PRESENT;
+		}
+	}
 }
 
 env::Window::~Window()
@@ -90,7 +146,7 @@ HWND env::Window::GetHandle()
 	return m_handle;
 }
 
-int env::Window::GetWidth()
+int env::Window::GetWidth() const
 {
 	RECT rect;
 	GetWindowRect(m_handle, &rect);
@@ -98,7 +154,7 @@ int env::Window::GetWidth()
 	return width;
 }
 
-int env::Window::GetHeight()
+int env::Window::GetHeight() const
 {
 	RECT rect;
 	GetWindowRect(m_handle, &rect);
@@ -115,11 +171,38 @@ float env::Window::GetAspectRatio()
 	return width / height;
 }
 
+env::Texture2D* env::Window::GetCurrentBackbuffer()
+{
+	return m_backbuffers[m_currentBackbufferindex];
+}
+
+void env::Window::PushTarget(WindowTarget* target)
+{
+	Texture2D* backbuffer = m_backbuffers[m_currentBackbufferindex];
+	target->Native = backbuffer->Native;
+	target->Views.RenderTarget = backbuffer->Views.RenderTarget;
+	target->Views.ShaderResource = backbuffer->Views.ShaderResource;
+
+	m_targets.push_back(target);
+}
+
+void env::Window::Present()
+{
+	m_swapchain->Present(0, 0);
+
+	m_currentBackbufferindex = (m_currentBackbufferindex + 1) % NUM_BACK_BUFFERS;
+	Texture2D* backbuffer = m_backbuffers[m_currentBackbufferindex];
+	for (auto& t : m_targets) {
+		t->Native = backbuffer->Native;
+		t->Views.RenderTarget = backbuffer->Views.RenderTarget;
+		t->Views.ShaderResource = backbuffer->Views.ShaderResource;
+	}
+}
+
 void env::Window::OnEventUpdate()
 {
 	MSG msg = { 0 };
-	while (PeekMessageA(&msg, m_handle, NULL, NULL, PM_REMOVE))
-	{
+	while (PeekMessageA(&msg, m_handle, NULL, NULL, PM_REMOVE)) {
 		TranslateMessage(&msg);
 		DispatchMessageA(&msg);
 	}

@@ -94,30 +94,6 @@ namespace env
 		} Views;
 	};
 
-	//struct IndexBuffer : public Resource
-	//{
-	//	RESOURCE_TYPE(IndexBuffer)
-	//	UINT GetByteWidth() final { return sizeof(UINT) * NumIndices; }
-
-	//	UINT NumIndices = 0;
-
-	//	struct {
-	//		D3D12_INDEX_BUFFER_VIEW IndexBuffer = { 0 };
-	//	} Views;
-	//};
-
-	//struct VertexBuffer : public Resource
-	//{
-	//	RESOURCE_TYPE(VertexBuffer)
-	//	UINT GetByteWidth() final { return (UINT)Layout.GetByteWidth(); }
-
-	//	BufferLayout Layout;
-
-	//	struct {
-	//		D3D12_VERTEX_BUFFER_VIEW VertexBuffer = { 0 };
-	//	} Views;
-	//};
-
 	struct Texture2D : public Resource
 	{
 		RESOURCE_TYPE(Texture2D)
@@ -162,31 +138,21 @@ namespace env
 		ID3D12PipelineState* State;
 	};
 
-	// Defined in Window.h
-	class Window;
 	struct WindowTarget : public Resource
 	{
 		RESOURCE_TYPE(WindowTarget)
 
-		static const int NUM_BACK_BUFFERS = 2;
+		struct {
+			D3D12_CPU_DESCRIPTOR_HANDLE RenderTarget = { 0 };
+			D3D12_CPU_DESCRIPTOR_HANDLE ShaderResource = { 0 };
+		} Views;
 
-		int Width;
-		int Height;
+		RECT ScissorRect;
+		D3D12_VIEWPORT Viewport;
+
 		float startXFactor;
 		float startYFactor;
 		float widthFactor;
 		float heightFactor;
-		env::Window* AppWindow;
-		RECT ScissorRect;
-		D3D12_VIEWPORT Viewport;
-
-		IDXGISwapChain1* SwapChain;
-		int ActiveBackBufferIndex = 0;
-
-		Texture2D* Backbuffers[NUM_BACK_BUFFERS];
-		inline Texture2D* GetActiveBackbuffer()
-		{
-			return Backbuffers[ActiveBackBufferIndex];
-		}
 	};
 }

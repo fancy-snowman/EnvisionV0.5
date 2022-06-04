@@ -22,7 +22,7 @@ namespace env
 		std::unordered_map<ID, Texture2D*> m_texture2Ds;
 		std::unordered_map<ID, Texture2DArray*> m_texture2DArrays;
 		std::unordered_map<ID, PipelineState*> m_pipelineStates;
-		std::unordered_map<ID, WindowTarget*> m_windowTargets;	
+		std::unordered_map<ID, WindowTarget*> m_targets;
 
 		DescriptorAllocator m_CBVAllocator;
 		DescriptorAllocator m_SRVAllocator;
@@ -55,7 +55,7 @@ namespace env
 		ResourceManager& operator=(const ResourceManager&& other) = delete;
 
 		Resource* GetResourceNonConst(ID resourceID);
-		void AdjustViewportAndScissorRect(WindowTarget& target);
+		void AdjustViewportAndScissorRect(WindowTarget& target, const Window& window);
 
 		D3D12_CPU_DESCRIPTOR_HANDLE CreateCBV(Resource* resource);
 		D3D12_CPU_DESCRIPTOR_HANDLE CreateSRV(Resource* resource);
@@ -68,8 +68,6 @@ namespace env
 
 		ID CreateBufferArray(const std::string& name, int numBuffers, const BufferLayout& layout, void* initialData = nullptr);
 		ID CreateBuffer(const std::string& name, const BufferLayout& layout, BufferBindType bindType = BufferBindType::Unknown, void* initialData = nullptr);
-		//ID CreateIndexBuffer(const std::string& name, int numIndices, void* initialData = nullptr);
-		//ID CreateVertexBuffer(const std::string& name, int numVertices, const BufferLayout& layout, void* initialData = nullptr);
 		ID CreateTexture2D(const std::string& name, int width, int height, DXGI_FORMAT format, TextureBindType bindType = TextureBindType::Unknown, void* initialData = nullptr);
 		ID CreateTexture2D(const std::string& name, TextureBindType bindType, ID3D12Resource* existingTexture);
 		ID CreateTexture2DArray(const std::string& name, int numTextures, int width, int height, DXGI_FORMAT format, void* initialData = nullptr);
@@ -81,7 +79,7 @@ namespace env
 		Texture2D* GetTexture2D(ID resourceID);
 		Texture2DArray* GetTexture2DArray(ID resourceID);
 		PipelineState* GetPipelineState(ID resourceID);
-		WindowTarget* GetWindowTarget(ID resourceID);
+		WindowTarget* GetTarget(ID resourceID);
 		Resource* GetResource(ID resourceID);
 
 		void UploadBufferData(ID resourceID, void* data, UINT numBytes = 0, UINT destinationOffset = 0);

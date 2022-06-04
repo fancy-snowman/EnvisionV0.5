@@ -149,7 +149,7 @@ namespace env
 
 		~DirectList() final;
 
-		void ClearRenderTarget(Texture2D* target, float red = 0.0f, float green = 0.0f, float blue = 0.0f, float alpha = 0.0f);
+		void ClearRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE target, float red = 0.0f, float green = 0.0f, float blue = 0.0f, float alpha = 0.0f);
 
 		void Draw(UINT numVertices, UINT vertexOffset);
 		void DrawIndexed(UINT numIndices, UINT indexOffset, UINT vertexOffset);
@@ -158,7 +158,7 @@ namespace env
 
 		void SetPrimitiveTopology(D3D12_PRIMITIVE_TOPOLOGY topology);
 		void SetPipelineState(PipelineState* state);
-		void SetWindowTarget(WindowTarget* target);
+		void SetTarget(WindowTarget* target);
 		void SetIndexBuffer(Buffer* buffer);
 		void SetVertexBuffer(Buffer* buffer, UINT slot);
 	};

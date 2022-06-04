@@ -100,16 +100,16 @@ void env::Renderer::Initialize()
 
 void env::Renderer::BeginFrame(ID target)
 {
-	WindowTarget* targetWindow = ResourceManager::Get()->GetWindowTarget(target);
+	WindowTarget* targetResource = ResourceManager::Get()->GetTarget(target);
 	PipelineState* pipeline = ResourceManager::Get()->GetPipelineState(m_pipelineState);
 
-	m_frameInfo.Target = targetWindow;
+	m_frameInfo.WindowTarget = targetResource;
 	m_frameInfo.FrameDescriptorAllocator.Clear();
 
 	m_directList->Reset();
 
-	m_directList->SetWindowTarget(targetWindow);
-	m_directList->ClearRenderTarget(targetWindow->GetActiveBackbuffer(), 0.2f, 0.2f, 0.2f);
+	m_directList->SetTarget(targetResource);
+	m_directList->ClearRenderTarget(targetResource->Views.RenderTarget, 0.2f, 0.2f, 0.2f);
 
 	m_directList->SetPipelineState(pipeline);
 
@@ -164,20 +164,15 @@ void env::Renderer::EndFrame()
 	queue.Execute();
 	queue.WaitForIdle();
 
-	if (m_frameInfo.Target->GetType() == ResourceType::WindowTarget)
+	if (m_frameInfo.WindowTarget->GetType() == ResourceType::WindowTarget)
 	{
-		WindowTarget* window = (WindowTarget*)m_frameInfo.Target;
-		Texture2D* backbuffer = window->GetActiveBackbuffer();
-
+		WindowTarget* target = (WindowTarget*)m_frameInfo.WindowTarget;
 
 		m_directList->Reset();
-		m_directList->TransitionResource(backbuffer, D3D12_RESOURCE_STATE_PRESENT);
+		m_directList->TransitionResource(target, D3D12_RESOURCE_STATE_PRESENT);
 		m_directList->Close();
 		queue.QueueList(m_directList);
 		queue.Execute();
 		queue.WaitForIdle();
-
-		window->SwapChain->Present(0, 0);
-		window->ActiveBackBufferIndex = (window->ActiveBackBufferIndex + 1) % WindowTarget::NUM_BACK_BUFFERS;
 	}
 }

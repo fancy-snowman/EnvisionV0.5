@@ -26,7 +26,7 @@ namespace env
 		ID m_phongBuffer;
 		
 		struct {
-			Resource* Target;
+			Resource* WindowTarget;
 			DescriptorAllocator FrameDescriptorAllocator;
 		} m_frameInfo;
 
