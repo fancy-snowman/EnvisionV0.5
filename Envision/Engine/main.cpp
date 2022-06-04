@@ -5,6 +5,8 @@
 #include "envision/graphics/AssetManager.h"
 #include "envision/graphics/Renderer.h"
 
+#include <assimp/Importer.hpp>
+
 class RenderLayer : public env::Layer
 {
 public:
@@ -58,6 +60,8 @@ public:
 	TestApplication(int argc, char** argv) :
 		env::Application(argc, argv, "TestApplication")
 	{
+		Assimp::Importer importer;
+		
 		m_window = new env::Window(1200, 800, "Envision", *this);
 
 		m_target = env::ResourceManager::Get()->CreateWindowTarget("TargetWindow", m_window);
