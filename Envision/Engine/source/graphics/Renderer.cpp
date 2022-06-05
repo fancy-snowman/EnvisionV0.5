@@ -51,8 +51,17 @@ env::Renderer::Renderer(env::IDGenerator& commonIDGenerator) :
 	using namespace DirectX;
 
 	{
-		XMMATRIX view = XMMatrixLookAtLH({ 0.0f, 0.0f, -2.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f });
-		XMMATRIX projection = XMMatrixPerspectiveFovLH(3.14f / 2.0f, 1200.f / 800.f, 1.0f, 10.f);
+		XMVECTOR cameraPosition = { 0.0f, 3.0f, -5.f };
+		XMVECTOR cameraTarget = { 0.0f, 0.0f, 0.f };
+		XMVECTOR cameraUp = { 0.0f, 1.0f, 0.f };
+		
+		float FOV = 3.14f / 2.0f;
+		float aspect = 1200.f / 800.f;
+		float nearZ = 1.0f;
+		float farZ = 20.f;
+
+		XMMATRIX view = XMMatrixLookAtLH(cameraPosition, cameraTarget, cameraUp);
+		XMMATRIX projection = XMMatrixPerspectiveFovLH(FOV, aspect, nearZ, farZ);
 
 		XMFLOAT4X4 viewProjection;
 		XMStoreFloat4x4(&viewProjection, XMMatrixTranspose(view * projection));
@@ -131,18 +140,18 @@ void env::Renderer::BeginFrame(ID target)
 	{ // Set up object
 		Buffer* objectBuffer = ResourceManager::Get()->GetBuffer(m_objectBuffer);
 
-		static const float factorRoll = 2.0f;
-		static const float factorPitch = -1.0f;
-		static const float factorYaw = -3.0f;
+		static const float factorRoll = 0.0f;
+		static const float factorPitch = 1.0f;
+		static const float factorYaw = 0.0f;
 		static float rotationTime = 0.0f;
 		rotationTime += 0.001f;
 		using namespace DirectX;
-		XMMATRIX translation = XMMatrixTranslation(0.1f, 0.5f, 3.0f);
+		XMMATRIX translation = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
 		XMMATRIX rotation = XMMatrixRotationRollPitchYaw(
 			sin(rotationTime * factorRoll),
-			cos(rotationTime * factorPitch),
+			3.14 + sin(rotationTime * factorPitch),
 			sin(rotationTime * factorYaw));
-		XMMATRIX scale = XMMatrixScaling(1.5f, 1.5f, 1.5f);
+		XMMATRIX scale = XMMatrixScaling(0.005f, 0.005f, 0.005f);
 
 		XMFLOAT4X4 transform;
 		XMStoreFloat4x4(&transform, XMMatrixTranspose(scale * rotation * translation));

@@ -708,15 +708,6 @@
     <ClCompile Include="code\AssetLib\M3D\M3DExporter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="contrib\zip\src\zip.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="contrib\zip\test\test.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="contrib\zip\test\test_miniz.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="code\AssetLib\IFC\IFCBoolean.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -738,9 +729,6 @@
     <ClCompile Include="code\AssetLib\IFC\IFCProfile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="code\AssetLib\IFC\IFCReaderGen_4.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="code\AssetLib\IFC\IFCReaderGen1_2x3.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -748,6 +736,27 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="code\AssetLib\IFC\IFCUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="contrib\poly2tri\poly2tri\common\shapes.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="contrib\poly2tri\poly2tri\sweep\advancing_front.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="contrib\poly2tri\poly2tri\sweep\cdt.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="contrib\poly2tri\poly2tri\sweep\sweep.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="contrib\poly2tri\poly2tri\sweep\sweep_context.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="contrib\pugixml\src\pugixml.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="code\AssetLib\C4D\C4DImporter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1748,19 +1757,10 @@
     <ClInclude Include="code\AssetLib\M3D\M3DExporter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="contrib\zip\src\miniz.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="contrib\zip\src\zip.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="code\AssetLib\IFC\IFCLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="code\AssetLib\IFC\IFCReaderGen_2x3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="code\AssetLib\IFC\IFCReaderGen_4.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="code\AssetLib\IFC\IFCUtil.h">
@@ -1770,6 +1770,45 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\assimp\revision.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="contrib\poly2tri\poly2tri\common\shapes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="contrib\poly2tri\poly2tri\common\utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="contrib\poly2tri\poly2tri\sweep\advancing_front.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="contrib\poly2tri\poly2tri\sweep\cdt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="contrib\poly2tri\poly2tri\sweep\sweep.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="contrib\poly2tri\poly2tri\sweep\sweep_context.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="contrib\poly2tri\poly2tri\poly2tri.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="contrib\pugixml\src\pugiconfig.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="contrib\pugixml\src\pugixml.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="contrib\stb\stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\assimp\Base64.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\assimp\GltfMaterial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\AssetLib\C4D\C4DImporter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1797,9 +1836,6 @@
     </None>
     <None Include="include\assimp\vector3.inl">
       <Filter>Header Files</Filter>
-    </None>
-    <None Include="contrib\zlib\win32\zlib.def">
-      <Filter>Source Files</Filter>
     </None>
     <None Include="code\AssetLib\Blender\BlenderDNA.inl">
       <Filter>Header Files</Filter>
@@ -1834,8 +1870,14 @@
     <None Include="contrib\Open3DGC\o3dgcVector.inl">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="contrib\zlib\win32\zlib.def">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
+    <ResourceCompile Include="code\res\assimp.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
     <ResourceCompile Include="contrib\zlib\win32\zlib1.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
