@@ -141,7 +141,7 @@ void env::Renderer::BeginFrame(ID target)
 		Buffer* objectBuffer = ResourceManager::Get()->GetBuffer(m_objectBuffer);
 
 		static const float factorRoll = 0.0f;
-		static const float factorPitch = 1.0f;
+		static const float factorPitch = 0.1f;
 		static const float factorYaw = 0.0f;
 		static float rotationTime = 0.0f;
 		rotationTime += 0.001f;
@@ -151,7 +151,7 @@ void env::Renderer::BeginFrame(ID target)
 			sin(rotationTime * factorRoll),
 			3.14 + sin(rotationTime * factorPitch),
 			sin(rotationTime * factorYaw));
-		XMMATRIX scale = XMMatrixScaling(0.005f, 0.005f, 0.005f);
+		XMMATRIX scale = XMMatrixScaling(0.01f, 0.01f, 0.01f);
 
 		XMFLOAT4X4 transform;
 		XMStoreFloat4x4(&transform, XMMatrixTranspose(scale * rotation * translation));
@@ -180,6 +180,7 @@ void env::Renderer::Submit(ID mesh, ID material)
 	m_directList->SetIndexBuffer(indexBuffer);
 
 	m_directList->DrawIndexed(indexBuffer->Layout.GetNumRepetitions(), 0, 0);
+	//m_directList->DrawIndexed(3132, 0, 0);
 }
 
 void env::Renderer::EndFrame()

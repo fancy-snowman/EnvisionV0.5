@@ -139,3 +139,99 @@ ID env::AssetManager::CreatePhongMaterial(const std::string& name)
 
 	return materialID;
 }
+
+ID env::AssetManager::LoadMesh(const std::string& name, const std::string& filePath)
+{
+	Assimp::Importer importer;
+
+	const aiScene* scene = importer.ReadFile(filePath, 0/*
+		aiProcess_MakeLeftHanded
+		| aiProcess_GenUVCoords
+		| aiProcess_FlipUVs*/);
+
+	if (!scene && scene->HasMeshes())
+		return ID_ERROR;
+
+	int numVertices = 0;
+	int numIndices = 0;
+
+	for (int i = 0; i < scene->mNumMeshes; i++) {
+		numVertices += scene->mMeshes[i]->mNumVertices;
+		const aiMesh* mesh = scene->mMeshes[i];
+		for (int j = 0; j < mesh->mNumFaces; j++) {
+			numIndices += mesh->mFaces[j].mNumIndices;
+		}
+	}
+
+	struct Vertex
+	{
+		struct {
+			float x, y, z;
+		} Position;
+
+		struct {
+			float x, y, z;
+			
+		} Normal;
+
+		struct {
+			float u, v;
+		} Texcoord;
+	};
+
+	std::vector<Vertex> vertices(numVertices);
+	std::vector<UINT> indices(numIndices);
+
+	int nextVertex = 0;
+	int nextIndex = 0;
+
+	int meshVertexOffset = 0;
+
+	for (int i = 0; i < scene->mNumMeshes; i++) {
+		const aiMesh* mesh = scene->mMeshes[i];
+
+		for (int j = 0; j < mesh->mNumVertices; j++) {
+			const aiVector3D& position = mesh->mVertices[j];
+			const aiVector3D& normal = mesh->mNormals[j];
+			const aiVector3D& texCoord = mesh->mTextureCoords[0][j];
+
+			Vertex& vertex = vertices[nextVertex++];
+			vertex.Position = { position.x, position.y, position.z };
+			vertex.Normal = { normal.x, normal.y, normal.z };
+			vertex.Texcoord = { texCoord.x, texCoord.y };
+		}
+
+		for (int j = 0; j < mesh->mNumFaces; j++) {
+			const aiFace& face = mesh->mFaces[j];
+			for (int k = 0; k < face.mNumIndices; k++) {
+				indices[nextIndex++] = face.mIndices[k] + meshVertexOffset;
+			}
+		}
+
+		meshVertexOffset += mesh->mNumVertices;
+	}
+
+	ID vertexBuffer = ResourceManager::Get()->CreateBuffer(name + "_vertexBuffer", BufferLayout({
+		{ "POSITION", ShaderDataType::Float3 },
+		{ "NORMAL", ShaderDataType::Float3 },
+		{ "TEXCOORD", ShaderDataType::Float2 } },
+		vertices.size()),
+		BufferBindType::Vertex,
+		vertices.data());
+
+	ID indexBuffer = ResourceManager::Get()->CreateBuffer(name + "_indexBuffer", BufferLayout({
+		{ "INDEX", ShaderDataType::Uint }},
+		indices.size()),
+		BufferBindType::Index,
+		indices.data());
+
+	ID meshID = m_commonIDGenerator.GenerateUnique();
+	Mesh* mesh = new Mesh(meshID, name);
+	mesh->VertexBuffer = vertexBuffer;
+	mesh->NumVertices = (int)vertices.size();
+	mesh->IndexBuffer = indexBuffer;
+	mesh->NumIndices = (int)indices.size();
+	m_meshes[meshID] = mesh;
+
+	return meshID;
+}
