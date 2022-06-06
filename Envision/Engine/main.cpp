@@ -164,7 +164,6 @@ public:
 
 	void OnUpdate(const env::Duration& delta) override
 	{
-		//m_camera.Transform.RotationRollPitchYaw.z += delta.InSeconds() * 0.001f;
 		static const float TARGET_FRAME_TIME = 1.f / 120.f;
 		static float deltaSum = 0.0f;
 		deltaSum += delta.InSeconds();
