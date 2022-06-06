@@ -50,41 +50,80 @@ env::Renderer::Renderer(env::IDGenerator& commonIDGenerator) :
 
 	using namespace DirectX;
 
-	{
-		XMVECTOR cameraPosition = { 0.0f, 250.0f, -500.f };
-		XMVECTOR cameraTarget = { 0.0f, 0.0f, 0.f };
-		XMVECTOR cameraUp = { 0.0f, 1.0f, 0.f };
+	{		
+		float aspect = 1200.f / 800.f;	
+
 		
-		float FOV = 3.14f / 2.0f;
-		float aspect = 1200.f / 800.f;
-		float nearZ = 10.0f;
-		float farZ = 1000.f;
 
-		XMMATRIX view = XMMatrixLookAtLH(cameraPosition, cameraTarget, cameraUp);
-		XMMATRIX projection = XMMatrixPerspectiveFovLH(FOV, aspect, nearZ, farZ);
+		m_frameInfo.CameraBufferInfo;
+		m_frameInfo.CameraBufferInfo.Position = { 0.0f, 250.f, -500.0 };
+		m_frameInfo.CameraBufferInfo.FieldOfView = 3.14f / 2.0f;
+		m_frameInfo.CameraBufferInfo.ForwardDirection = { 0.0f, 0.0f, 1.0f };
+		m_frameInfo.CameraBufferInfo.DistanceNearPlane = 10.0f;
+		m_frameInfo.CameraBufferInfo.UpDirection = { 0.0f, 1.0f, 0.0f };
+		m_frameInfo.CameraBufferInfo.DistanceFarPlane = 1000.0f;
 
-		XMFLOAT4X4 viewProjection;
-		XMStoreFloat4x4(&viewProjection, XMMatrixTranspose(view * projection));
+		XMMATRIX view = XMMatrixLookToLH(
+			XMLoadFloat3(&m_frameInfo.CameraBufferInfo.Position),
+			XMLoadFloat3(&m_frameInfo.CameraBufferInfo.ForwardDirection),
+			XMLoadFloat3(&m_frameInfo.CameraBufferInfo.UpDirection));
+		XMMATRIX projection = XMMatrixPerspectiveFovLH(
+			m_frameInfo.CameraBufferInfo.FieldOfView,
+			aspect,
+			m_frameInfo.CameraBufferInfo.DistanceNearPlane,
+			m_frameInfo.CameraBufferInfo.DistanceFarPlane);
+		XMMATRIX viewProjection = view * projection;
+
+		view = XMMatrixTranspose(view);
+		projection = XMMatrixTranspose(projection);
+		viewProjection = XMMatrixTranspose(viewProjection);
+
+		XMStoreFloat4x4(&m_frameInfo.CameraBufferInfo.ViewMatrix, view);
+		XMStoreFloat4x4(&m_frameInfo.CameraBufferInfo.ProjectionMatrix, projection);
+		XMStoreFloat4x4(&m_frameInfo.CameraBufferInfo.ViewProjectionMatrix, viewProjection);
 
 		m_cameraBuffer = ResourceManager::Get()->CreateBuffer("CameraBuffer", {
-			{ "ViewProjectionMatrix", ShaderDataType::Float4x4} },
+			{ "Position", ShaderDataType::Float3 },
+			{ "FieldOfView", ShaderDataType::Float },
+			{ "ForwardDirection", ShaderDataType::Float3 },
+			{ "DistanceNearPlane", ShaderDataType::Float },
+			{ "UpDirection", ShaderDataType::Float3 },
+			{ "DistanceFarPlane", ShaderDataType::Float },
+			{ "ViewMatrix", ShaderDataType::Float4x4 },
+			{ "ProjectionMatrix", ShaderDataType::Float4x4 },
+			{ "ViewProjectionMatrix", ShaderDataType::Float4x4 } },
 			BufferBindType::Constant,
-			&viewProjection);
+			&m_frameInfo.CameraBufferInfo);
 	}
 
 	{
-		XMMATRIX translation = XMMatrixTranslation(0.1f, 0.5f, 0.0f);
-		XMMATRIX rotation = XMMatrixRotationRollPitchYaw(0.785f, 1.0f, 0.0f);
-		XMMATRIX scale = XMMatrixScaling(2.0f, 2.0f, 2.0f);
+		XMMATRIX translation = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+		XMMATRIX rotation = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
+		XMMATRIX scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 
 		XMFLOAT4X4 transform;
-		XMStoreFloat4x4(&transform, XMMatrixTranspose(scale * rotation * translation));
+		//XMStoreFloat4x4(&transform, XMMatrixTranspose(scale * rotation * translation));
+		XMStoreFloat4x4(&transform, XMMatrixIdentity());
+
+		ObjectBufferData data;
+		data.Position = { 0.0f, 0.0f, 0.0f };
+		data.ID = 0;
+		data.ForwardDirection = { 0.0f, 0.0f, 1.0f };
+		data.MaterialID = 0;
+		data.UpDirection = { 0.0f, 1.0f, 0.0f };
+		data.Pad = 0;
+		data.WorldMatrix = transform;
 
 		m_objectBuffer = ResourceManager::Get()->CreateBuffer("ObjectBuffer", {
+			{ "Position", ShaderDataType::Float3 },
+			{ "ID", ShaderDataType::Float },
+			{ "ForwardDirection", ShaderDataType::Float3 },
+			{ "MaterialID", ShaderDataType::Float },
+			{ "UpDirection", ShaderDataType::Float3 },
+			{ "Pad", ShaderDataType::Float },
 			{ "WorldMatrix", ShaderDataType::Float4x4 } },
 			BufferBindType::Constant,
-			&transform);
-
+			&data);
 	}
 
 	//m_phongBuffer = ResourceManager::Get()->CreateConstantBuffer("PhongBuffer", {
@@ -107,10 +146,12 @@ void env::Renderer::Initialize()
 {
 }
 
-void env::Renderer::BeginFrame(ID target)
+void env::Renderer::BeginFrame(const CameraSettings& camera, ID target)
 {
 	WindowTarget* targetResource = ResourceManager::Get()->GetTarget(target);
 	PipelineState* pipeline = ResourceManager::Get()->GetPipelineState(m_pipelineState);
+
+	float aspectRatio = targetResource->Viewport.Width / targetResource->Viewport.Height;
 
 	m_frameInfo.WindowTarget = targetResource;
 	m_frameInfo.FrameDescriptorAllocator.Clear();
@@ -126,7 +167,69 @@ void env::Renderer::BeginFrame(ID target)
 	m_directList->SetDescriptorHeaps(1, &descriptorHeap);
 
 	{ // Set up camera
+		
+		using namespace DirectX;
+
+		XMFLOAT3 cameraForward = { 0.0f, 0.0f, 1.0f };
+		XMFLOAT3 cameraUp = { 0.0f, 1.0f, 0.0f };
+		XMFLOAT4X4 cameraView;
+		XMFLOAT4X4 cameraProjection;
+		XMFLOAT4X4 cameraViewProjection;
+
+		{
+			XMMATRIX rotation = XMMatrixRotationRollPitchYaw(
+				camera.Transform.RotationRollPitchYaw.y,
+				camera.Transform.RotationRollPitchYaw.z,
+				camera.Transform.RotationRollPitchYaw.x);
+
+			XMStoreFloat3(&cameraForward, XMVector3TransformNormal(
+				XMLoadFloat3(&cameraForward),
+				rotation));
+
+			XMStoreFloat3(&cameraUp, XMVector3TransformNormal(
+				XMLoadFloat3(&cameraUp),
+				rotation));
+
+			XMMATRIX view = XMMatrixLookToLH(
+				XMLoadFloat3(&camera.Transform.Position),
+				XMLoadFloat3(&cameraForward),
+				XMLoadFloat3(&cameraUp));
+
+			XMMATRIX projection = XMMatrixPerspectiveFovLH(
+				camera.Projection.FieldOfView,
+				aspectRatio,
+				camera.Projection.DistanceNearPlane,
+				camera.Projection.DistanceFarPlane);
+
+			XMMATRIX viewProjection = view * projection;
+
+			view = XMMatrixTranspose(view);
+			projection = XMMatrixTranspose(projection);
+			viewProjection = XMMatrixTranspose(viewProjection);
+
+			XMStoreFloat4x4(&cameraView, view);
+			XMStoreFloat4x4(&cameraProjection, projection);
+			XMStoreFloat4x4(&cameraViewProjection, viewProjection);
+		}
+
+
+		m_frameInfo.CameraBufferInfo.Position = camera.Transform.Position;
+		m_frameInfo.CameraBufferInfo.ForwardDirection = cameraForward;
+		m_frameInfo.CameraBufferInfo.UpDirection = cameraUp;
+		m_frameInfo.CameraBufferInfo.ViewMatrix = cameraView;
+		m_frameInfo.CameraBufferInfo.ProjectionMatrix = cameraProjection;
+		m_frameInfo.CameraBufferInfo.ViewProjectionMatrix = cameraViewProjection;
+
+		m_frameInfo.CameraBufferInfo.FieldOfView = camera.Projection.FieldOfView;
+		m_frameInfo.CameraBufferInfo.DistanceNearPlane = camera.Projection.DistanceNearPlane;
+		m_frameInfo.CameraBufferInfo.DistanceFarPlane = camera.Projection.DistanceFarPlane;
+		
 		Buffer* cameraBuffer = ResourceManager::Get()->GetBuffer(m_cameraBuffer);
+
+		ResourceManager::Get()->UploadBufferData(m_cameraBuffer,
+			&m_frameInfo.CameraBufferInfo,
+			sizeof(m_frameInfo.CameraBufferInfo));
+
 		D3D12_CPU_DESCRIPTOR_HANDLE cameraBufferSource = cameraBuffer->Views.Constant;
 		D3D12_CPU_DESCRIPTOR_HANDLE cameraBufferDest = m_frameInfo.FrameDescriptorAllocator.Allocate();
 		GPU::GetDevice()->CopyDescriptorsSimple(1,
@@ -155,7 +258,7 @@ void env::Renderer::BeginFrame(ID target)
 
 		XMFLOAT4X4 transform;
 		XMStoreFloat4x4(&transform, XMMatrixTranspose(scale * rotation * translation));
-		ResourceManager::Get()->UploadBufferData(m_objectBuffer, &transform, sizeof(transform));
+		//ResourceManager::Get()->UploadBufferData(m_objectBuffer, &transform, sizeof(transform));
 
 		D3D12_CPU_DESCRIPTOR_HANDLE objectBufferSource = objectBuffer->Views.Constant;
 		D3D12_CPU_DESCRIPTOR_HANDLE objectBufferDest = m_frameInfo.FrameDescriptorAllocator.Allocate();

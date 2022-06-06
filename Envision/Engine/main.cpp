@@ -5,42 +5,120 @@
 #include "envision/graphics/AssetManager.h"
 #include "envision/graphics/Renderer.h"
 
-class RenderLayer : public env::Layer
+class SceneUpdateLayer : public env::Layer
 {
+private:
+
+	env::CameraSettings& m_commonCamera;
+
+	struct {
+		float Roll = 0.0f;
+		float Pitch = 0.0f;
+		float Yaw = 0.0f;
+		float Forward = 0.0f;
+		float Up = 0.0f;
+		float Right = 0.0f;
+	} m_cameraDelta;
+
+	struct {
+		bool W : 1;
+		bool A : 1;
+		bool S : 1;
+		bool D : 1;
+	} m_keyDownStates = { 0 };
+
 public:
 
-	RenderLayer() : env::Layer("TestLayer") {}
-	~RenderLayer() final = default;
+	SceneUpdateLayer(env::CameraSettings& camera) : m_commonCamera(camera), env::Layer("TestLayer") {}
+	~SceneUpdateLayer() final = default;
 
 public:
 
 	void OnAttach() final
 	{
-		std::cout << "RenderLayer Attached" << std::endl;
+		std::cout << "SceneUpdateLayer Attached" << std::endl;
 	}
 
 	void OnDetach() final
 	{
-		std::cout << "RenderLayer Detached" << std::endl;
+		std::cout << "SceneUpdateLayer Detached" << std::endl;
 	}
 
 	void OnUpdate(const env::Duration& delta) final
 	{
-		//std::cout << "Updated with delta " << delta.InSeconds() << std::endl;
+		if (m_keyDownStates.W)
+			m_cameraDelta.Forward += m_commonCamera.Movement.SpeedForward * delta.InSeconds();
+		if (m_keyDownStates.A)
+			m_cameraDelta.Right -= m_commonCamera.Movement.SpeedRight * delta.InSeconds();
+		if (m_keyDownStates.S)
+			m_cameraDelta.Forward -= m_commonCamera.Movement.SpeedForward * delta.InSeconds();
+		if (m_keyDownStates.D)
+			m_cameraDelta.Right += m_commonCamera.Movement.SpeedRight * delta.InSeconds();
 
-		//env::KeyUpEvent kdevent;
-		//env::Event& e = (env::Event&)kdevent;
-		//OnEvent(e);
+
+		m_commonCamera.Transform.RotationRollPitchYaw.z +=
+			m_cameraDelta.Yaw * m_commonCamera.Movement.TurnSpeedHorizontal * delta.InSeconds();
+		m_commonCamera.Transform.RotationRollPitchYaw.y +=
+			m_cameraDelta.Pitch * m_commonCamera.Movement.TurnSpeedVertical * delta.InSeconds();
+
+		if (m_cameraDelta.Forward != 0.0f)
+			m_commonCamera.Transform.MoveForward(m_cameraDelta.Forward
+				* m_commonCamera.Movement.SpeedForward
+				* delta.InSeconds());
+		if (m_cameraDelta.Up != 0.0f)
+			m_commonCamera.Transform.MoveUp(m_cameraDelta.Up
+				* m_commonCamera.Movement.SpeedUp
+				* delta.InSeconds());
+		if (m_cameraDelta.Right != 0.0f)
+			m_commonCamera.Transform.MoveRight(m_cameraDelta.Right
+				* m_commonCamera.Movement.SpeedRight
+				* delta.InSeconds());
+
+		m_cameraDelta.Yaw = 0.0f;
+		m_cameraDelta.Pitch = 0.0f;
+		m_cameraDelta.Forward = 0.0f;
+		m_cameraDelta.Up = 0.0f;
+		m_cameraDelta.Right = 0.0f;
 	}
 
 	void OnEvent(env::Event& event)
 	{
-		//std::cout << "New event: " << event.GetTypeName() << std::endl;
+		event.CallIf<env::KeyDownEvent>([&](env::KeyDownEvent& e) {
+			std::cout << "KeyDown: " << (int)e.Code << "\n";
+			if (e.Code == env::KeyCode::W) m_keyDownStates.W = true;
+			else if (e.Code == env::KeyCode::A) m_keyDownStates.A = true;
+			else if (e.Code == env::KeyCode::S) m_keyDownStates.S = true;
+			else if (e.Code == env::KeyCode::D) m_keyDownStates.D = true;
+			return false;
+		});
 
-		//event.CallIf<env::KeyDownEvent>([](env::KeyDownEvent& e) {
-		//	std::cout << "Key down: " << (int)e.Code << std::endl;
-		//	return false;
-		//});
+		event.CallIf<env::KeyUpEvent>([&](env::KeyUpEvent& e) {
+			std::cout << "KeyDown: " << (int)e.Code << "\n";
+			if (e.Code == env::KeyCode::W) m_keyDownStates.W = false;
+			else if (e.Code == env::KeyCode::A) m_keyDownStates.A = false;
+			else if (e.Code == env::KeyCode::S) m_keyDownStates.S = false;
+			else if (e.Code == env::KeyCode::D) m_keyDownStates.D = false;
+			return false;
+		});
+
+		event.CallIf<env::MouseMoveEvent>([&](env::MouseMoveEvent& e) {
+			if (e.Modifiers.RightMouse) {
+				m_cameraDelta.Yaw -= e.DeltaX;
+				m_cameraDelta.Pitch -= e.DeltaY;
+			}
+
+			if (e.Modifiers.MiddleMouse) {
+				m_cameraDelta.Right += e.DeltaX;
+				m_cameraDelta.Up -= e.DeltaY;
+			}
+
+			return false;
+		});
+
+		event.CallIf<env::MouseScrollEvent>([&](env::MouseScrollEvent& e) {
+			m_cameraDelta.Forward += e.Delta * 10.0f;
+			return false;
+		});
 	}
 
 };
@@ -52,6 +130,8 @@ class TestApplication : public env::Application
 	ID m_target;
 	ID m_mesh;
 	ID m_material;
+
+	env::CameraSettings m_camera;
 
 public:
 
@@ -65,127 +145,29 @@ public:
 
 		m_target = env::ResourceManager::Get()->CreateWindowTarget("TargetWindow", m_window);
 
-		struct Vertex {
-			struct {
-				float x, y, z;
-			} Position;
-
-			struct {
-				float r, g, b;
-			} Color;
-
-			struct {
-				float x, y, z;
-			} Normal;
-		};
-
-
-		//Assimp::Importer importer;
-		//const aiScene* scene = importer.ReadFile("assets/SM_helicopter_01.fbx", 0);
-		//const aiMesh* mesh = scene->mMeshes[0];
-
-		//std::vector<Vertex> vertices(mesh->mNumVertices);
-		//for (int i = 0; i < mesh->mNumVertices; i++)
-		//{
-		//	aiVector3D& position = mesh->mVertices[i];
-		//	//const aiVector3D* texCoord = mesh->mTextureCoords[i];
-		//	aiVector3D& normal = mesh->mNormals[i];
-
-		//	Vertex& vertex = vertices[i];
-		//	vertex.Position = { position.x, position.y, position.z };
-		//	vertex.Color = { 1.0f, 1.0f, 1.0f };
-		//	vertex.Normal = { normal.x, normal.y, normal.z };
-		//}
-
-		////for (int i = 0; i <)
-
-		////std::vector<Vertex> vertices = {
-		////	// Front
-		////	{ {  1.0f, -1.0f,  1.0f }, { 1.0f, 0.0f, 0.0f }, {  0.0f,  0.0f,  1.0f } },
-		////	{ {  1.0f,  1.0f,  1.0f }, { 1.0f, 0.0f, 0.0f }, {  0.0f,  0.0f,  1.0f } },
-		////	{ { -1.0f,  1.0f,  1.0f }, { 1.0f, 0.0f, 0.0f }, {  0.0f,  0.0f,  1.0f } },
-		////	{ {  1.0f, -1.0f,  1.0f }, { 1.0f, 0.0f, 0.0f }, {  0.0f,  0.0f,  1.0f } },
-		////	{ { -1.0f,  1.0f,  1.0f }, { 1.0f, 0.0f, 0.0f }, {  0.0f,  0.0f,  1.0f } },
-		////	{ { -1.0f, -1.0f,  1.0f }, { 1.0f, 0.0f, 0.0f }, {  0.0f,  0.0f,  1.0f } },
-
-		////	// Back
-		////	{ { -1.0f, -1.0f, -1.0f }, { 0.0f, 1.0f, 0.0f }, {  0.0f,  0.0f, -1.0f } },
-		////	{ { -1.0f,  1.0f, -1.0f }, { 0.0f, 1.0f, 0.0f }, {  0.0f,  0.0f, -1.0f } },
-		////	{ {  1.0f,  1.0f, -1.0f }, { 0.0f, 1.0f, 0.0f }, {  0.0f,  0.0f, -1.0f } },
-		////	{ { -1.0f, -1.0f, -1.0f }, { 0.0f, 1.0f, 0.0f }, {  0.0f,  0.0f, -1.0f } },
-		////	{ {  1.0f,  1.0f, -1.0f }, { 0.0f, 1.0f, 0.0f }, {  0.0f,  0.0f, -1.0f } },
-		////	{ {  1.0f, -1.0f, -1.0f }, { 0.0f, 1.0f, 0.0f }, {  0.0f,  0.0f, -1.0f } },
-
-		////	// Left
-		////	{ { -1.0f, -1.0f,  1.0f }, { 0.0f, 0.0f, 1.0f }, { -1.0f,  0.0f,  0.0f } },
-		////	{ { -1.0f,  1.0f,  1.0f }, { 0.0f, 0.0f, 1.0f }, { -1.0f,  0.0f,  0.0f } },
-		////	{ { -1.0f,  1.0f, -1.0f }, { 0.0f, 0.0f, 1.0f }, { -1.0f,  0.0f,  0.0f } },
-		////	{ { -1.0f, -1.0f,  1.0f }, { 0.0f, 0.0f, 1.0f }, { -1.0f,  0.0f,  0.0f } },
-		////	{ { -1.0f,  1.0f, -1.0f }, { 0.0f, 0.0f, 1.0f }, { -1.0f,  0.0f,  0.0f } },
-		////	{ { -1.0f, -1.0f, -1.0f }, { 0.0f, 0.0f, 1.0f }, { -1.0f,  0.0f,  0.0f } },
-
-		////	// Right
-		////	{ {  1.0f, -1.0f, -1.0f }, { 1.0f, 1.0f, 0.0f }, {  1.0f,  0.0f,  0.0f } },
-		////	{ {  1.0f,  1.0f, -1.0f }, { 1.0f, 1.0f, 0.0f }, {  1.0f,  0.0f,  0.0f } },
-		////	{ {  1.0f,  1.0f,  1.0f }, { 1.0f, 1.0f, 0.0f }, {  1.0f,  0.0f,  0.0f } },
-		////	{ {  1.0f, -1.0f, -1.0f }, { 1.0f, 1.0f, 0.0f }, {  1.0f,  0.0f,  0.0f } },
-		////	{ {  1.0f,  1.0f,  1.0f }, { 1.0f, 1.0f, 0.0f }, {  1.0f,  0.0f,  0.0f } },
-		////	{ {  1.0f, -1.0f,  1.0f }, { 1.0f, 1.0f, 0.0f }, {  1.0f,  0.0f,  0.0f } },
-
-		////	// Up
-		////	{ { -1.0f,  1.0f, -1.0f }, { 1.0f, 0.0f, 1.0f }, {  0.0f,  1.0f,  0.0f } },
-		////	{ { -1.0f,  1.0f,  1.0f }, { 1.0f, 0.0f, 1.0f }, {  0.0f,  1.0f,  0.0f } },
-		////	{ {  1.0f,  1.0f,  1.0f }, { 1.0f, 0.0f, 1.0f }, {  0.0f,  1.0f,  0.0f } },
-		////	{ { -1.0f,  1.0f, -1.0f }, { 1.0f, 0.0f, 1.0f }, {  0.0f,  1.0f,  0.0f } },
-		////	{ {  1.0f,  1.0f,  1.0f }, { 1.0f, 0.0f, 1.0f }, {  0.0f,  1.0f,  0.0f } },
-		////	{ {  1.0f,  1.0f, -1.0f }, { 1.0f, 0.0f, 1.0f }, {  0.0f,  1.0f,  0.0f } },
-
-		////	// Down
-		////	{ { -1.0f, -1.0f,  1.0f }, { 0.0f, 1.0f, 1.0f }, {  0.0f, -1.0f,  0.0f } },
-		////	{ { -1.0f, -1.0f, -1.0f }, { 0.0f, 1.0f, 1.0f }, {  0.0f, -1.0f,  0.0f } },
-		////	{ {  1.0f, -1.0f, -1.0f }, { 0.0f, 1.0f, 1.0f }, {  0.0f, -1.0f,  0.0f } },
-		////	{ { -1.0f, -1.0f,  1.0f }, { 0.0f, 1.0f, 1.0f }, {  0.0f, -1.0f,  0.0f } },
-		////	{ {  1.0f, -1.0f, -1.0f }, { 0.0f, 1.0f, 1.0f }, {  0.0f, -1.0f,  0.0f } },
-		////	{ {  1.0f, -1.0f,  1.0f }, { 0.0f, 1.0f, 1.0f }, {  0.0f, -1.0f,  0.0f } },
-		////};
-
-		//std::vector<UINT> indices;
-
-		//for (int i = 0; i < mesh->mNumFaces; i++)
-		//{
-		//	aiFace& face = mesh->mFaces[i];
-		//	
-		//	for (int j = 0; j < face.mNumIndices; j++)
-		//	{
-		//		indices.push_back(face.mIndices[j]);
-		//	}
-		//}
-
-
-		////for (UINT i = 0; i < (UINT)vertices.size(); i++)
-		//	//indices.push_back(i);
-
-		//env::BufferLayout vertexLayout({
-		//	{ "position", env::ShaderDataType::Float3 },
-		//	{ "color", env::ShaderDataType::Float3 },
-		//	{ "normal", env::ShaderDataType::Float3 } },
-		//	vertices.size());
-
-		//m_mesh = env::AssetManager::Get()->CreateMesh("Box",
-		//	vertices.data(),
-		//	vertexLayout,
-		//	indices.data(),
-		//	indices.size());
-
 		m_material = env::AssetManager::Get()->CreatePhongMaterial("DefaultMaterial");
 
-		//PushLayer(new RenderLayer);
+		m_camera.Transform.Position = { 0.0f, 250.f, -500.0 };
+		m_camera.Transform.RotationRollPitchYaw = { 0.0f, 0.0f, 0.0f };
+		m_camera.Projection.FieldOfView = 3.14f / 2.0f;
+		m_camera.Projection.DistanceNearPlane = 10.0f;
+		m_camera.Projection.DistanceFarPlane = 1000.0f;
+		m_camera.Projection.Orthographic = false;
+		m_camera.Movement.TurnSpeedHorizontal = 0.002f;
+		m_camera.Movement.TurnSpeedVertical = 0.002f;
+		m_camera.Movement.SpeedRight = 0.8f;
+		m_camera.Movement.SpeedUp = 0.8f;
+		m_camera.Movement.SpeedForward = 0.8f;
+
+		PushLayer(new SceneUpdateLayer(m_camera));
 		PushWindow(m_window);
 	}
 
 	void OnUpdate(const env::Duration& delta) override
 	{
-		env::Renderer::Get()->BeginFrame(m_target);
+		//m_camera.Transform.RotationRollPitchYaw.z += delta.InSeconds() * 0.001f;
+
+		env::Renderer::Get()->BeginFrame(m_camera, m_target);
 		env::Renderer::Get()->Submit(m_mesh, m_material);
 		env::Renderer::Get()->EndFrame();
 	}

@@ -7,6 +7,15 @@
 
 namespace env
 {
+	struct MouseModifiers
+	{
+		bool Ctrl : 1;
+		bool Shift : 1;
+		bool LeftMouse : 1;
+		bool MiddleMouse : 1;
+		bool RightMouse : 1;
+	};
+
 	struct KeyInfo
 	{
 		// Modifiers
@@ -38,6 +47,7 @@ namespace env
 		MouseMove,
 		MouseKeyDown,
 		MouseKeyUp,
+		MouseScroll,
 	};
 
 	#define EVENT_TYPE(structName, type)\
@@ -76,7 +86,7 @@ namespace env
 	struct KeyDownEvent : public Event
 	{
 		EVENT_TYPE(KeyDownEvent, KeyDown)
-			KeyDownEvent(KeyCode key, KeyInfo info = KeyInfo()) :
+		KeyDownEvent(KeyCode key, KeyInfo info = KeyInfo()) :
 			Code(key),
 			Info(info),
 			Event(EventType::KeyDown) {}
@@ -89,23 +99,41 @@ namespace env
 	{
 		EVENT_TYPE(KeyUpEvent, KeyUp)
 		KeyUpEvent(KeyCode key, KeyInfo info = KeyInfo()) :
-			PKey(key),
+			Code(key),
 			Info(info),
 			Event(EventType::KeyUp) {}
 
-		const KeyCode PKey;
+		const KeyCode Code;
 		const KeyInfo Info;
 	};
 
 	struct MouseMoveEvent : public Event
 	{
 		EVENT_TYPE(MouseMoveEvent, MouseMove)
-		MouseMoveEvent(float x, float y) : 
-			X(x),
-			Y(y),
+		MouseMoveEvent(float posX, float posY, float deltaX, float deltaY, MouseModifiers modifiers) : 
+			PosX(posX),
+			PosY(posY),
+			DeltaX(deltaX),
+			DeltaY(deltaY),
+			Modifiers(modifiers),
 			Event(EventType::MouseMove) {}
 
 		// TODO: Change to float2
-		float X, Y;
+		float PosX, PosY;
+		float DeltaX, DeltaY;
+		MouseModifiers Modifiers;
+	};
+
+	struct MouseScrollEvent : public Event
+	{
+		EVENT_TYPE(MouseScrollEvent, MouseScroll)
+		MouseScrollEvent(float delta, MouseModifiers modifiers) :
+			Delta(delta),
+			Modifiers(modifiers),
+			Event(EventType::MouseScroll) {}
+
+		// TODO: Change to float2
+		float Delta;
+		MouseModifiers Modifiers;
 	};
 }

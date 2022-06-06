@@ -14,22 +14,41 @@ struct VS_OUT
 
 cbuffer CameraBuffer : register(b0)
 {
-	float4x4 ViewProjection;
+	struct {
+		float3 Position;
+		float FieldOfView;
+		float3 ForwardDirection;
+		float DistanceNearPlane;
+		float3 UpDirection;
+		float DistanceFarPlane;
+		float4x4 ViewMatrix;
+		float4x4 ProjectionMatrix;
+		float4x4 ViewProjectionMatrix;
+	} Camera;
 }
 
 cbuffer ObjectBuffer : register(b1)
 {
-	float4x4 World;
+	struct {
+		float3 Position;
+		float ID;
+		float3 ForwardDirection;
+		float MaterialID;
+		float3 UpDirection;
+		float Pad;
+
+		float4x4 WorldMatrix;
+	} Object;
 }
 
 VS_OUT VS_main(VS_IN input)
 {
 	VS_OUT output;
 	output.Position = float4(input.Position, 1.0f);
-	output.Position = mul(output.Position, World);
-	output.Position = mul(output.Position, ViewProjection);
+	output.Position = mul(output.Position, Object.WorldMatrix);
+	output.Position = mul(output.Position, Camera.ViewProjectionMatrix);
 
-	output.Normal = normalize(mul(float4(input.Normal, 0.f), World));
+	output.Normal = normalize(mul(float4(input.Normal, 0.f), Object.WorldMatrix));
 
 	output.Texcoord = input.Texcoord;
 

@@ -32,6 +32,80 @@ void env::Window::InitWindowClass()
 				KeyDownEvent event(code, info);
 				GetWindowObject(hwnd)->m_application.PublishEvent(event);
 			}
+			break;
+		}
+
+		case WM_KEYUP:
+		{
+			KeyCode code = KeyCode::Unknown;
+			KeyInfo info;
+
+			if (wParam >= 0x41 && wParam <= 0x5A) // Between A-Z
+			{
+				int index = (int)wParam - 0x41;
+				code = (KeyCode)((int)KeyCode::A + index);
+
+				KeyUpEvent event(code, info);
+				GetWindowObject(hwnd)->m_application.PublishEvent(event);
+			}
+			break;
+		}
+
+		case WM_MOUSEMOVE:
+		{
+			static float lastPosX = LOWORD(lParam);
+			static float lastPosY = HIWORD(lParam);
+
+			float posX = LOWORD(lParam);
+			float posY = HIWORD(lParam);
+			float deltaX = lastPosX - posX;
+			float deltaY = lastPosY - posY;
+			lastPosX = posX;
+			lastPosY = posY;
+
+			MouseModifiers modifiers;
+			ZeroMemory(&modifiers, sizeof(modifiers));
+			
+			modifiers.Ctrl = ((wParam & MK_CONTROL) == MK_CONTROL);
+			modifiers.Shift = ((wParam & MK_SHIFT) == MK_SHIFT);
+			modifiers.LeftMouse = ((wParam & MK_LBUTTON) == MK_LBUTTON);
+			modifiers.MiddleMouse = ((wParam & MK_MBUTTON) == MK_MBUTTON);
+			modifiers.RightMouse = ((wParam & MK_RBUTTON) == MK_RBUTTON);
+
+			MouseMoveEvent event(posX, posY, deltaX, deltaY, modifiers);
+			GetWindowObject(hwnd)->m_application.PublishEvent(event);
+			break;
+		}
+
+		case WM_MOUSEWHEEL:
+		{
+			//static float lastPosX = LOWORD(lParam);
+			//static float lastPosY = HIWORD(lParam);
+
+			//float posX = LOWORD(lParam);
+			//float posY = HIWORD(lParam);
+			//float deltaX = lastPosX - posX;
+			//float deltaY = lastPosY - posY;
+			//lastPosX = posX;
+			//lastPosY = posY;
+
+			WORD eventMods = LOWORD(wParam);
+			WORD eventDelta = HIWORD(wParam);
+
+			float delta = (eventDelta == WHEEL_DELTA) ? 1.0f : -1.0f;
+
+			MouseModifiers modifiers;
+			ZeroMemory(&modifiers, sizeof(modifiers));
+
+			modifiers.Ctrl = ((eventMods & MK_CONTROL) == MK_CONTROL);
+			modifiers.Shift = ((eventMods & MK_SHIFT) == MK_SHIFT);
+			modifiers.LeftMouse = ((eventMods & MK_LBUTTON) == MK_LBUTTON);
+			modifiers.MiddleMouse = ((eventMods & MK_MBUTTON) == MK_MBUTTON);
+			modifiers.RightMouse = ((eventMods & MK_RBUTTON) == MK_RBUTTON);
+
+			MouseScrollEvent event(delta, modifiers);
+			GetWindowObject(hwnd)->m_application.PublishEvent(event);
+			break;
 		}
 
 		case WM_DESTROY:
