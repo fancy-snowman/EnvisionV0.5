@@ -29,7 +29,6 @@ VS_OUT VS_main(VS_IN input)
 	output.Position = mul(output.Position, World);
 	output.Position = mul(output.Position, ViewProjection);
 
-	// Why is normalize necessay? It should still be length of 1?
 	output.Normal = normalize(mul(float4(input.Normal, 0.f), World));
 
 	output.Texcoord = input.Texcoord;

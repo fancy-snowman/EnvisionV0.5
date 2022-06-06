@@ -51,14 +51,14 @@ env::Renderer::Renderer(env::IDGenerator& commonIDGenerator) :
 	using namespace DirectX;
 
 	{
-		XMVECTOR cameraPosition = { 0.0f, 3.0f, -5.f };
+		XMVECTOR cameraPosition = { 0.0f, 250.0f, -500.f };
 		XMVECTOR cameraTarget = { 0.0f, 0.0f, 0.f };
 		XMVECTOR cameraUp = { 0.0f, 1.0f, 0.f };
 		
 		float FOV = 3.14f / 2.0f;
 		float aspect = 1200.f / 800.f;
-		float nearZ = 1.0f;
-		float farZ = 20.f;
+		float nearZ = 10.0f;
+		float farZ = 1000.f;
 
 		XMMATRIX view = XMMatrixLookAtLH(cameraPosition, cameraTarget, cameraUp);
 		XMMATRIX projection = XMMatrixPerspectiveFovLH(FOV, aspect, nearZ, farZ);
@@ -151,7 +151,7 @@ void env::Renderer::BeginFrame(ID target)
 			sin(rotationTime * factorRoll),
 			3.14 + sin(rotationTime * factorPitch),
 			sin(rotationTime * factorYaw));
-		XMMATRIX scale = XMMatrixScaling(0.01f, 0.01f, 0.01f);
+		XMMATRIX scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 
 		XMFLOAT4X4 transform;
 		XMStoreFloat4x4(&transform, XMMatrixTranspose(scale * rotation * translation));
