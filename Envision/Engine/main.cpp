@@ -84,7 +84,6 @@ public:
 	void OnEvent(env::Event& event)
 	{
 		event.CallIf<env::KeyDownEvent>([&](env::KeyDownEvent& e) {
-			std::cout << "KeyDown: " << (int)e.Code << "\n";
 			if (e.Code == env::KeyCode::W) m_keyDownStates.W = true;
 			else if (e.Code == env::KeyCode::A) m_keyDownStates.A = true;
 			else if (e.Code == env::KeyCode::S) m_keyDownStates.S = true;
@@ -93,7 +92,6 @@ public:
 		});
 
 		event.CallIf<env::KeyUpEvent>([&](env::KeyUpEvent& e) {
-			std::cout << "KeyDown: " << (int)e.Code << "\n";
 			if (e.Code == env::KeyCode::W) m_keyDownStates.W = false;
 			else if (e.Code == env::KeyCode::A) m_keyDownStates.A = false;
 			else if (e.Code == env::KeyCode::S) m_keyDownStates.S = false;
@@ -116,7 +114,7 @@ public:
 		});
 
 		event.CallIf<env::MouseScrollEvent>([&](env::MouseScrollEvent& e) {
-			m_cameraDelta.Forward += e.Delta * 10.0f;
+			m_cameraDelta.Forward += e.Delta * 20.0f;
 			return false;
 		});
 	}

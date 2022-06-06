@@ -62,8 +62,11 @@ float4 PS_main(VS_OUT input) : SV_TARGET
 	float factor = dot(input.Normal, dirToSun);
 	factor = clamp(factor, 0.3f, 1.0f);
 
-	//input.Normal = float3(1.0f, 1.0f, 1.0f);
-	//input.Normal = input.Normal / 2.0f;
-
 	return float4(input.Normal, 1.0f);
+	//return float4(input.Texcoord, 0.0f, 1.0f);
+
+	//float4 color = float4(0.8f, 0.6f, 0.5f, 1.0f);
+	//color = color * factor;
+	//color.w = 1.0f;
+	//return color;
 }

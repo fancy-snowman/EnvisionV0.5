@@ -48,6 +48,7 @@ void env::Window::InitWindowClass()
 				KeyUpEvent event(code, info);
 				GetWindowObject(hwnd)->m_application.PublishEvent(event);
 			}
+
 			break;
 		}
 
