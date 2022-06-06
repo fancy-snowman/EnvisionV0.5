@@ -165,10 +165,16 @@ public:
 	void OnUpdate(const env::Duration& delta) override
 	{
 		//m_camera.Transform.RotationRollPitchYaw.z += delta.InSeconds() * 0.001f;
+		static const float TARGET_FRAME_TIME = 1.f / 120.f;
+		static float deltaSum = 0.0f;
+		deltaSum += delta.InSeconds();
 
-		env::Renderer::Get()->BeginFrame(m_camera, m_target);
-		env::Renderer::Get()->Submit(m_mesh, m_material);
-		env::Renderer::Get()->EndFrame();
+		if (deltaSum >= TARGET_FRAME_TIME) {
+			deltaSum -= TARGET_FRAME_TIME;
+			env::Renderer::Get()->BeginFrame(m_camera, m_target);
+			env::Renderer::Get()->Submit(m_mesh, m_material);
+			env::Renderer::Get()->EndFrame();
+		}
 	}
 
 	~TestApplication() override = default;
