@@ -25,6 +25,11 @@ private:
 		bool A : 1;
 		bool S : 1;
 		bool D : 1;
+
+		bool Up : 1;
+		bool Left : 1;
+		bool Down : 1;
+		bool Right : 1;
 	} m_keyDownStates = { 0 };
 
 public:
@@ -55,6 +60,14 @@ public:
 		if (m_keyDownStates.D)
 			m_cameraDelta.Right += m_commonCamera.Movement.SpeedRight * delta.InSeconds();
 
+		if (m_keyDownStates.Up)
+			m_cameraDelta.Pitch -= m_commonCamera.Movement.TurnSpeedVertical * delta.InSeconds();
+		if (m_keyDownStates.Left)
+			m_cameraDelta.Yaw -= m_commonCamera.Movement.TurnSpeedHorizontal * delta.InSeconds();
+		if (m_keyDownStates.Down)
+			m_cameraDelta.Pitch += m_commonCamera.Movement.TurnSpeedVertical * delta.InSeconds();
+		if (m_keyDownStates.Right)
+			m_cameraDelta.Yaw += m_commonCamera.Movement.TurnSpeedHorizontal * delta.InSeconds();
 
 		m_commonCamera.Transform.RotationRollPitchYaw.z +=
 			m_cameraDelta.Yaw * m_commonCamera.Movement.TurnSpeedHorizontal * delta.InSeconds();
@@ -88,6 +101,11 @@ public:
 			else if (e.Code == env::KeyCode::A) m_keyDownStates.A = true;
 			else if (e.Code == env::KeyCode::S) m_keyDownStates.S = true;
 			else if (e.Code == env::KeyCode::D) m_keyDownStates.D = true;
+
+			else if (e.Code == env::KeyCode::Up) m_keyDownStates.Up = true;
+			else if (e.Code == env::KeyCode::Left) m_keyDownStates.Left = true;
+			else if (e.Code == env::KeyCode::Down) m_keyDownStates.Down = true;
+			else if (e.Code == env::KeyCode::Right) m_keyDownStates.Right = true;
 			return false;
 		});
 
@@ -96,6 +114,11 @@ public:
 			else if (e.Code == env::KeyCode::A) m_keyDownStates.A = false;
 			else if (e.Code == env::KeyCode::S) m_keyDownStates.S = false;
 			else if (e.Code == env::KeyCode::D) m_keyDownStates.D = false;
+
+			else if (e.Code == env::KeyCode::Up) m_keyDownStates.Up = false;
+			else if (e.Code == env::KeyCode::Left) m_keyDownStates.Left = false;
+			else if (e.Code == env::KeyCode::Down) m_keyDownStates.Down = false;
+			else if (e.Code == env::KeyCode::Right) m_keyDownStates.Right = false;
 			return false;
 		});
 
@@ -152,8 +175,8 @@ public:
 		m_camera.Projection.DistanceNearPlane = 10.0f;
 		m_camera.Projection.DistanceFarPlane = 1000.0f;
 		m_camera.Projection.Orthographic = false;
-		m_camera.Movement.TurnSpeedHorizontal = 0.002f;
-		m_camera.Movement.TurnSpeedVertical = 0.002f;
+		m_camera.Movement.TurnSpeedHorizontal = 0.02f;
+		m_camera.Movement.TurnSpeedVertical = 0.02f;
 		m_camera.Movement.SpeedRight = 0.8f;
 		m_camera.Movement.SpeedUp = 0.8f;
 		m_camera.Movement.SpeedForward = 0.8f;

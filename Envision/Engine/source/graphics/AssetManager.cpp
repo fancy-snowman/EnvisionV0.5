@@ -144,10 +144,13 @@ ID env::AssetManager::LoadMesh(const std::string& name, const std::string& fileP
 {
 	Assimp::Importer importer;
 
-	const aiScene* scene = importer.ReadFile(filePath, 0/*
-		aiProcess_MakeLeftHanded
-		| aiProcess_GenUVCoords
-		| aiProcess_FlipUVs*/);
+	//const aiScene* scene = importer.ReadFile(filePath, 
+	//	aiProcess_MakeLeftHanded
+	//	| aiProcess_GenUVCoords
+	//	| aiProcess_FlipUVs);
+
+	const aiScene* scene = importer.ReadFile(filePath,
+		aiProcess_ConvertToLeftHanded);
 
 	if (!scene && scene->HasMeshes())
 		return ID_ERROR;

@@ -28,10 +28,16 @@ void env::Window::InitWindowClass()
 			{
 				int index = (int)wParam - 0x41;
 				code = (KeyCode)((int)KeyCode::A + index);
-
-				KeyDownEvent event(code, info);
-				GetWindowObject(hwnd)->m_application.PublishEvent(event);
 			}
+
+			else if (wParam == VK_UP) { code = KeyCode::Up; }
+			else if (wParam == VK_LEFT) { code = KeyCode::Left; }
+			else if (wParam == VK_DOWN) { code = KeyCode::Down; }
+			else if (wParam == VK_RIGHT) { code = KeyCode::Right; }
+
+			KeyDownEvent event(code, info);
+			GetWindowObject(hwnd)->m_application.PublishEvent(event);
+
 			break;
 		}
 
@@ -44,10 +50,15 @@ void env::Window::InitWindowClass()
 			{
 				int index = (int)wParam - 0x41;
 				code = (KeyCode)((int)KeyCode::A + index);
-
-				KeyUpEvent event(code, info);
-				GetWindowObject(hwnd)->m_application.PublishEvent(event);
 			}
+
+			else if (wParam == VK_UP) { code = KeyCode::Up; }
+			else if (wParam == VK_LEFT) { code = KeyCode::Left; }
+			else if (wParam == VK_DOWN) { code = KeyCode::Down; }
+			else if (wParam == VK_RIGHT) { code = KeyCode::Right; }
+
+			KeyUpEvent event(code, info);
+			GetWindowObject(hwnd)->m_application.PublishEvent(event);
 
 			break;
 		}
