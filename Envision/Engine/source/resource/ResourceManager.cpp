@@ -267,7 +267,38 @@ D3D12_CPU_DESCRIPTOR_HANDLE env::ResourceManager::CreateRTV(Resource* resource)
 
 D3D12_CPU_DESCRIPTOR_HANDLE env::ResourceManager::CreateDSV(Resource* resource)
 {
-	return D3D12_CPU_DESCRIPTOR_HANDLE();
+	{
+		bool isTexture2D = (resource->GetType() == ResourceType::Texture2D);
+		assert(isTexture2D);
+	}
+
+	D3D12_CPU_DESCRIPTOR_HANDLE handle = m_DSVAllocator.Allocate();
+
+	D3D12_DEPTH_STENCIL_VIEW_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+
+	ResourceType type = resource->GetType();
+	switch (type)
+	{
+	case ResourceType::Texture2D:
+	{
+		Texture2D* texture = (Texture2D*)resource;
+		desc.Format = texture->Format;
+		desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+		desc.Texture2D.MipSlice = 0;
+
+		break;
+	}
+
+	default:
+		return D3D12_CPU_DESCRIPTOR_HANDLE(); // TODO: handle error
+	}
+
+	GPU::GetDevice()->CreateDepthStencilView(resource->Native,
+		&desc,
+		handle);
+
+	return handle;
 }
 
 ID env::ResourceManager::CreateBufferArray(const std::string& name, int numBuffers, const BufferLayout& layout, void* initialData)
@@ -391,6 +422,7 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, int width, int
 		bool isRenderTarget = any(bindType & TextureBindType::RenderTarget) || (bindType == TextureBindType::Unknown);
 		bool isShaderResource = any(bindType & TextureBindType::ShaderResource) || (bindType == TextureBindType::Unknown);
 		bool isUnorderedAccess = any(bindType & TextureBindType::UnorderedAccess) || (bindType == TextureBindType::Unknown);
+		bool isDepthStencil = any(bindType & TextureBindType::DepthStencil);
 
 		if (isRenderTarget)
 			resourceDescription.Flags = resourceDescription.Flags | D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
@@ -398,6 +430,18 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, int width, int
 		//	resourceDescription.Flags = resourceDescription.Flags | D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE;
 		if (isUnorderedAccess)
 			resourceDescription.Flags = resourceDescription.Flags | D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+		if (isDepthStencil)
+			resourceDescription.Flags = resourceDescription.Flags | D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+
+		D3D12_CLEAR_VALUE clearValue = {};
+		D3D12_CLEAR_VALUE* clearValuePtr = nullptr;
+
+		if (isDepthStencil) {
+			clearValue.Format = resourceDescription.Format;
+			clearValue.DepthStencil.Depth = 1.0f;
+			clearValue.DepthStencil.Stencil = 0;
+			clearValuePtr = &clearValue;
+		}
 
 		D3D12_PLACED_SUBRESOURCE_FOOTPRINT footprint = { 0 };
 		UINT numRows = 0;
@@ -414,7 +458,7 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, int width, int
 			D3D12_HEAP_FLAG_NONE,
 			&resourceDescription,
 			textureDesc.State,
-			NULL,
+			clearValuePtr,
 			IID_PPV_ARGS(&textureDesc.Native));
 
 		ASSERT_HR(hr, "Could not create texture 2D buffer");
@@ -427,6 +471,8 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, int width, int
 			textureDesc.Views.ShaderResource = CreateSRV(&textureDesc);
 		if (any(bindType & TextureBindType::UnorderedAccess))
 			textureDesc.Views.UnorderedAccess = CreateUAV(&textureDesc);
+		if (any(bindType & TextureBindType::DepthStencil))
+			textureDesc.Views.DepthStencil = CreateDSV(&textureDesc);
 	}
 
 	ID resourceID = m_commonIDGenerator.GenerateUnique();
@@ -586,6 +632,22 @@ ID env::ResourceManager::CreatePipelineState(const std::string& name, std::initi
 		pipelineDesc.NumRenderTargets = 1;
 		pipelineDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 		pipelineDesc.SampleDesc.Count = 1;
+
+		pipelineDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
+		pipelineDesc.DepthStencilState.DepthEnable = true;
+		pipelineDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+		pipelineDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+		pipelineDesc.DepthStencilState.StencilEnable = false;
+		pipelineDesc.DepthStencilState.StencilReadMask = D3D12_DEFAULT_STENCIL_READ_MASK;
+		pipelineDesc.DepthStencilState.StencilWriteMask = D3D12_DEFAULT_STENCIL_WRITE_MASK;
+		pipelineDesc.DepthStencilState.FrontFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+		pipelineDesc.DepthStencilState.BackFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+		pipelineDesc.DepthStencilState.FrontFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
+		pipelineDesc.DepthStencilState.BackFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
+		pipelineDesc.DepthStencilState.FrontFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
+		pipelineDesc.DepthStencilState.BackFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
+		pipelineDesc.DepthStencilState.FrontFace.StencilFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+		pipelineDesc.DepthStencilState.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_ALWAYS;
 
 		D3D12_RENDER_TARGET_BLEND_DESC defaultBlendDesc = {
 			false, false,

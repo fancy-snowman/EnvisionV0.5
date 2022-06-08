@@ -150,6 +150,7 @@ namespace env
 		~DirectList() final;
 
 		void ClearRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE target, float red = 0.0f, float green = 0.0f, float blue = 0.0f, float alpha = 0.0f);
+		void ClearDepthStencil(D3D12_CPU_DESCRIPTOR_HANDLE stencil, bool clearDepth, bool clearStencil, FLOAT depthValue, UINT8 stencilValue);
 
 		void Draw(UINT numVertices, UINT vertexOffset);
 		void DrawIndexed(UINT numIndices, UINT indexOffset, UINT vertexOffset);
@@ -158,7 +159,7 @@ namespace env
 
 		void SetPrimitiveTopology(D3D12_PRIMITIVE_TOPOLOGY topology);
 		void SetPipelineState(PipelineState* state);
-		void SetTarget(WindowTarget* target);
+		void SetTarget(WindowTarget* target, Texture2D* depthStencil = nullptr);
 		void SetIndexBuffer(Buffer* buffer);
 		void SetVertexBuffer(Buffer* buffer, UINT slot);
 	};

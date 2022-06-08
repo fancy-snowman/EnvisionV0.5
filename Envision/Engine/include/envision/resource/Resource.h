@@ -48,6 +48,7 @@ namespace env
 		RenderTarget		= 1 << 0,
 		ShaderResource		= 1 << 1,
 		UnorderedAccess		= 1 << 2,
+		DepthStencil		= 1 << 3,
 	};
 	TextureBindType operator|(TextureBindType a, TextureBindType b);
 	TextureBindType operator&(TextureBindType a, TextureBindType b);
@@ -109,6 +110,7 @@ namespace env
 			D3D12_CPU_DESCRIPTOR_HANDLE RenderTarget = { 0 };
 			D3D12_CPU_DESCRIPTOR_HANDLE ShaderResource = { 0 };
 			D3D12_CPU_DESCRIPTOR_HANDLE UnorderedAccess = { 0 };
+			D3D12_CPU_DESCRIPTOR_HANDLE DepthStencil = { 0 };
 		} Views;
 	};
 

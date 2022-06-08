@@ -162,6 +162,14 @@ void env::DirectList::ClearRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE target, floa
 	m_list->ClearRenderTargetView(target, clearColor, 0, NULL);
 }
 
+void env::DirectList::ClearDepthStencil(D3D12_CPU_DESCRIPTOR_HANDLE stencil, bool clearDepth, bool clearStencil, FLOAT depthValue, UINT8 stencilValue)
+{
+	UINT flags = 0;
+	if (clearDepth) flags |= (UINT)D3D12_CLEAR_FLAG_DEPTH;
+	if (clearStencil) flags |= (UINT)D3D12_CLEAR_FLAG_STENCIL;
+	m_list->ClearDepthStencilView(stencil, (D3D12_CLEAR_FLAGS)flags, depthValue, stencilValue, 0, nullptr);
+}
+
 void env::DirectList::Draw(UINT numVertices, UINT vertexOffset)
 {
 	m_list->DrawInstanced(numVertices, 1, vertexOffset, 0);
@@ -193,13 +201,21 @@ void env::DirectList::SetPipelineState(PipelineState* state)
 	m_list->SetPipelineState(state->State);
 }
 
-void env::DirectList::SetTarget(WindowTarget* target)
+void env::DirectList::SetTarget(WindowTarget* target, Texture2D* depthStencil)
 {
 	m_list->RSSetViewports(1, &target->Viewport);
 	m_list->RSSetScissorRects(1, &target->ScissorRect);
 
 	TransitionResource(target, D3D12_RESOURCE_STATE_RENDER_TARGET);
-	m_list->OMSetRenderTargets(1, &target->Views.RenderTarget, FALSE, NULL);
+
+	D3D12_CPU_DESCRIPTOR_HANDLE* depthDescriptor = nullptr;
+
+	if (depthStencil) {
+		TransitionResource(depthStencil, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+		depthDescriptor = &depthStencil->Views.DepthStencil;
+	}
+
+	m_list->OMSetRenderTargets(1, &target->Views.RenderTarget, FALSE, depthDescriptor);
 }
 
 void env::DirectList::SetIndexBuffer(Buffer* buffer)

@@ -85,6 +85,7 @@ namespace env
 		ID m_pipelineState;
 		
 		ID m_intermediateTarget;
+		ID m_depthStencil;
 
 		ID m_cameraBuffer;
 		ID m_objectBuffer;

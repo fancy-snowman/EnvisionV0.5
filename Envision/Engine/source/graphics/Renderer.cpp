@@ -48,6 +48,12 @@ env::Renderer::Renderer(env::IDGenerator& commonIDGenerator) :
 		DXGI_FORMAT_R8G8B8A8_UNORM,
 		TextureBindType::RenderTarget);
 
+	m_depthStencil = ResourceManager::Get()->CreateTexture2D("DepthStencil",
+		1200,
+		800,
+		DXGI_FORMAT_D32_FLOAT,
+		TextureBindType::DepthStencil);
+
 	using namespace DirectX;
 
 	{		
@@ -158,8 +164,11 @@ void env::Renderer::BeginFrame(const CameraSettings& camera, ID target)
 
 	m_directList->Reset();
 
-	m_directList->SetTarget(targetResource);
+	Texture2D* depthStencil = ResourceManager::Get()->GetTexture2D(m_depthStencil);
+
+	m_directList->SetTarget(targetResource, depthStencil);
 	m_directList->ClearRenderTarget(targetResource->Views.RenderTarget, 0.2f, 0.2f, 0.2f);
+	m_directList->ClearDepthStencil(depthStencil->Views.DepthStencil, true, false, 1.0f, 0);
 
 	m_directList->SetPipelineState(pipeline);
 
