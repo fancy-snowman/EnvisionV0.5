@@ -10,6 +10,8 @@ namespace env
 
 		Mesh,
 		Material,
+	
+		Scene,
 	};
 
 	struct Asset
@@ -79,5 +81,10 @@ namespace env
 
 		PhongMaterial(const ID resourceID, const std::string& name) :
 			Material(resourceID, name) {}
+	};
+
+	struct Scene : public Asset
+	{
+		entt::registry ECSRegistry;
 	};
 }
