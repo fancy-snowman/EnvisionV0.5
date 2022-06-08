@@ -154,6 +154,8 @@ class TestApplication : public env::Application
 
 	env::CameraSettings m_camera;
 
+	entt::registry m_registry;
+
 public:
 
 	TestApplication(int argc, char** argv) :

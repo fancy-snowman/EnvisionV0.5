@@ -47,4 +47,6 @@ typedef long long ID;
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include <entt/entt.hpp>
+
 #endif

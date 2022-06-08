@@ -74,28 +74,28 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(ProjectDir)build/</OutDir>
     <IntDir>$(ProjectDir)int/</IntDir>
-    <ExternalIncludePath>$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(SolutionDir)Thirdparty/include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</ExternalIncludePath>
     <LibraryPath>$(SolutionDir)Assimp/lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(ProjectDir)build/</OutDir>
     <IntDir>$(ProjectDir)int/</IntDir>
-    <ExternalIncludePath>$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(SolutionDir)Thirdparty/include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</ExternalIncludePath>
     <LibraryPath>$(SolutionDir)Assimp/lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(ProjectDir)build/</OutDir>
     <IntDir>$(ProjectDir)int/</IntDir>
-    <ExternalIncludePath>$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(SolutionDir)Thirdparty/include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</ExternalIncludePath>
     <LibraryPath>$(SolutionDir)Assimp/lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(ProjectDir)build/</OutDir>
     <IntDir>$(ProjectDir)int/</IntDir>
-    <ExternalIncludePath>$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(SolutionDir)Thirdparty/include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</ExternalIncludePath>
     <LibraryPath>$(SolutionDir)Assimp/lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -105,6 +105,8 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)/include;$(ProjectDir)/external/assimp/include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -121,6 +123,8 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)/include;$(ProjectDir)/external/assimp/include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -137,6 +141,8 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)/include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -153,6 +159,8 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)/include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
