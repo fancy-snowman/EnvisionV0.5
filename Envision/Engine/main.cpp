@@ -124,8 +124,8 @@ public:
 
 		event.CallIf<env::MouseMoveEvent>([&](env::MouseMoveEvent& e) {
 			if (e.Modifiers.RightMouse) {
-				m_cameraDelta.Yaw -= e.DeltaX;
-				m_cameraDelta.Pitch -= e.DeltaY;
+				m_cameraDelta.Yaw -= e.DeltaX * 0.035f;
+				m_cameraDelta.Pitch -= e.DeltaY * 0.035f;
 			}
 
 			if (e.Modifiers.MiddleMouse) {
@@ -177,8 +177,8 @@ public:
 		m_camera.Projection.DistanceNearPlane = 10.0f;
 		m_camera.Projection.DistanceFarPlane = 1000.0f;
 		m_camera.Projection.Orthographic = false;
-		m_camera.Movement.TurnSpeedHorizontal = 0.02f;
-		m_camera.Movement.TurnSpeedVertical = 0.02f;
+		m_camera.Movement.TurnSpeedHorizontal = 0.05f;
+		m_camera.Movement.TurnSpeedVertical = 0.05f;
 		m_camera.Movement.SpeedRight = 0.8f;
 		m_camera.Movement.SpeedUp = 0.8f;
 		m_camera.Movement.SpeedForward = 0.8f;
