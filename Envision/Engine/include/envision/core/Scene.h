@@ -38,6 +38,8 @@ namespace env
 		template <typename T> T& GetComponent(ID entity);
 		template <typename T> T& SetComponent(ID entity, const T& component);
 		template <typename T, typename ...Args> T& SetComponent(ID entity, Args... args);
+
+		void LoadEntitiesFromFile(const std::string& filePath);
 	};
 
 

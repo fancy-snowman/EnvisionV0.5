@@ -70,14 +70,14 @@ ID env::AssetManager::CreateMesh(const std::string& name)
 		BufferLayout({
 			{ "position", ShaderDataType::Float2 },
 			{ "color", ShaderDataType::Float3 },
-		}, vertices.size()),
+		}, (UINT)vertices.size()),
 		BufferBindType::Vertex,
 		vertices.data());
 
 	ID indexBuffer = ResourceManager::Get()->CreateBuffer("IndexBuffer",
 		BufferLayout({
 			{ "index", ShaderDataType::Uint },
-		}, indices.size()),
+		}, (UINT)indices.size()),
 		BufferBindType::Index,
 		indices.data());
 
@@ -158,10 +158,10 @@ ID env::AssetManager::LoadMesh(const std::string& name, const std::string& fileP
 	int numVertices = 0;
 	int numIndices = 0;
 
-	for (int i = 0; i < scene->mNumMeshes; i++) {
+	for (size_t i = 0; i < scene->mNumMeshes; i++) {
 		numVertices += scene->mMeshes[i]->mNumVertices;
 		const aiMesh* mesh = scene->mMeshes[i];
-		for (int j = 0; j < mesh->mNumFaces; j++) {
+		for (size_t j = 0; j < mesh->mNumFaces; j++) {
 			numIndices += mesh->mFaces[j].mNumIndices;
 		}
 	}
@@ -190,10 +190,10 @@ ID env::AssetManager::LoadMesh(const std::string& name, const std::string& fileP
 
 	int meshVertexOffset = 0;
 
-	for (int i = 0; i < scene->mNumMeshes; i++) {
+	for (size_t i = 0; i < scene->mNumMeshes; i++) {
 		const aiMesh* mesh = scene->mMeshes[i];
 
-		for (int j = 0; j < mesh->mNumVertices; j++) {
+		for (size_t j = 0; j < mesh->mNumVertices; j++) {
 			const aiVector3D& position = mesh->mVertices[j];
 			const aiVector3D& normal = mesh->mNormals[j];
 			const aiVector3D& texCoord = mesh->mTextureCoords[0][j];
@@ -204,9 +204,9 @@ ID env::AssetManager::LoadMesh(const std::string& name, const std::string& fileP
 			vertex.Texcoord = { texCoord.x, texCoord.y };
 		}
 
-		for (int j = 0; j < mesh->mNumFaces; j++) {
+		for (size_t j = 0; j < mesh->mNumFaces; j++) {
 			const aiFace& face = mesh->mFaces[j];
-			for (int k = 0; k < face.mNumIndices; k++) {
+			for (size_t k = 0; k < face.mNumIndices; k++) {
 				indices[nextIndex++] = face.mIndices[k] + meshVertexOffset;
 			}
 		}
@@ -218,13 +218,13 @@ ID env::AssetManager::LoadMesh(const std::string& name, const std::string& fileP
 		{ "POSITION", ShaderDataType::Float3 },
 		{ "NORMAL", ShaderDataType::Float3 },
 		{ "TEXCOORD", ShaderDataType::Float2 } },
-		vertices.size()),
+		(UINT)vertices.size()),
 		BufferBindType::Vertex,
 		vertices.data());
 
 	ID indexBuffer = ResourceManager::Get()->CreateBuffer(name + "_indexBuffer", BufferLayout({
 		{ "INDEX", ShaderDataType::Uint }},
-		indices.size()),
+		(UINT)indices.size()),
 		BufferBindType::Index,
 		indices.data());
 

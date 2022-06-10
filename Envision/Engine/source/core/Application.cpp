@@ -13,11 +13,13 @@ env::Application::Application(int argc, char** argv, const std::string& name) :
 	ResourceManager::Initialize(m_IDGenerator);
 	AssetManager::Initialize(m_IDGenerator);
 	Renderer::Initialize(m_IDGenerator);
+
+	m_activeScene = new Scene();
 }
 
 env::Application::~Application()
 {
-	for (auto& l : m_layerStack)
+	for (auto& l : m_systemStack)
 	{
 		l->OnDetach(*m_activeScene);
 		delete l;
@@ -25,10 +27,10 @@ env::Application::~Application()
 	}
 }
 
-void env::Application::PushLayer(Layer* layer)
+void env::Application::PushSystem(System* layer)
 {
-	m_layerStack.push_back(layer);
-	m_layerStack.back()->OnAttach(*m_activeScene);
+	m_systemStack.push_back(layer);
+	m_systemStack.back()->OnAttach(*m_activeScene);
 }
 
 void env::Application::PushWindow(Window* window)
@@ -39,7 +41,7 @@ void env::Application::PushWindow(Window* window)
 
 void env::Application::PublishEvent(Event& event)
 {
-	for (auto& l : m_layerStack)
+	for (auto& l : m_systemStack)
 	{
 		if (event.Handled)
 			break;
@@ -67,7 +69,7 @@ void env::Application::Run()
 		// Update application before its layers
 		this->OnUpdate(delta);
 
-		for (auto& l : m_layerStack)
+		for (auto& l : m_systemStack)
 		{
 			l->OnUpdate(*m_activeScene, delta);
 		}

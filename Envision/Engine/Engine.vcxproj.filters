@@ -83,7 +83,7 @@
     <ClInclude Include="include\envision\core\Application.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\envision\core\Layer.h">
+    <ClInclude Include="include\envision\core\System.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\envision\core\Time.h">

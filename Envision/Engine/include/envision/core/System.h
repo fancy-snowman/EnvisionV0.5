@@ -6,14 +6,14 @@
 
 namespace env
 {
-	class Layer
+	class System
 	{
 		std::string m_name;
 
 	public:
 
-		Layer(const std::string& name = "Layer") : m_name(name) {}
-		virtual ~Layer() = default;
+		System(const std::string& name = "Layer") : m_name(name) {}
+		virtual ~System() = default;
 
 	public:
 

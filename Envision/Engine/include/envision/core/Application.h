@@ -1,7 +1,7 @@
 #pragma once
 #include "envision/envpch.h"
 #include "envision/core/IDGenerator.h"
-#include "envision/core/Layer.h"
+#include "envision/core/System.h"
 #include "envision/core/Scene.h"
 #include "envision/core/Time.h"
 #include "envision/core/Window.h"
@@ -13,12 +13,12 @@ namespace env
 	class Application
 	{
 		std::string m_name;
-		std::vector<Layer*> m_layerStack;
+		std::vector<System*> m_systemStack;
 		std::vector<Window*> m_windows;
 
 		env::IDGenerator m_IDGenerator;
 
-		Scene* m_activeScene;
+		Scene* m_activeScene = nullptr;
 
 	public:
 
@@ -31,7 +31,7 @@ namespace env
 
 	public:
 
-		void PushLayer(Layer* layer);
+		void PushSystem(System* layer);
 		void PushWindow(Window* window);
 
 	public:

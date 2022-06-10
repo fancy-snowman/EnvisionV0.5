@@ -209,7 +209,7 @@
     <ClInclude Include="include\envision\core\GPU.h" />
     <ClInclude Include="include\envision\core\IDGenerator.h" />
     <ClInclude Include="include\envision\core\KeyCodes.h" />
-    <ClInclude Include="include\envision\core\Layer.h" />
+    <ClInclude Include="include\envision\core\System.h" />
     <ClInclude Include="include\envision\core\Time.h" />
     <ClInclude Include="include\envision\core\Window.h" />
     <ClInclude Include="include\envision\envpch.h" />

@@ -39,7 +39,7 @@ namespace env
 		void SetRepetitions(UINT repetitions);
 
 		inline UINT GetByteWidth() const { return m_repetitionStride; }
-		inline UINT GetNumElements() const { return m_elements.size(); }
+		inline UINT GetNumElements() const { return (UINT)m_elements.size(); }
 		inline UINT GetNumRepetitions() const { return m_numRepetitions; }
 
 		DXGI_FORMAT GetDXGIFormat() const;

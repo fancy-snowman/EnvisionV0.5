@@ -5,6 +5,11 @@
 
 namespace env
 {
+	struct LoadedEntityInfo
+	{
+		
+	};
+
 	// Singleton
 	class AssetManager
 	{

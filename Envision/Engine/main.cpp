@@ -5,7 +5,7 @@
 #include "envision/graphics/AssetManager.h"
 #include "envision/graphics/Renderer.h"
 
-class SceneUpdateLayer : public env::Layer
+class SceneUpdateLayer : public env::System
 {
 private:
 
@@ -34,7 +34,7 @@ private:
 
 public:
 
-	SceneUpdateLayer(env::CameraSettings& camera) : m_commonCamera(camera), env::Layer("TestLayer") {}
+	SceneUpdateLayer(env::CameraSettings& camera) : m_commonCamera(camera), env::System("TestLayer") {}
 	~SceneUpdateLayer() final = default;
 
 public:
@@ -94,7 +94,7 @@ public:
 		m_cameraDelta.Right = 0.0f;
 	}
 
-	void OnEvent(env::Event& event)
+	void OnEvent(env::Scene& scene, env::Event& event) final
 	{
 		event.CallIf<env::KeyDownEvent>([&](env::KeyDownEvent& e) {
 			if (e.Code == env::KeyCode::W) m_keyDownStates.W = true;
@@ -183,7 +183,7 @@ public:
 		m_camera.Movement.SpeedUp = 0.8f;
 		m_camera.Movement.SpeedForward = 0.8f;
 
-		PushLayer(new SceneUpdateLayer(m_camera));
+		PushSystem(new SceneUpdateLayer(m_camera));
 		PushWindow(m_window);
 	}
 

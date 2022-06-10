@@ -1,6 +1,16 @@
 #include "envision/envpch.h"
 #include "envision/core/Scene.h"
 
+env::Scene::Scene()
+{
+
+}
+
+env::Scene::~Scene()
+{
+
+}
+
 ID env::Scene::CreateEntity()
 {
 	return (ID)m_registry.create();
@@ -19,4 +29,9 @@ int env::Scene::GetEntityCount()
 bool env::Scene::IsEntity(ID entity)
 {
 	return m_registry.valid((entt::entity)entity);
+}
+
+void env::Scene::LoadEntitiesFromFile(const std::string& filePath)
+{
+	//std::vector<
 }
