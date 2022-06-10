@@ -39,17 +39,17 @@ public:
 
 public:
 
-	void OnAttach() final
+	void OnAttach(env::Scene& scene) final
 	{
 		std::cout << "SceneUpdateLayer Attached" << std::endl;
 	}
 
-	void OnDetach() final
+	void OnDetach(env::Scene& scene) final
 	{
 		std::cout << "SceneUpdateLayer Detached" << std::endl;
 	}
 
-	void OnUpdate(const env::Duration& delta) final
+	void OnUpdate(env::Scene& scene, const env::Duration& delta) final
 	{
 		if (m_keyDownStates.W)
 			m_cameraDelta.Forward += m_commonCamera.Movement.SpeedForward * delta.InSeconds();

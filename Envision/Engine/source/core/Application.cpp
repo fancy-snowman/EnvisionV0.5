@@ -19,7 +19,7 @@ env::Application::~Application()
 {
 	for (auto& l : m_layerStack)
 	{
-		l->OnDetach();
+		l->OnDetach(*m_activeScene);
 		delete l;
 		l = nullptr;
 	}
@@ -28,7 +28,7 @@ env::Application::~Application()
 void env::Application::PushLayer(Layer* layer)
 {
 	m_layerStack.push_back(layer);
-	m_layerStack.back()->OnAttach();
+	m_layerStack.back()->OnAttach(*m_activeScene);
 }
 
 void env::Application::PushWindow(Window* window)
@@ -43,7 +43,7 @@ void env::Application::PublishEvent(Event& event)
 	{
 		if (event.Handled)
 			break;
-		l->OnEvent(event);
+		l->OnEvent(*m_activeScene, event);
 	}
 }
 
@@ -69,7 +69,7 @@ void env::Application::Run()
 
 		for (auto& l : m_layerStack)
 		{
-			l->OnUpdate(delta);
+			l->OnUpdate(*m_activeScene, delta);
 		}
 
 		for (auto& w : m_windows)

@@ -66,6 +66,9 @@
     <ClCompile Include="source\graphics\RootSignature.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\core\Scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\envision\envpch.h">
@@ -137,10 +140,7 @@
     <ClInclude Include="include\envision\graphics\RootSignature.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\envision\scene\Scene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\envision\scene\System.h">
+    <ClInclude Include="include\envision\core\Scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

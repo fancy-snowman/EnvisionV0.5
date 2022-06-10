@@ -2,6 +2,7 @@
 #include "envision/envpch.h"
 #include "envision/core/Time.h"
 #include "envision/core/Event.h"
+#include "envision/core/Scene.h"
 
 namespace env
 {
@@ -20,9 +21,9 @@ namespace env
 
 	public:
 
-		virtual void OnAttach() {}
-		virtual void OnDetach() {}
-		virtual void OnUpdate(const Duration& delta) {}
-		virtual void OnEvent(env::Event& event) {}
+		virtual void OnAttach(Scene& scene) {}
+		virtual void OnDetach(Scene& scene) {}
+		virtual void OnUpdate(Scene& scene, const Duration& delta) {}
+		virtual void OnEvent(Scene& scene, env::Event& event) {}
 	};
 }

@@ -1,7 +1,6 @@
 #pragma once
 #include "envision/envpch.h"
 #include "envision/core/Time.h"
-#include "envision/scene/System.h"
 
 namespace env
 {
@@ -39,10 +38,41 @@ namespace env
 		template <typename T> T& GetComponent(ID entity);
 		template <typename T> T& SetComponent(ID entity, const T& component);
 		template <typename T, typename ...Args> T& SetComponent(ID entity, Args... args);
-		
-		// System related
-
-		template <typename T, typename... Args> System& CreateSystem(Args... args);
-		void UpdateSystems(const Duration& delta);
 	};
+
+
+
+	/**
+	*	Definitions for scene's template function below
+	*/
+
+	template<typename T>
+	inline bool Scene::HasComponent(ID entity)
+	{
+		return m_registry.any_of<T>(entity);
+	}
+
+	template<typename T>
+	inline void Scene::RemoveComponent(ID entity)
+	{
+		m_registry.remove<T>(entity);
+	}
+
+	template<typename T>
+	inline T& Scene::GetComponent(ID entity)
+	{
+		return m_registry.get<T>(entity);
+	}
+
+	template<typename T>
+	inline T& Scene::SetComponent(ID entity, const T& component)
+	{
+		return m_registry.emplace_or_replace<T>(entity, component);
+	}
+
+	template<typename T, typename ...Args>
+	inline T& Scene::SetComponent(ID entity, Args ...args)
+	{
+		return m_registry.emplace_or_replace<T>(entity, std::forward(args));
+	}
 }

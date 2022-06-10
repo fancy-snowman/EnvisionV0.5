@@ -197,6 +197,7 @@
       </ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="source\resource\ShaderDataType.cpp" />
+    <ClCompile Include="source\core\Scene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\envision\core\Application.h" />
@@ -222,8 +223,7 @@
     <ClInclude Include="include\envision\resource\Resource.h" />
     <ClInclude Include="include\envision\resource\ResourceManager.h" />
     <ClInclude Include="include\envision\resource\ShaderDataType.h" />
-    <ClInclude Include="include\envision\scene\Scene.h" />
-    <ClInclude Include="include\envision\scene\System.h" />
+    <ClInclude Include="include\envision\core\Scene.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

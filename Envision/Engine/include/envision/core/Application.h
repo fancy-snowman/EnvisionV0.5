@@ -2,6 +2,7 @@
 #include "envision/envpch.h"
 #include "envision/core/IDGenerator.h"
 #include "envision/core/Layer.h"
+#include "envision/core/Scene.h"
 #include "envision/core/Time.h"
 #include "envision/core/Window.h"
 
@@ -16,6 +17,8 @@ namespace env
 		std::vector<Window*> m_windows;
 
 		env::IDGenerator m_IDGenerator;
+
+		Scene* m_activeScene;
 
 	public:
 
