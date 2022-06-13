@@ -1,5 +1,7 @@
 #include "envision/envpch.h"
 #include "envision/core/Application.h"
+#include "envision/core/Scene.h"
+#include "envision/core/Component.h"
 
 #include "envision/resource/ResourceManager.h"
 #include "envision/graphics/AssetManager.h"
@@ -9,15 +11,19 @@ class SceneUpdateLayer : public env::System
 {
 private:
 
-	env::CameraSettings& m_commonCamera;
-
 	struct {
-		float Roll = 0.0f;
-		float Pitch = 0.0f;
-		float Yaw = 0.0f;
-		float Forward = 0.0f;
-		float Up = 0.0f;
-		float Right = 0.0f;
+
+		struct {
+			float Horizontal = 0.0f;
+			float Vertical = 0.0f;
+		} Rotation;
+
+		struct {
+			float Forward = 0.0f;
+			float Up = 0.0f;
+			float Right = 0.0f;
+		} Movement;
+
 	} m_cameraDelta;
 
 	struct {
@@ -34,7 +40,7 @@ private:
 
 public:
 
-	SceneUpdateLayer(env::CameraSettings& camera) : m_commonCamera(camera), env::System("TestLayer") {}
+	SceneUpdateLayer() : env::System("TestLayer") {}
 	~SceneUpdateLayer() final = default;
 
 public:
@@ -51,47 +57,48 @@ public:
 
 	void OnUpdate(env::Scene& scene, const env::Duration& delta) final
 	{
-		if (m_keyDownStates.W)
-			m_cameraDelta.Forward += m_commonCamera.Movement.SpeedForward * delta.InSeconds();
-		if (m_keyDownStates.A)
-			m_cameraDelta.Right -= m_commonCamera.Movement.SpeedRight * delta.InSeconds();
-		if (m_keyDownStates.S)
-			m_cameraDelta.Forward -= m_commonCamera.Movement.SpeedForward * delta.InSeconds();
-		if (m_keyDownStates.D)
-			m_cameraDelta.Right += m_commonCamera.Movement.SpeedRight * delta.InSeconds();
+		scene.ForEach<env::CameraControllerComponent, env::CameraComponent, env::TransformComponent>(
+			[&](env::CameraControllerComponent& controller, env::CameraComponent& camera, env::TransformComponent& transform) {
+				if (m_keyDownStates.W)
+					m_cameraDelta.Movement.Forward += controller.SpeedForward * delta.InSeconds();
+				if (m_keyDownStates.A)
+					m_cameraDelta.Movement.Right -= controller.SpeedRight * delta.InSeconds();
+				if (m_keyDownStates.S)
+					m_cameraDelta.Movement.Forward -= controller.SpeedForward * delta.InSeconds();
+				if (m_keyDownStates.D)
+					m_cameraDelta.Movement.Right += controller.SpeedRight * delta.InSeconds();
 
-		if (m_keyDownStates.Up)
-			m_cameraDelta.Pitch -= m_commonCamera.Movement.TurnSpeedVertical * delta.InSeconds();
-		if (m_keyDownStates.Left)
-			m_cameraDelta.Yaw -= m_commonCamera.Movement.TurnSpeedHorizontal * delta.InSeconds();
-		if (m_keyDownStates.Down)
-			m_cameraDelta.Pitch += m_commonCamera.Movement.TurnSpeedVertical * delta.InSeconds();
-		if (m_keyDownStates.Right)
-			m_cameraDelta.Yaw += m_commonCamera.Movement.TurnSpeedHorizontal * delta.InSeconds();
+				if (m_keyDownStates.Up)
+					m_cameraDelta.Rotation.Vertical -= controller.TurnSpeedVertical * delta.InSeconds();
+				if (m_keyDownStates.Left)
+					m_cameraDelta.Rotation.Horizontal -= controller.TurnSpeedHorizontal * delta.InSeconds();
+				if (m_keyDownStates.Down)
+					m_cameraDelta.Rotation.Vertical += controller.TurnSpeedVertical * delta.InSeconds();
+				if (m_keyDownStates.Right)
+					m_cameraDelta.Rotation.Horizontal += controller.TurnSpeedHorizontal * delta.InSeconds();
 
-		m_commonCamera.Transform.RotationRollPitchYaw.z +=
-			m_cameraDelta.Yaw * m_commonCamera.Movement.TurnSpeedHorizontal * delta.InSeconds();
-		m_commonCamera.Transform.RotationRollPitchYaw.y +=
-			m_cameraDelta.Pitch * m_commonCamera.Movement.TurnSpeedVertical * delta.InSeconds();
+				transform.Transformation.RotateAxisY(m_cameraDelta.Rotation.Horizontal * controller.TurnSpeedHorizontal * delta.InSeconds());
+				transform.Transformation.RotatePitch(m_cameraDelta.Rotation.Vertical * controller.TurnSpeedVertical * delta.InSeconds());
 
-		if (m_cameraDelta.Forward != 0.0f)
-			m_commonCamera.Transform.MoveForward(m_cameraDelta.Forward
-				* m_commonCamera.Movement.SpeedForward
-				* delta.InSeconds());
-		if (m_cameraDelta.Up != 0.0f)
-			m_commonCamera.Transform.MoveUp(m_cameraDelta.Up
-				* m_commonCamera.Movement.SpeedUp
-				* delta.InSeconds());
-		if (m_cameraDelta.Right != 0.0f)
-			m_commonCamera.Transform.MoveRight(m_cameraDelta.Right
-				* m_commonCamera.Movement.SpeedRight
-				* delta.InSeconds());
+				if (m_cameraDelta.Movement.Forward != 0.0f)
+					transform.Transformation.TranslateForward(m_cameraDelta.Movement.Forward
+						* controller.SpeedForward
+						* delta.InSeconds());
+				if (m_cameraDelta.Movement.Up != 0.0f)
+					transform.Transformation.TranslateUp(m_cameraDelta.Movement.Up
+						* controller.SpeedUp
+						* delta.InSeconds());
+				if (m_cameraDelta.Movement.Right != 0.0f)
+					transform.Transformation.TranslateRight(m_cameraDelta.Movement.Right
+						* controller.SpeedRight
+						* delta.InSeconds());
+			});
 
-		m_cameraDelta.Yaw = 0.0f;
-		m_cameraDelta.Pitch = 0.0f;
-		m_cameraDelta.Forward = 0.0f;
-		m_cameraDelta.Up = 0.0f;
-		m_cameraDelta.Right = 0.0f;
+		m_cameraDelta.Rotation.Horizontal = 0.0f;
+		m_cameraDelta.Rotation.Vertical = 0.0f;
+		m_cameraDelta.Movement.Forward = 0.0f;
+		m_cameraDelta.Movement.Up = 0.0f;
+		m_cameraDelta.Movement.Right = 0.0f;
 	}
 
 	void OnEvent(env::Scene& scene, env::Event& event) final
@@ -124,20 +131,20 @@ public:
 
 		event.CallIf<env::MouseMoveEvent>([&](env::MouseMoveEvent& e) {
 			if (e.Modifiers.RightMouse) {
-				m_cameraDelta.Yaw -= e.DeltaX * 0.035f;
-				m_cameraDelta.Pitch -= e.DeltaY * 0.035f;
+				m_cameraDelta.Rotation.Horizontal -= e.DeltaX * 0.035f;
+				m_cameraDelta.Rotation.Vertical -= e.DeltaY * 0.035f;
 			}
 
 			if (e.Modifiers.MiddleMouse) {
-				m_cameraDelta.Right += e.DeltaX;
-				m_cameraDelta.Up -= e.DeltaY;
+				m_cameraDelta.Movement.Right += e.DeltaX;
+				m_cameraDelta.Movement.Up -= e.DeltaY;
 			}
 
 			return false;
 		});
 
 		event.CallIf<env::MouseScrollEvent>([&](env::MouseScrollEvent& e) {
-			m_cameraDelta.Forward += e.Delta * 20.0f;
+			m_cameraDelta.Movement.Forward += e.Delta * 20.0f;
 			return false;
 		});
 	}
@@ -154,7 +161,7 @@ class TestApplication : public env::Application
 
 	env::CameraSettings m_camera;
 
-	entt::registry m_registry;
+	ID m_mainCamera;
 
 public:
 
@@ -171,19 +178,30 @@ public:
 
 		m_material = env::AssetManager::Get()->CreatePhongMaterial("DefaultMaterial");
 
-		m_camera.Transform.Position = { 0.0f, 250.f, -500.0 };
-		m_camera.Transform.RotationRollPitchYaw = { 0.0f, 0.0f, 0.0f };
-		m_camera.Projection.FieldOfView = 3.14f / 2.0f;
-		m_camera.Projection.DistanceNearPlane = 10.0f;
-		m_camera.Projection.DistanceFarPlane = 1000.0f;
-		m_camera.Projection.Orthographic = false;
-		m_camera.Movement.TurnSpeedHorizontal = 0.05f;
-		m_camera.Movement.TurnSpeedVertical = 0.05f;
-		m_camera.Movement.SpeedRight = 0.8f;
-		m_camera.Movement.SpeedUp = 0.8f;
-		m_camera.Movement.SpeedForward = 0.8f;
+		env::Scene* scene = GetActiveScene();
+		
+		m_mainCamera = scene->CreateEntity("Camera");
 
-		PushSystem(new SceneUpdateLayer(m_camera));
+		env::CameraControllerComponent cameraController;
+		cameraController.TurnSpeedHorizontal = 0.04f;
+		cameraController.TurnSpeedVertical = 0.04f;
+		cameraController.SpeedForward = 0.8f;
+		cameraController.SpeedUp = 0.8f;
+		cameraController.SpeedRight = 0.8f;
+		scene->SetComponent<env::CameraControllerComponent>(m_mainCamera, cameraController);
+
+		env::CameraComponent camera;
+		camera.Settings.FieldOfView = 3.14f / 2.0f;
+		camera.Settings.DistanceNearPlane = 10.0f;
+		camera.Settings.DistanceFarPlane = 1000.0f;
+		camera.Settings.Orthographic = false;
+		scene->SetComponent<env::CameraComponent>(m_mainCamera, camera);
+
+		env::TransformComponent cameraTransform;
+		cameraTransform.Transformation.SetPosition({ 0.0f, 0.0f, -500.0f });
+		scene->SetComponent<env::TransformComponent>(m_mainCamera, cameraTransform);
+
+		PushSystem(new SceneUpdateLayer());
 		PushWindow(m_window);
 	}
 
@@ -195,8 +213,15 @@ public:
 
 		if (deltaSum >= TARGET_FRAME_TIME) {
 			deltaSum -= TARGET_FRAME_TIME;
-			env::Renderer::Get()->BeginFrame(m_camera, m_target);
-			env::Renderer::Get()->Submit(m_mesh, m_material);
+
+			env::Scene* scene = GetActiveScene();
+			env::CameraSettings cameraSettings = scene->GetComponent<env::CameraComponent>(m_mainCamera).Settings;
+			env::Transform& cameraTransform = scene->GetComponent<env::TransformComponent>(m_mainCamera).Transformation;
+			//env::Transform cameraTransform;
+			env::Transform objectTransform;
+
+			env::Renderer::Get()->BeginFrame(cameraSettings, cameraTransform, m_target);
+			env::Renderer::Get()->Submit(objectTransform, m_mesh, m_material);
 			env::Renderer::Get()->EndFrame();
 		}
 	}

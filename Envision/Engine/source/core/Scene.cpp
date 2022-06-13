@@ -11,9 +11,12 @@ env::Scene::~Scene()
 
 }
 
-ID env::Scene::CreateEntity()
+ID env::Scene::CreateEntity(const std::string& name)
 {
-	return (ID)m_registry.create();
+	entt::entity entity = m_registry.create();
+	m_registry.emplace<DebugInfoComponent>(entity, name);
+
+	return (ID)entity;
 }
 
 void env::Scene::RemoveEntity(ID entity)

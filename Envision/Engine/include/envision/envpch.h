@@ -42,6 +42,12 @@ typedef long long ID;
 	MB_OK)
 
 #include <DirectXMath.h>
+#include <DirectXTK/SimpleMath.h>
+using Float2 = DirectX::SimpleMath::Vector2;
+using Float3 = DirectX::SimpleMath::Vector3;
+using Float4 = DirectX::SimpleMath::Vector4;
+using Float4x4 = DirectX::SimpleMath::Matrix;
+using Quaternion = DirectX::SimpleMath::Quaternion;
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>

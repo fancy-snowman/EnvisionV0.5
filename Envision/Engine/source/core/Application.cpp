@@ -39,6 +39,11 @@ void env::Application::PushWindow(Window* window)
 	m_windows.back()->OnAttach();
 }
 
+env::Scene* env::Application::GetActiveScene()
+{
+	return m_activeScene;
+}
+
 void env::Application::PublishEvent(Event& event)
 {
 	for (auto& l : m_systemStack)

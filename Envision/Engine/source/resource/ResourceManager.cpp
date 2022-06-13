@@ -123,10 +123,10 @@ void env::ResourceManager::AdjustViewportAndScissorRect(WindowTarget& target, co
 	target.Viewport.MinDepth = 0.0f;
 	target.Viewport.MaxDepth = 1.0f;
 
-	target.ScissorRect.left = target.Viewport.TopLeftX;
-	target.ScissorRect.top = target.Viewport.TopLeftY;
-	target.ScissorRect.right = target.Viewport.TopLeftX + target.Viewport.Width;
-	target.ScissorRect.bottom = target.Viewport.TopLeftY + target.Viewport.Height;
+	target.ScissorRect.left = (LONG)target.Viewport.TopLeftX;
+	target.ScissorRect.top = (LONG)target.Viewport.TopLeftY;
+	target.ScissorRect.right = (LONG)target.Viewport.TopLeftX + (LONG)target.Viewport.Width;
+	target.ScissorRect.bottom = (LONG)target.Viewport.TopLeftY + (LONG)target.Viewport.Height;
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE env::ResourceManager::CreateCBV(Resource* resource)
@@ -507,8 +507,8 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, TextureBindTyp
 		else
 			textureDesc.State = D3D12_RESOURCE_STATE_COMMON;
 
-		textureDesc.Width = existingDesc.Width;
-		textureDesc.Height = existingDesc.Height;
+		textureDesc.Width = (int)existingDesc.Width;
+		textureDesc.Height = (int)existingDesc.Height;
 		textureDesc.Format = existingDesc.Format;
 
 		D3D12_PLACED_SUBRESOURCE_FOOTPRINT footprint;
@@ -686,7 +686,7 @@ ID env::ResourceManager::CreatePipelineState(const std::string& name, std::initi
 			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 		};
-		pipelineDesc.InputLayout.NumElements = inputLayout.size();
+		pipelineDesc.InputLayout.NumElements = (UINT)inputLayout.size();
 		pipelineDesc.InputLayout.pInputElementDescs = inputLayout.data();
 
 		hr = GPU::GetDevice()->CreateGraphicsPipelineState(&pipelineDesc, IID_PPV_ARGS(&resourceDesc.State));

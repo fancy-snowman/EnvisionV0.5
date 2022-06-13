@@ -34,6 +34,8 @@ namespace env
 		void PushSystem(System* layer);
 		void PushWindow(Window* window);
 
+		Scene* GetActiveScene();
+
 	public:
 
 		void PublishEvent(Event& event);

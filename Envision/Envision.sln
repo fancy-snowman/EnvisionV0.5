@@ -6,9 +6,12 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine\Engine.vcxproj", "{5711CABE-B321-4214-B82C-8DEDFBFC1145}"
 	ProjectSection(ProjectDependencies) = postProject
 		{D59AA3EE-A373-4BCB-BC5E-8CA30070F850} = {D59AA3EE-A373-4BCB-BC5E-8CA30070F850}
+		{16B130F8-7B9B-4CB7-BC8C-72283225D1A0} = {16B130F8-7B9B-4CB7-BC8C-72283225D1A0}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Assimp", "Assimp\Assimp.vcxproj", "{D59AA3EE-A373-4BCB-BC5E-8CA30070F850}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectXTK", "DirectXTK\DirectXTK.vcxproj", "{16B130F8-7B9B-4CB7-BC8C-72283225D1A0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,6 +37,14 @@ Global
 		{D59AA3EE-A373-4BCB-BC5E-8CA30070F850}.Release|x64.Build.0 = Release|x64
 		{D59AA3EE-A373-4BCB-BC5E-8CA30070F850}.Release|x86.ActiveCfg = Release|Win32
 		{D59AA3EE-A373-4BCB-BC5E-8CA30070F850}.Release|x86.Build.0 = Release|Win32
+		{16B130F8-7B9B-4CB7-BC8C-72283225D1A0}.Debug|x64.ActiveCfg = Debug|x64
+		{16B130F8-7B9B-4CB7-BC8C-72283225D1A0}.Debug|x64.Build.0 = Debug|x64
+		{16B130F8-7B9B-4CB7-BC8C-72283225D1A0}.Debug|x86.ActiveCfg = Debug|Win32
+		{16B130F8-7B9B-4CB7-BC8C-72283225D1A0}.Debug|x86.Build.0 = Debug|Win32
+		{16B130F8-7B9B-4CB7-BC8C-72283225D1A0}.Release|x64.ActiveCfg = Release|x64
+		{16B130F8-7B9B-4CB7-BC8C-72283225D1A0}.Release|x64.Build.0 = Release|x64
+		{16B130F8-7B9B-4CB7-BC8C-72283225D1A0}.Release|x86.ActiveCfg = Release|Win32
+		{16B130F8-7B9B-4CB7-BC8C-72283225D1A0}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

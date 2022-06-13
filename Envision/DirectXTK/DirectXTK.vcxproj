@@ -21,32 +21,32 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{5711cabe-b321-4214-b82c-8dedfbfc1145}</ProjectGuid>
-    <RootNamespace>Engine</RootNamespace>
+    <ProjectGuid>{16b130f8-7b9b-4cb7-bc8c-72283225d1a0}</ProjectGuid>
+    <RootNamespace>DirectXTK</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -72,31 +72,25 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(ProjectDir)build/</OutDir>
+    <OutDir>$(ProjectDir)lib/</OutDir>
     <IntDir>$(ProjectDir)int/</IntDir>
-    <ExternalIncludePath>$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(SolutionDir)Thirdparty/include;$(SolutionDir)DirectXTK/include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</ExternalIncludePath>
-    <LibraryPath>$(SolutionDir)Assimp/lib;$(SolutionDir)DirectXTK/lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
+    <TargetName>$(ProjectName)_d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(ProjectDir)build/</OutDir>
+    <OutDir>$(ProjectDir)lib/</OutDir>
     <IntDir>$(ProjectDir)int/</IntDir>
-    <ExternalIncludePath>$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(SolutionDir)Thirdparty/include;$(SolutionDir)DirectXTK/include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</ExternalIncludePath>
-    <LibraryPath>$(SolutionDir)Assimp/lib;$(SolutionDir)DirectXTK/lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(ProjectDir)build/</OutDir>
+    <OutDir>$(ProjectDir)lib/</OutDir>
     <IntDir>$(ProjectDir)int/</IntDir>
-    <ExternalIncludePath>$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(SolutionDir)Thirdparty/include;$(SolutionDir)DirectXTK/include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</ExternalIncludePath>
-    <LibraryPath>$(SolutionDir)Assimp/lib;$(SolutionDir)DirectXTK/lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <TargetName>$(ProjectName)_d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(ProjectDir)build/</OutDir>
+    <OutDir>$(ProjectDir)lib/</OutDir>
     <IntDir>$(ProjectDir)int/</IntDir>
-    <ExternalIncludePath>$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(SolutionDir)Thirdparty/include;$(SolutionDir)DirectXTK/include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</ExternalIncludePath>
-    <LibraryPath>$(SolutionDir)Assimp/lib;$(SolutionDir)DirectXTK/lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -104,14 +98,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)/include;$(ProjectDir)/external/assimp/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)include/DirectXTK;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Assimp_d.lib;DirectXTK_d.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -122,16 +114,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)/include;$(ProjectDir)/external/assimp/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)include/DirectXTK;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Assimp.lib;DirectXTK.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -140,14 +130,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)include/DirectXTK;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Assimp_d.lib;DirectXTK_d.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -158,76 +146,26 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)include/DirectXTK;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Assimp.lib;DirectXTK.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="include\envision\core\CommandQueue.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="source\core\Application.cpp" />
-    <ClCompile Include="source\core\CommandList.cpp" />
-    <ClCompile Include="source\core\DescriptorAllocator.cpp" />
-    <ClCompile Include="source\core\GPU.cpp" />
-    <ClCompile Include="source\core\Transform.cpp" />
-    <ClCompile Include="source\core\Window.cpp" />
-    <ClCompile Include="source\envpch.cpp" />
-    <ClCompile Include="source\core\IDGenerator.cpp" />
-    <ClCompile Include="source\graphics\AssetManager.cpp" />
-    <ClCompile Include="source\graphics\Renderer.cpp" />
-    <ClCompile Include="source\graphics\RootSignature.cpp" />
-    <ClCompile Include="source\graphics\Shader.cpp" />
-    <ClCompile Include="source\resource\BufferLayout.cpp" />
-    <ClCompile Include="source\resource\Resource.cpp" />
-    <ClCompile Include="source\resource\ResourceManager.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      </ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="source\resource\ShaderDataType.cpp" />
-    <ClCompile Include="source\core\Scene.cpp" />
+    <ClCompile Include="src\pch.cpp" />
+    <ClCompile Include="src\SimpleMath.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\envision\core\Application.h" />
-    <ClInclude Include="include\envision\core\Camera.h" />
-    <ClInclude Include="include\envision\core\Command.h" />
-    <ClInclude Include="include\envision\core\CommandList.h" />
-    <ClInclude Include="include\envision\core\CommandQueue.h" />
-    <ClInclude Include="include\envision\core\Component.h" />
-    <ClInclude Include="include\envision\core\DescriptorAllocator.h" />
-    <ClInclude Include="include\envision\core\Event.h" />
-    <ClInclude Include="include\envision\core\GPU.h" />
-    <ClInclude Include="include\envision\core\IDGenerator.h" />
-    <ClInclude Include="include\envision\core\KeyCodes.h" />
-    <ClInclude Include="include\envision\core\System.h" />
-    <ClInclude Include="include\envision\core\Time.h" />
-    <ClInclude Include="include\envision\core\Transform.h" />
-    <ClInclude Include="include\envision\core\Window.h" />
-    <ClInclude Include="include\envision\envpch.h" />
-    <ClInclude Include="include\envision\graphics\AssetManager.h" />
-    <ClInclude Include="include\envision\graphics\Assets.h" />
-    <ClInclude Include="include\envision\graphics\Renderer.h" />
-    <ClInclude Include="include\envision\graphics\RootSignature.h" />
-    <ClInclude Include="include\envision\graphics\Shader.h" />
-    <ClInclude Include="include\envision\resource\BufferLayout.h" />
-    <ClInclude Include="include\envision\resource\PipelineState.h" />
-    <ClInclude Include="include\envision\resource\Resource.h" />
-    <ClInclude Include="include\envision\resource\ResourceManager.h" />
-    <ClInclude Include="include\envision\resource\ShaderDataType.h" />
-    <ClInclude Include="include\envision\core\Scene.h" />
+    <ClInclude Include="include\DirectXTK\SimpleMath.h" />
+    <ClInclude Include="src\pch.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="include\DirectXTK\SimpleMath.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
