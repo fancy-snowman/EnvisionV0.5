@@ -17,6 +17,7 @@ namespace env
 	public:
 
 		Transform();
+		Transform(const Float4x4& transformMatrix);
 		~Transform();
 
 		// Position
@@ -45,9 +46,9 @@ namespace env
 		void RotateAxisXYZ(float x, float y, float z);
 
 		const Quaternion& GetRotation();
-		const Float3 GetRight();
-		const Float3 GetUp();
-		const Float3 GetForward();
+		const Float3 GetRight() const;
+		const Float3 GetUp() const;
+		const Float3 GetForward() const;
 		Float4x4 GetRotationMatrix();
 
 		// Scale
@@ -62,6 +63,7 @@ namespace env
 		// Transform
 	
 		const Float4x4& GetMatrix();
+		Float4x4 GetMatrix() const;
 		Float4x4 GetMatrixTransposed();
 	};
 }

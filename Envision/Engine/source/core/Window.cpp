@@ -102,9 +102,9 @@ void env::Window::InitWindowClass()
 			//lastPosY = posY;
 
 			WORD eventMods = LOWORD(wParam);
-			WORD eventDelta = HIWORD(wParam);
+			short eventDelta = HIWORD(wParam);
 
-			float delta = (eventDelta == WHEEL_DELTA) ? 1.0f : -1.0f;
+			float delta = eventDelta / WHEEL_DELTA;
 
 			MouseModifiers modifiers;
 			ZeroMemory(&modifiers, sizeof(modifiers));

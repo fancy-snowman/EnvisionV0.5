@@ -21,7 +21,7 @@ namespace env
 		bool operator>=(const Duration& other) { return m_duration >= other.m_duration; }
 		bool operator==(const Duration& other) { return m_duration == other.m_duration; }
 
-		float InSeconds() const { return m_duration.count() / 1000000.f; }
+		float InSeconds() const { return m_duration.count() / 1000000000.f; }
 
 	private:
 		std::chrono::high_resolution_clock::duration m_duration;

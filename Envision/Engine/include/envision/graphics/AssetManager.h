@@ -49,7 +49,7 @@ namespace env
 		//ID CreateMesh(const std::string& name, VERTICES AND INDICES);
 
 		ID CreateMesh(const std::string& name); // Prototype
-		ID CreateMesh(const std::string& name, void* vertices, BufferLayout& vertexBufferLayout, void* indices, UINT numIndices);
+		ID CreateMesh(const std::string& name, void* vertices, const BufferLayout& vertexBufferLayout, void* indices, UINT numIndices);
 		ID LoadMesh(const std::string& name, const std::string& filePath);
 		ID CreatePhongMaterial(const std::string& name); // Prototype
 	};

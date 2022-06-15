@@ -27,28 +27,35 @@ cbuffer CameraBuffer : register(b0)
 	} Camera;
 }
 
-cbuffer ObjectBuffer : register(b1)
+cbuffer RootConstants : register(b1)
 {
-	struct {
-		float3 Position;
-		float ID;
-		float3 ForwardDirection;
-		float MaterialID;
-		float3 UpDirection;
-		float Pad;
-
-		float4x4 WorldMatrix;
-	} Object;
+	unsigned int ObjectBufferIndex;
 }
+
+struct ObjectData
+{
+	float3 Position;
+	float ID;
+	float3 ForwardDirection;
+	float MaterialID;
+	float3 UpDirection;
+	float Pad;
+
+	float4x4 WorldMatrix;
+};
+
+StructuredBuffer<ObjectData> ObjectBuffers : register (t0);
 
 VS_OUT VS_main(VS_IN input)
 {
+	ObjectData object = ObjectBuffers[ObjectBufferIndex];
+
 	VS_OUT output;
 	output.Position = float4(input.Position, 1.0f);
-	output.Position = mul(output.Position, Object.WorldMatrix);
+	output.Position = mul(output.Position, object.WorldMatrix);
 	output.Position = mul(output.Position, Camera.ViewProjectionMatrix);
 
-	output.Normal = normalize(mul(float4(input.Normal, 0.f), Object.WorldMatrix));
+	output.Normal = normalize(mul(float4(input.Normal, 0.f), object.WorldMatrix));
 
 	output.Texcoord = input.Texcoord;
 
@@ -62,7 +69,7 @@ float4 PS_main(VS_OUT input) : SV_TARGET
 	float factor = dot(input.Normal, dirToSun);
 	factor = clamp(factor, 0.3f, 1.0f);
 
-	return float4(input.Normal, 1.0f);
+	return float4(factor, factor, factor, 1.0f);
 	//return float4(input.Texcoord, 0.0f, 1.0f);
 
 	//float4 color = float4(0.8f, 0.6f, 0.5f, 1.0f);

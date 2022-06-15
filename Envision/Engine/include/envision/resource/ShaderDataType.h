@@ -3,6 +3,14 @@
 
 namespace env
 {
+	struct VertexType
+	{
+		Float3 Position;
+		Float3 Normal;
+		Float2 Texcoord;
+	};
+	using IndexType = UINT;
+
 	enum class ShaderDataType
 	{
 		Unknown = 0,

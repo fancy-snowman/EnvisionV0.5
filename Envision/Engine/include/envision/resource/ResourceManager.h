@@ -66,7 +66,7 @@ namespace env
 
 	public:
 
-		ID CreateBufferArray(const std::string& name, int numBuffers, const BufferLayout& layout, void* initialData = nullptr);
+		ID CreateBufferArray(const std::string& name, const BufferLayout& layout, BufferBindType bindType = BufferBindType::Unknown, void* initialData = nullptr);
 		ID CreateBuffer(const std::string& name, const BufferLayout& layout, BufferBindType bindType = BufferBindType::Unknown, void* initialData = nullptr);
 		ID CreateTexture2D(const std::string& name, int width, int height, DXGI_FORMAT format, TextureBindType bindType = TextureBindType::Unknown, void* initialData = nullptr);
 		ID CreateTexture2D(const std::string& name, TextureBindType bindType, ID3D12Resource* existingTexture);

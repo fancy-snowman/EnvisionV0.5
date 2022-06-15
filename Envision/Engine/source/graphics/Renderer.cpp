@@ -39,8 +39,11 @@ env::Renderer::Renderer(env::IDGenerator& commonIDGenerator) :
 		true,
 		{
 			{ ParameterType::CBV, ShaderStage::Vertex, D3D12_ROOT_DESCRIPTOR{0, 0} },
-			{ ParameterType::CBV, ShaderStage::Vertex, D3D12_ROOT_DESCRIPTOR{1, 0} },
-		});
+			{ ParameterType::Constant, ShaderStage::Vertex, D3D12_ROOT_CONSTANTS{1, 0, 1} },
+			{ ParameterType::Table, ShaderStage::Vertex, {
+				{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, 0 },
+			},
+		}});
 
 	m_intermediateTarget = ResourceManager::Get()->CreateTexture2D("IntermediateTarget",
 		1200,
@@ -120,16 +123,20 @@ env::Renderer::Renderer(env::IDGenerator& commonIDGenerator) :
 		data.Pad = 0;
 		data.WorldMatrix = transform;
 
-		m_objectBuffer = ResourceManager::Get()->CreateBuffer("ObjectBuffer", {
-			{ "Position", ShaderDataType::Float3 },
-			{ "ID", ShaderDataType::Float },
-			{ "ForwardDirection", ShaderDataType::Float3 },
-			{ "MaterialID", ShaderDataType::Float },
-			{ "UpDirection", ShaderDataType::Float3 },
-			{ "Pad", ShaderDataType::Float },
-			{ "WorldMatrix", ShaderDataType::Float4x4 } },
-			BufferBindType::Constant,
-			&data);
+		std::vector<ObjectBufferData> initialData(6000, data);
+
+		m_objectBuffer = ResourceManager::Get()->CreateBufferArray("ObjectBuffer",
+			BufferLayout({
+				{ "Position", ShaderDataType::Float3 },
+				{ "ID", ShaderDataType::Float },
+				{ "ForwardDirection", ShaderDataType::Float3 },
+				{ "MaterialID", ShaderDataType::Float },
+				{ "UpDirection", ShaderDataType::Float3 },
+				{ "Pad", ShaderDataType::Float },
+				{ "WorldMatrix", ShaderDataType::Float4x4 } },
+				(UINT)initialData.size()),
+			BufferBindType::ShaderResource,
+			initialData.data());
 	}
 
 	//m_phongBuffer = ResourceManager::Get()->CreateConstantBuffer("PhongBuffer", {
@@ -161,6 +168,8 @@ void env::Renderer::BeginFrame(const CameraSettings& cameraSettings, Transform& 
 
 	m_frameInfo.WindowTarget = targetResource;
 	m_frameInfo.FrameDescriptorAllocator.Clear();
+	m_frameInfo.ObjectData.clear();
+	m_frameInfo.RenderJobs.clear();
 
 	m_directList->Reset();
 
@@ -213,41 +222,34 @@ void env::Renderer::BeginFrame(const CameraSettings& cameraSettings, Transform& 
 			&m_frameInfo.CameraBufferInfo,
 			sizeof(m_frameInfo.CameraBufferInfo));
 
-		D3D12_CPU_DESCRIPTOR_HANDLE cameraBufferSource = cameraBuffer->Views.Constant;
-		D3D12_CPU_DESCRIPTOR_HANDLE cameraBufferDest = m_frameInfo.FrameDescriptorAllocator.Allocate();
-		GPU::GetDevice()->CopyDescriptorsSimple(1,
-			cameraBufferDest,
-			cameraBufferSource,
-			D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		//D3D12_CPU_DESCRIPTOR_HANDLE cameraBufferSource = cameraBuffer->Views.Constant;
+		//D3D12_CPU_DESCRIPTOR_HANDLE cameraBufferDest = m_frameInfo.FrameDescriptorAllocator.Allocate();
+		//GPU::GetDevice()->CopyDescriptorsSimple(1,
+		//	cameraBufferDest,
+		//	cameraBufferSource,
+		//	D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 		m_directList->GetNative()->SetGraphicsRootConstantBufferView(0, cameraBuffer->Native->GetGPUVirtualAddress());
 	}
 
 	{ // Set up object
-		Buffer* objectBuffer = ResourceManager::Get()->GetBuffer(m_objectBuffer);
+		BufferArray* objectBuffer = ResourceManager::Get()->GetBufferArray(m_objectBuffer);
 
-		D3D12_CPU_DESCRIPTOR_HANDLE objectBufferSource = objectBuffer->Views.Constant;
+		D3D12_CPU_DESCRIPTOR_HANDLE objectBufferSource = objectBuffer->Views.ShaderResource;
 		D3D12_CPU_DESCRIPTOR_HANDLE objectBufferDest = m_frameInfo.FrameDescriptorAllocator.Allocate();
 		GPU::GetDevice()->CopyDescriptorsSimple(1,
 			objectBufferDest,
 			objectBufferSource,
 			D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
-		m_directList->GetNative()->SetGraphicsRootConstantBufferView(1, objectBuffer->Native->GetGPUVirtualAddress());
+		//m_directList->GetNative()->SetGraphicsRootConstantBufferView(1, objectBuffer->Native->GetGPUVirtualAddress());
 	}
+
+	m_directList->GetNative()->SetGraphicsRootDescriptorTable(2, m_frameInfo.FrameDescriptorAllocator.GetHeap()->GetGPUDescriptorHandleForHeapStart());
 }
 
 void env::Renderer::Submit(Transform& transform, ID mesh, ID material)
 {
-	const Mesh* meshAsset = AssetManager::Get()->GetMesh(mesh);
-	const Material* materialAsset = AssetManager::Get()->GetMaterial(material);
-
-	Buffer* vertexBuffer = ResourceManager::Get()->GetBuffer(meshAsset->VertexBuffer);
-	Buffer* indexBuffer = ResourceManager::Get()->GetBuffer(meshAsset->IndexBuffer);
-
-	m_directList->SetVertexBuffer(vertexBuffer, 0);
-	m_directList->SetIndexBuffer(indexBuffer);
-
 	ObjectBufferData objectData;
 	objectData.Position = transform.GetPosition();
 	objectData.ID = mesh;
@@ -257,15 +259,39 @@ void env::Renderer::Submit(Transform& transform, ID mesh, ID material)
 	objectData.Pad = 0;
 	objectData.WorldMatrix = transform.GetMatrixTransposed();
 
-	Buffer* objectBuffer = ResourceManager::Get()->GetBuffer(m_objectBuffer);
-	ResourceManager::Get()->UploadBufferData(m_objectBuffer, &objectData, sizeof(objectData));
+	m_frameInfo.ObjectData.push_back(objectData);
+	m_frameInfo.RenderJobs.push_back(RenderJob({ mesh, material }));
 
-	m_directList->DrawIndexed(indexBuffer->Layout.GetNumRepetitions(), 0, 0);
+	//Buffer* objectBuffer = ResourceManager::Get()->GetBuffer(m_objectBuffer);
+	//ResourceManager::Get()->UploadBufferData(m_objectBuffer, &objectData, sizeof(objectData));
+
+	//m_directList->DrawIndexed(indexBuffer->Layout.GetNumRepetitions(), 0, 0);
 	//m_directList->DrawIndexed(3132, 0, 0);
 }
 
 void env::Renderer::EndFrame()
 {
+	ResourceManager::Get()->UploadBufferData(m_objectBuffer,
+		m_frameInfo.ObjectData.data(),
+		m_frameInfo.ObjectData.size() * sizeof(ObjectBufferData));
+
+	for (UINT i = 0; i < (UINT)m_frameInfo.RenderJobs.size(); i++) {
+
+		const RenderJob& job = m_frameInfo.RenderJobs[i];
+
+		const Mesh* meshAsset = AssetManager::Get()->GetMesh(job.MeshID);
+		const Material* materialAsset = AssetManager::Get()->GetMaterial(job.MaterialID);
+
+		Buffer* vertexBuffer = ResourceManager::Get()->GetBuffer(meshAsset->VertexBuffer);
+		Buffer* indexBuffer = ResourceManager::Get()->GetBuffer(meshAsset->IndexBuffer);
+
+		m_directList->SetVertexBuffer(vertexBuffer, 0);
+		m_directList->SetIndexBuffer(indexBuffer);
+
+		m_directList->GetNative()->SetGraphicsRoot32BitConstant(1, i, 0);
+		m_directList->DrawIndexed(indexBuffer->Layout.GetNumRepetitions(), 0, 0);
+	}
+
 	m_directList->Close();
 
 	CommandQueue& queue = GPU::GetPresentQueue();

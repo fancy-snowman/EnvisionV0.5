@@ -8,6 +8,24 @@ env::Transform::Transform() :
 	m_rotation(Quaternion::Identity),
 	m_scale(Float3::One)
 {
+	//
+}
+
+env::Transform::Transform(const Float4x4& matrix) :
+	m_matrix(Float4x4::Identity),
+	m_dirty(true),
+	m_position(Float3::Zero),
+	m_rotation(Quaternion::Identity),
+	m_scale(Float3::One)
+{
+	using namespace DirectX;
+	XMVECTOR scale;
+	XMVECTOR rotation;
+	XMVECTOR translation;
+	DirectX::XMMatrixDecompose(&scale, &rotation, &translation, matrix);
+	m_scale = scale;
+	m_rotation = rotation;
+	m_position = translation;
 }
 
 env::Transform::~Transform()
@@ -134,19 +152,19 @@ const Quaternion& env::Transform::GetRotation()
 	return m_rotation;
 }
 
-const Float3 env::Transform::GetRight()
+const Float3 env::Transform::GetRight() const
 {
 	Float3 right = DirectX::XMVector3Rotate(Float3::UnitX, m_rotation);
 	return right;
 }
 
-const Float3 env::Transform::GetUp()
+const Float3 env::Transform::GetUp() const
 {
 	Float3 up = DirectX::XMVector3Rotate(Float3::UnitY, m_rotation);
 	return up;
 }
 
-const Float3 env::Transform::GetForward()
+const Float3 env::Transform::GetForward() const
 {
 	Float3 forward = DirectX::XMVector3Rotate(Float3::UnitZ, m_rotation);
 	return forward;
@@ -187,8 +205,6 @@ Float4x4 env::Transform::GetScaleMatrix()
 const Float4x4& env::Transform::GetMatrix()
 {
 	if (m_dirty) {
-		Float3 forward = GetForward();
-		Float3 up = GetUp();
 		m_matrix = DirectX::XMMatrixTransformation(
 			Float3::Zero,
 			Float3::Zero,
@@ -199,6 +215,18 @@ const Float4x4& env::Transform::GetMatrix()
 		m_dirty = false;
 	}
 	return m_matrix;
+}
+
+Float4x4 env::Transform::GetMatrix() const
+{
+	Float4x4 matrix = DirectX::XMMatrixTransformation(
+		Float3::Zero,
+		Float3::Zero,
+		m_scale,
+		Float3::Zero,
+		m_rotation,
+		m_position);
+	return matrix;
 }
 
 Float4x4 env::Transform::GetMatrixTransposed()

@@ -43,7 +43,7 @@ namespace env
 		template <typename... Ts, typename Func>
 		void ForEach(Func func);
 
-		void LoadEntitiesFromFile(const std::string& filePath);
+		void LoadScene(const std::string& filePath);
 	};
 
 

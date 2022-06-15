@@ -183,9 +183,10 @@ D3D12_CPU_DESCRIPTOR_HANDLE env::ResourceManager::CreateSRV(Resource* resource)
 	{
 		BufferArray* buffer = (BufferArray*)resource;
 		desc.Format = DXGI_FORMAT_UNKNOWN;
+		desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 		desc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
 		desc.Buffer.FirstElement = 0;
-		desc.Buffer.NumElements = buffer->NumBuffers;
+		desc.Buffer.NumElements = buffer->Layout.GetNumRepetitions();
 		desc.Buffer.StructureByteStride = buffer->Layout.GetByteWidth();
 		break;
 	}
@@ -301,9 +302,71 @@ D3D12_CPU_DESCRIPTOR_HANDLE env::ResourceManager::CreateDSV(Resource* resource)
 	return handle;
 }
 
-ID env::ResourceManager::CreateBufferArray(const std::string& name, int numBuffers, const BufferLayout& layout, void* initialData)
+ID env::ResourceManager::CreateBufferArray(const std::string& name, const BufferLayout& layout, BufferBindType bindType, void* initialData)
 {
-	return ID();
+	HRESULT hr = S_OK;
+
+	bool isShaderResource = any(bindType & BufferBindType::ShaderResource) || (bindType == BufferBindType::Unknown);
+	bool isUnorderedAccess = any(bindType & BufferBindType::UnorderedAccess) || (bindType == BufferBindType::Unknown);
+
+	BufferArray bufferDesc;
+
+	bufferDesc.Name = name;
+	bufferDesc.State = D3D12_RESOURCE_STATE_COMMON;
+	bufferDesc.Layout = layout;
+
+	UINT elementStride = bufferDesc.Layout.GetByteWidth();
+	UINT numElements = bufferDesc.Layout.GetNumRepetitions();
+
+	UINT bufferWidth = elementStride * numElements;
+
+	{ // Create the resource
+		D3D12_HEAP_PROPERTIES heapProperties;
+		ZeroMemory(&heapProperties, sizeof(heapProperties));
+		heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
+		heapProperties.CreationNodeMask = 1;
+		heapProperties.VisibleNodeMask = 1;
+
+		D3D12_RESOURCE_DESC resourceDescription;
+		ZeroMemory(&resourceDescription, sizeof(resourceDescription));
+		resourceDescription.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+		resourceDescription.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+		resourceDescription.Width = (UINT64)bufferWidth;
+		resourceDescription.Height = 1;
+		resourceDescription.DepthOrArraySize = 1;
+		resourceDescription.MipLevels = 1;
+		resourceDescription.Format = DXGI_FORMAT_UNKNOWN;
+		resourceDescription.SampleDesc.Count = 1;
+		resourceDescription.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+		hr = GPU::GetDevice()->CreateCommittedResource(&heapProperties,
+			D3D12_HEAP_FLAG_NONE,
+			&resourceDescription,
+			bufferDesc.State,
+			NULL,
+			IID_PPV_ARGS(&bufferDesc.Native));
+
+		ASSERT_HR(hr, "Could not create buffer array");
+	}
+
+	{ // Create views
+		if (isShaderResource) {
+			bufferDesc.Views.ShaderResource = CreateSRV(&bufferDesc);
+		}
+		if (isUnorderedAccess) {
+			bufferDesc.Views.UnorderedAccess = CreateUAV(&bufferDesc);
+		}
+	}
+
+	ID resourceID = m_commonIDGenerator.GenerateUnique();
+	BufferArray* buffer = new BufferArray(std::move(bufferDesc));
+	m_buffersArrays[resourceID] = buffer;
+
+	if (initialData) {
+		UploadBufferData(resourceID, initialData, bufferWidth);
+	}
+
+	return resourceID;
 }
 
 ID env::ResourceManager::CreateBuffer(const std::string& name, const BufferLayout& layout, BufferBindType bindType, void* initialData)

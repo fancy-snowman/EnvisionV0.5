@@ -77,21 +77,15 @@ public:
 				if (m_keyDownStates.Right)
 					m_cameraDelta.Rotation.Horizontal += controller.TurnSpeedHorizontal * delta.InSeconds();
 
-				transform.Transformation.RotateAxisY(m_cameraDelta.Rotation.Horizontal * controller.TurnSpeedHorizontal * delta.InSeconds());
-				transform.Transformation.RotatePitch(m_cameraDelta.Rotation.Vertical * controller.TurnSpeedVertical * delta.InSeconds());
+				transform.Transformation.RotateAxisY(m_cameraDelta.Rotation.Horizontal);
+				transform.Transformation.RotatePitch(m_cameraDelta.Rotation.Vertical);
 
 				if (m_cameraDelta.Movement.Forward != 0.0f)
-					transform.Transformation.TranslateForward(m_cameraDelta.Movement.Forward
-						* controller.SpeedForward
-						* delta.InSeconds());
+					transform.Transformation.TranslateForward(m_cameraDelta.Movement.Forward);
 				if (m_cameraDelta.Movement.Up != 0.0f)
-					transform.Transformation.TranslateUp(m_cameraDelta.Movement.Up
-						* controller.SpeedUp
-						* delta.InSeconds());
+					transform.Transformation.TranslateUp(m_cameraDelta.Movement.Up);
 				if (m_cameraDelta.Movement.Right != 0.0f)
-					transform.Transformation.TranslateRight(m_cameraDelta.Movement.Right
-						* controller.SpeedRight
-						* delta.InSeconds());
+					transform.Transformation.TranslateRight(m_cameraDelta.Movement.Right);
 			});
 
 		m_cameraDelta.Rotation.Horizontal = 0.0f;
@@ -131,8 +125,8 @@ public:
 
 		event.CallIf<env::MouseMoveEvent>([&](env::MouseMoveEvent& e) {
 			if (e.Modifiers.RightMouse) {
-				m_cameraDelta.Rotation.Horizontal -= e.DeltaX * 0.035f;
-				m_cameraDelta.Rotation.Vertical -= e.DeltaY * 0.035f;
+				m_cameraDelta.Rotation.Horizontal -= e.DeltaX * 0.005f;
+				m_cameraDelta.Rotation.Vertical -= e.DeltaY * 0.005f;
 			}
 
 			if (e.Modifiers.MiddleMouse) {
@@ -144,7 +138,7 @@ public:
 		});
 
 		event.CallIf<env::MouseScrollEvent>([&](env::MouseScrollEvent& e) {
-			m_cameraDelta.Movement.Forward += e.Delta * 20.0f;
+			m_cameraDelta.Movement.Forward += e.Delta * 50.0f;
 			return false;
 		});
 	}
@@ -156,8 +150,6 @@ class TestApplication : public env::Application
 	env::Window* m_window;
 
 	ID m_target;
-	ID m_mesh;
-	ID m_material;
 
 	env::CameraSettings m_camera;
 
@@ -169,36 +161,38 @@ public:
 		env::Application(argc, argv, "TestApplication")
 	{
 		
-		m_mesh = env::AssetManager::Get()->LoadMesh("Helicopter", "assets/SM_helicopter_01.fbx");
+		//m_mesh = env::AssetManager::Get()->LoadMesh("Helicopter", "assets/SM_helicopter_01.fbx");
 		//m_mesh = env::AssetManager::Get()->LoadMesh("City", "assets/city.fbx");
+
+		GetActiveScene()->LoadScene("assets/city.fbx");
 		
 		m_window = new env::Window(1200, 800, "Envision", *this);
 
 		m_target = env::ResourceManager::Get()->CreateWindowTarget("TargetWindow", m_window);
-
-		m_material = env::AssetManager::Get()->CreatePhongMaterial("DefaultMaterial");
 
 		env::Scene* scene = GetActiveScene();
 		
 		m_mainCamera = scene->CreateEntity("Camera");
 
 		env::CameraControllerComponent cameraController;
-		cameraController.TurnSpeedHorizontal = 0.04f;
-		cameraController.TurnSpeedVertical = 0.04f;
-		cameraController.SpeedForward = 0.8f;
-		cameraController.SpeedUp = 0.8f;
-		cameraController.SpeedRight = 0.8f;
+		cameraController.TurnSpeedHorizontal = 3.14f;
+		cameraController.TurnSpeedVertical = 3.14f;
+		cameraController.SpeedForward = 5000.0f;
+		cameraController.SpeedUp = 1000.0f;
+		cameraController.SpeedRight = 1000.0f;
 		scene->SetComponent<env::CameraControllerComponent>(m_mainCamera, cameraController);
 
 		env::CameraComponent camera;
 		camera.Settings.FieldOfView = 3.14f / 2.0f;
 		camera.Settings.DistanceNearPlane = 10.0f;
-		camera.Settings.DistanceFarPlane = 1000.0f;
+		camera.Settings.DistanceFarPlane = 100000.0f;
 		camera.Settings.Orthographic = false;
 		scene->SetComponent<env::CameraComponent>(m_mainCamera, camera);
 
 		env::TransformComponent cameraTransform;
-		cameraTransform.Transformation.SetPosition({ 0.0f, 0.0f, -500.0f });
+		cameraTransform.Transformation.SetPosition({ 5000.0f, 5000.0f, 5000.0f });
+		cameraTransform.Transformation.RotateAxisY(-2.0f * 3.14f / 3.0f);
+		cameraTransform.Transformation.RotatePitch(2.0f * 3.14f / 12.0f);
 		scene->SetComponent<env::TransformComponent>(m_mainCamera, cameraTransform);
 
 		PushSystem(new SceneUpdateLayer());
@@ -221,7 +215,11 @@ public:
 			env::Transform objectTransform;
 
 			env::Renderer::Get()->BeginFrame(cameraSettings, cameraTransform, m_target);
-			env::Renderer::Get()->Submit(objectTransform, m_mesh, m_material);
+
+			scene->ForEach<env::RenderComponent, env::TransformComponent>([&](env::RenderComponent& render, env::TransformComponent& transform) {
+				env::Renderer::Get()->Submit(transform.Transformation, render.Mesh, render.Material);
+			});
+			
 			env::Renderer::Get()->EndFrame();
 		}
 	}

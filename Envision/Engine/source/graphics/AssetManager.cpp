@@ -92,7 +92,7 @@ ID env::AssetManager::CreateMesh(const std::string& name)
 	return meshID;
 }
 
-ID env::AssetManager::CreateMesh(const std::string& name, void* vertices, BufferLayout& vertexBufferLayout, void* indices, UINT numIndices)
+ID env::AssetManager::CreateMesh(const std::string& name, void* vertices, const BufferLayout& vertexBufferLayout, void* indices, UINT numIndices)
 {
 	ID vertexBuffer = ResourceManager::Get()->CreateBuffer(name + "_vertexBuffer",
 		vertexBufferLayout,

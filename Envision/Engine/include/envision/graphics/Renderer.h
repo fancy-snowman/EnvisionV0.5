@@ -27,6 +27,23 @@ namespace env
 		ID m_objectBuffer;
 		ID m_phongBuffer;
 		
+		struct ObjectBufferData
+		{
+			DirectX::XMFLOAT3 Position;
+			float ID;
+			DirectX::XMFLOAT3 ForwardDirection;
+			float MaterialID;
+			DirectX::XMFLOAT3 UpDirection;
+			float Pad;
+			DirectX::XMFLOAT4X4 WorldMatrix;
+		};
+
+		struct RenderJob
+		{
+			ID MeshID = ID_ERROR;
+			ID MaterialID = ID_ERROR;
+		};
+
 		struct FrameInfo
 		{
 
@@ -42,20 +59,14 @@ namespace env
 				DirectX::XMFLOAT4X4 ViewProjectionMatrix;
 			} CameraBufferInfo;
 
+			std::vector<ObjectBufferData> ObjectData;
+			std::vector<RenderJob> RenderJobs;
+
 			Resource* WindowTarget;
 			DescriptorAllocator FrameDescriptorAllocator;
 		} m_frameInfo;
 
-		struct ObjectBufferData
-		{
-			DirectX::XMFLOAT3 Position;
-			float ID;
-			DirectX::XMFLOAT3 ForwardDirection;
-			float MaterialID;
-			DirectX::XMFLOAT3 UpDirection;
-			float Pad;
-			DirectX::XMFLOAT4X4 WorldMatrix;
-		};
+		
 
 	public:
 

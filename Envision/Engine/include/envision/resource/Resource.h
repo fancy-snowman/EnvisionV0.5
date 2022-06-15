@@ -35,7 +35,8 @@ namespace env
 		Constant			= 1 << 0,
 		Index				= 1 << 1,
 		Vertex				= 1 << 2,
-		UnorderedAccess		= 1 << 3,
+		ShaderResource		= 1 << 3,
+		UnorderedAccess		= 1 << 4,
 	};
 	BufferBindType operator|(BufferBindType a, BufferBindType b);
 	BufferBindType operator&(BufferBindType a, BufferBindType b);
@@ -70,13 +71,13 @@ namespace env
 	struct BufferArray : public Resource
 	{
 		RESOURCE_TYPE(BufferArray)
-		UINT GetByteWidth() final { return (UINT)Layout.GetByteWidth() * NumBuffers; }
+		UINT GetByteWidth() final { return (UINT)Layout.GetByteWidth() * Layout.GetNumRepetitions(); }
 			
 		BufferLayout Layout;
-		UINT NumBuffers;
 
 		struct {
 			D3D12_CPU_DESCRIPTOR_HANDLE ShaderResource = { 0 };
+			D3D12_CPU_DESCRIPTOR_HANDLE UnorderedAccess = { 0 };
 		} Views;
 	};
 
