@@ -164,7 +164,7 @@ public:
 		//m_mesh = env::AssetManager::Get()->LoadMesh("Helicopter", "assets/SM_helicopter_01.fbx");
 		//m_mesh = env::AssetManager::Get()->LoadMesh("City", "assets/city.fbx");
 
-		GetActiveScene()->LoadScene("assets/city.fbx");
+		GetActiveScene()->LoadScene("City", "assets/city.fbx");
 		
 		m_window = new env::Window(1200, 800, "Envision", *this);
 

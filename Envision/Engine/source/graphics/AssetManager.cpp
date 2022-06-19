@@ -117,6 +117,22 @@ ID env::AssetManager::CreateMesh(const std::string& name, void* vertices, const 
 	return meshID;
 }
 
+ID env::AssetManager::CreateMesh(const std::string& name, ID vertexBuffer, UINT offsetVertices, UINT numVertices, ID indexBuffer, UINT offsetIndices, UINT numIndices)
+{
+	ID meshID = m_commonIDGenerator.GenerateUnique();
+	Mesh* mesh = new Mesh(meshID, name);
+	mesh->VertexBuffer = vertexBuffer;
+	mesh->IndexBuffer = indexBuffer;
+	mesh->OffsetVertices = offsetVertices;
+	mesh->OffsetIndices = offsetIndices;
+	mesh->NumVertices = numVertices;
+	mesh->NumIndices = (int)numIndices;
+	
+	m_meshes[meshID] = mesh;
+
+	return meshID;
+}
+
 ID env::AssetManager::CreatePhongMaterial(const std::string& name)
 {
 	ID materialID = m_commonIDGenerator.GenerateUnique();

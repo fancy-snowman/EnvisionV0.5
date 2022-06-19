@@ -40,6 +40,8 @@ namespace env
 		CommandList(D3D12_COMMAND_LIST_TYPE type);
 		void Initialize(ID3D12Device* device);
 
+		virtual void ResetInherited() {}
+
 	private:
 
 		CommandList(CommandList&& other) = delete;
@@ -144,6 +146,14 @@ namespace env
 		DirectList(const DirectList& other) = delete;
 		DirectList& operator=(DirectList&& other) = delete;
 		DirectList& operator=(const DirectList& other) = delete;
+
+		void ResetInherited() final;
+
+		// TODO: Move this to a common GPU state?
+		struct {
+			ID3D12Resource* IndexBuffer = nullptr;
+			ID3D12Resource* VertexBuffers[8] = { nullptr };
+		} m_state;
 
 	public:
 

@@ -39,6 +39,7 @@ void env::CommandList::Reset()
 	m_allocator->Reset();
 	m_list->Reset(m_allocator, NULL);
 	m_state = ListState::Recording;
+	ResetInherited();
 }
 
 void env::CommandList::Close()
@@ -151,6 +152,14 @@ env::DirectList::DirectList() : env::ComputeList(D3D12_COMMAND_LIST_TYPE_DIRECT)
 	//
 }
 
+void env::DirectList::ResetInherited()
+{
+	m_state.IndexBuffer = nullptr;
+
+	for (int i = 0; i < 8; i++)
+		m_state.VertexBuffers[i] = nullptr;
+}
+
 env::DirectList::~DirectList()
 {
 	//
@@ -222,13 +231,21 @@ void env::DirectList::SetIndexBuffer(Buffer* buffer)
 {
 	assert(buffer->Views.Index.Format != DXGI_FORMAT_UNKNOWN);
 	TransitionResource(buffer, D3D12_RESOURCE_STATE_INDEX_BUFFER);
-	m_list->IASetIndexBuffer(&buffer->Views.Index);
+
+	if (m_state.IndexBuffer != buffer->Native) {
+		m_list->IASetIndexBuffer(&buffer->Views.Index);
+		m_state.IndexBuffer = buffer->Native;
+	}
 }
 
 void env::DirectList::SetVertexBuffer(Buffer* buffer, UINT slot)
 {
 	assert(buffer->Views.Vertex.StrideInBytes > 0);
 	TransitionResource(buffer, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
-	m_list->IASetVertexBuffers(slot, 1, &buffer->Views.Vertex);
 	m_list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); // Define this in vertex buffer
+
+	if (m_state.VertexBuffers[slot] != buffer->Native) {
+		m_list->IASetVertexBuffers(slot, 1, &buffer->Views.Vertex);
+		m_state.VertexBuffers[slot] == buffer->Native;
+	}
 }

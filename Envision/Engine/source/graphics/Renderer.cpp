@@ -62,8 +62,6 @@ env::Renderer::Renderer(env::IDGenerator& commonIDGenerator) :
 	{		
 		float aspect = 1200.f / 800.f;	
 
-		
-
 		m_frameInfo.CameraBufferInfo;
 		m_frameInfo.CameraBufferInfo.Position = { 0.0f, 250.f, -500.0 };
 		m_frameInfo.CameraBufferInfo.FieldOfView = 3.14f / 2.0f;
@@ -289,7 +287,9 @@ void env::Renderer::EndFrame()
 		m_directList->SetIndexBuffer(indexBuffer);
 
 		m_directList->GetNative()->SetGraphicsRoot32BitConstant(1, i, 0);
-		m_directList->DrawIndexed(indexBuffer->Layout.GetNumRepetitions(), 0, 0);
+		m_directList->DrawIndexed(meshAsset->NumIndices,
+			meshAsset->OffsetIndices,
+			meshAsset->OffsetVertices);
 	}
 
 	m_directList->Close();

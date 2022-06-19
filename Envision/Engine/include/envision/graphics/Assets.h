@@ -28,8 +28,11 @@ namespace env
 		ID VertexBuffer = ID_ERROR;
 		ID IndexBuffer = ID_ERROR;
 
-		int NumVertices = 0;
-		int NumIndices = 0;
+		UINT NumVertices = 0;
+		UINT NumIndices = 0;
+
+		UINT OffsetVertices = 0;
+		UINT OffsetIndices = 0;
 
 		Mesh(const ID resourceID, const std::string& name) :
 			Asset(resourceID, name, AssetType::Mesh) {}

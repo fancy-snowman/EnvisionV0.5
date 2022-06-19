@@ -41,11 +41,7 @@ namespace env
 	struct RenderComponent
 	{
 		ID Mesh = ID_ERROR;
-		UINT OffsetVertices = 0;
-
 		ID Material = ID_ERROR;
-		UINT OffsetIndices = 0;
-		UINT NumIndices = 0;
 
 		RenderComponent() = default;
 		RenderComponent(const RenderComponent& other) = default;
