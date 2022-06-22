@@ -43,12 +43,22 @@ env::RootParameter::RootParameter(ParameterType type, ShaderStage shaderStage, s
 void env::RootSignature::AdjustRangeTablePointers()
 {
 	m_ranges.shrink_to_fit();
-	int offset = 0;
+
+	int rangeOffset = 0;
 	for (auto& p : m_parameters) {
 		if (p.ParameterType == D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE) {
-			p.DescriptorTable.pDescriptorRanges =
-				(D3D12_DESCRIPTOR_RANGE*)((char*)m_ranges.data() + offset);
-			offset += p.DescriptorTable.NumDescriptorRanges;
+
+			p.DescriptorTable.pDescriptorRanges = (m_ranges.data() + rangeOffset);
+
+			int descriptorOffset = 0;
+			auto itRangesBegin = m_ranges.begin() + rangeOffset;
+			auto itRangesEnd = itRangesBegin + p.DescriptorTable.NumDescriptorRanges;
+			for (auto itRange = itRangesBegin; itRange != itRangesEnd; itRange++) {
+				itRange->OffsetInDescriptorsFromTableStart = descriptorOffset;
+				descriptorOffset += itRange->NumDescriptors;
+			}
+
+			rangeOffset += p.DescriptorTable.NumDescriptorRanges;
 		}
 	}
 }
@@ -81,6 +91,7 @@ env::RootSignature::RootSignature(std::initializer_list<RootParameter> elements)
 		if (e.Info.ParameterType == D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE) {
 			int rangeOffset = m_ranges.size();
 			m_ranges.insert(m_ranges.end(), e.Ranges.begin(), e.Ranges.end());
+			// TODO: Find where these start
 		}
 		m_parameters.push_back(e.Info);
 	}

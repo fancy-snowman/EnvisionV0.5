@@ -4,6 +4,12 @@
 
 namespace env
 {
+	struct DescriptorAllocation
+	{
+		D3D12_CPU_DESCRIPTOR_HANDLE CPUHandle;
+		D3D12_GPU_DESCRIPTOR_HANDLE GPUHandle;
+	};
+
 	class DescriptorAllocator
 	{
 	private:
@@ -13,7 +19,8 @@ namespace env
 
 		ID3D12DescriptorHeap* m_heap;
 
-		D3D12_CPU_DESCRIPTOR_HANDLE m_begin;
+		D3D12_CPU_DESCRIPTOR_HANDLE m_beginCPU;
+		D3D12_GPU_DESCRIPTOR_HANDLE m_beginGPU;
 		UINT m_nextIndex;
 		UINT m_endIndex;
 
@@ -35,8 +42,8 @@ namespace env
 
 	public:
 
-		D3D12_CPU_DESCRIPTOR_HANDLE Allocate(UINT numDescriptors = 1);
-		void Free(D3D12_CPU_DESCRIPTOR_HANDLE handle);
+		DescriptorAllocation Allocate(UINT numDescriptors = 1);
+		void Free(DescriptorAllocation handle);
 		void Clear();
 	};
 }

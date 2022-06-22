@@ -133,23 +133,14 @@ ID env::AssetManager::CreateMesh(const std::string& name, ID vertexBuffer, UINT 
 	return meshID;
 }
 
-ID env::AssetManager::CreatePhongMaterial(const std::string& name)
+ID env::AssetManager::CreatePhongMaterial(const std::string& name, Float3 ambient, Float3 diffuse, Float3 specular, float shininess)
 {
 	ID materialID = m_commonIDGenerator.GenerateUnique();
-	PhongMaterial* material = new PhongMaterial(materialID, "TestMaterial");
-	material->PerInstanceData.DiffuseFactor = { 0.8f, 0.4f, 0.4f };
-	material->PerInstanceData.AmbientFactor = { 0.4f, 0.8f, 0.4f };
-	material->PerInstanceData.SpecularFactor = { 0.4f, 0.4f, 0.8f };
-	material->PerInstanceData.SpecularExponent = 5.0f;
-
-	material->PerInstanceBufferLayout = {
-		{ "DiffuseFactor", ShaderDataType::Float3 },
-		{ "Padding1", ShaderDataType::Float },
-		{ "AmbientFactor", ShaderDataType::Float3 },
-		{ "Padding2", ShaderDataType::Float },
-		{ "SpecularFactor", ShaderDataType::Float3 },
-		{ "SpecularExponent", ShaderDataType::Float },
-	};
+	Material* material = new Material(materialID, name);
+	material->AmbientFactor = ambient;
+	material->DiffuseFactor = diffuse;
+	material->SpecularFactor = specular;
+	material->Shininess = shininess;
 
 	m_materials[materialID] = material;
 

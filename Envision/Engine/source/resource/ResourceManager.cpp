@@ -131,7 +131,7 @@ void env::ResourceManager::AdjustViewportAndScissorRect(WindowTarget& target, co
 
 D3D12_CPU_DESCRIPTOR_HANDLE env::ResourceManager::CreateCBV(Resource* resource)
 {
-	D3D12_CPU_DESCRIPTOR_HANDLE handle = m_CBVAllocator.Allocate();
+	D3D12_CPU_DESCRIPTOR_HANDLE handle = m_CBVAllocator.Allocate().CPUHandle;
 
 	D3D12_CONSTANT_BUFFER_VIEW_DESC desc;
 	ZeroMemory(&desc, sizeof(desc));
@@ -145,7 +145,7 @@ D3D12_CPU_DESCRIPTOR_HANDLE env::ResourceManager::CreateCBV(Resource* resource)
 
 D3D12_CPU_DESCRIPTOR_HANDLE env::ResourceManager::CreateSRV(Resource* resource)
 {
-	D3D12_CPU_DESCRIPTOR_HANDLE handle = m_SRVAllocator.Allocate();
+	D3D12_CPU_DESCRIPTOR_HANDLE handle = m_SRVAllocator.Allocate().CPUHandle;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC desc;
 	ZeroMemory(&desc, sizeof(desc));
@@ -236,7 +236,7 @@ D3D12_CPU_DESCRIPTOR_HANDLE env::ResourceManager::CreateRTV(Resource* resource)
 		// There exist RTV for buffers, may need to add this later?
 	}
 
-	D3D12_CPU_DESCRIPTOR_HANDLE handle = m_RTVAllocator.Allocate();
+	D3D12_CPU_DESCRIPTOR_HANDLE handle = m_RTVAllocator.Allocate().CPUHandle;
 
 	D3D12_RENDER_TARGET_VIEW_DESC desc;
 	ZeroMemory(&desc, sizeof(desc));
@@ -273,7 +273,7 @@ D3D12_CPU_DESCRIPTOR_HANDLE env::ResourceManager::CreateDSV(Resource* resource)
 		assert(isTexture2D);
 	}
 
-	D3D12_CPU_DESCRIPTOR_HANDLE handle = m_DSVAllocator.Allocate();
+	D3D12_CPU_DESCRIPTOR_HANDLE handle = m_DSVAllocator.Allocate().CPUHandle;
 
 	D3D12_DEPTH_STENCIL_VIEW_DESC desc;
 	ZeroMemory(&desc, sizeof(desc));

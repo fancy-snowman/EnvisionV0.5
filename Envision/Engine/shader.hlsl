@@ -62,14 +62,44 @@ VS_OUT VS_main(VS_IN input)
 	return output;
 }
 
+// --------------------------------------------------------
+
+struct MaterialData
+{
+	float3 AmbientFactor;
+	int AmbientMapIndex; // -1 if no map exist
+	float3 DiffuseFactor;
+	int DiffuseMapIndex; // -1 if no map exist
+	float3 SpecularFactor;
+	int SpecularMapIndex; // -1 if no map exist
+	float Shininess;
+	int MaterialID;
+	float2 Padding;
+};
+
+cbuffer RootConstants : register(b0)
+{
+	unsigned int MaterialBufferIndex;
+}
+
+StructuredBuffer<MaterialData> MaterialBuffers : register (t0);
+
 float4 PS_main(VS_OUT input) : SV_TARGET
 {
+	MaterialData material = MaterialBuffers[MaterialBufferIndex];
+
 	float3 dirToSun = -1.f * normalize(float3(-1.0f, -2.f, 0.8f));
 
 	float factor = dot(input.Normal, dirToSun);
 	factor = clamp(factor, 0.3f, 1.0f);
 
-	return float4(factor, factor, factor, 1.0f);
+	float3 color = material.DiffuseFactor;
+	color *= factor;
+
+	//return float4(material.MaterialID / 10.f, 0.0f, 0.0f, 1.0f);
+	return float4(color, 1.0f);
+
+
 	//return float4(input.Texcoord, 0.0f, 1.0f);
 
 	//float4 color = float4(0.8f, 0.6f, 0.5f, 1.0f);

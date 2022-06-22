@@ -190,7 +190,7 @@ env::Window::Window(int width, int height, const std::string& title, Application
 #ifdef _DEBUG
 		hr = CreateDXGIFactory2(DXGI_CREATE_FACTORY_DEBUG, IID_PPV_ARGS(&factory));
 #else
-		hr = CreateDXGIFactory(IID_PPV_ARGS(&g_factory));
+		hr = CreateDXGIFactory(IID_PPV_ARGS(&factory));
 #endif
 		ASSERT_HR(hr, "Could not create DXGIFactory");
 

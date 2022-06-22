@@ -40,47 +40,16 @@ namespace env
 
 	struct Material : public Asset
 	{
-		// TODO: Is this needed?
-		// Surely for custom materials?
+		Float3 AmbientFactor;
+		Float3 DiffuseFactor;
+		Float3 SpecularFactor;
+		float Shininess;
 
-		BufferLayout AllInstanceBufferLayout;
-		BufferLayout PerInstanceBufferLayout;
-
-		Material(const ID resourceID, const std::string& name) :
-			Asset(resourceID, name, AssetType::Material) {}
-	};
-
-	struct PhongMaterial : public Material
-	{
 		ID DiffuseMap = ID_ERROR;
 		ID AmbientMap = ID_ERROR;
 		ID SpecularMap = ID_ERROR;
 
-		// TODO: Change to float3
-		struct {
-			struct {
-				float X = 0;
-				float Y = 0;
-				float Z = 0;
-			} DiffuseFactor;
-			float Padding1 = 0;
-
-			struct {
-				float X = 0;
-				float Y = 0;
-				float Z = 0;
-			} AmbientFactor;
-			float Padding2 = 0;
-
-			struct {
-				float X = 0;
-				float Y = 0;
-				float Z = 0;
-			} SpecularFactor;
-			float SpecularExponent = 0;
-		} PerInstanceData;
-
-		PhongMaterial(const ID resourceID, const std::string& name) :
-			Material(resourceID, name) {}
+		Material(const ID resourceID, const std::string& name) :
+			Asset(resourceID, name, AssetType::Material) {}
 	};
 }

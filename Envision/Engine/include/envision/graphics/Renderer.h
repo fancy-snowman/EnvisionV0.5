@@ -25,7 +25,7 @@ namespace env
 
 		ID m_cameraBuffer;
 		ID m_objectBuffer;
-		ID m_phongBuffer;
+		ID m_materialBuffer;
 		
 		struct ObjectBufferData
 		{
@@ -36,6 +36,19 @@ namespace env
 			DirectX::XMFLOAT3 UpDirection;
 			float Pad;
 			DirectX::XMFLOAT4X4 WorldMatrix;
+		};
+
+		struct MaterialBufferData
+		{
+			Float3 AmbientFactor;
+			int AmbientMapIndex; // -1 if no map exist
+			Float3 DiffuseFactor;
+			int DiffuseMapIndex; // -1 if no map exist
+			Float3 SpecularFactor;
+			int SpecularMapIndex; // -1 if no map exist
+			float Shininess;
+			int MaterialID;
+			Float2 Padding;
 		};
 
 		struct RenderJob
@@ -60,6 +73,9 @@ namespace env
 			} CameraBufferInfo;
 
 			std::vector<ObjectBufferData> ObjectData;
+			std::vector<MaterialBufferData> MaterialData;
+			std::unordered_map<ID, UINT> MaterialIndices;
+
 			std::vector<RenderJob> RenderJobs;
 
 			Resource* WindowTarget;
