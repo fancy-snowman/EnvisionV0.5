@@ -774,6 +774,7 @@ ID env::ResourceManager::CreateWindowTarget(const std::string& name, Window* win
 	targetDesc.startYFactor = startYFactor;
 	targetDesc.widthFactor = widthFactor;
 	targetDesc.heightFactor = heightFactor;
+	targetDesc.AppWindow = window;
 
 	AdjustViewportAndScissorRect(targetDesc, *window);
 

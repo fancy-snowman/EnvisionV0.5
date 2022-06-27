@@ -10,6 +10,8 @@
 WNDCLASS env::Window::s_windowClass = { 0 };
 const WCHAR* env::Window::s_WINDOW_CLASS_NAME = L"ENV_WINDOW_CLASS";
 
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 void env::Window::InitWindowClass()
 {
 	WNDCLASS windowClass = { 0 };
@@ -17,6 +19,12 @@ void env::Window::InitWindowClass()
 	windowClass.cbWndExtra = sizeof(Window*);
 
 	windowClass.lpfnWndProc = [](HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) -> LRESULT {
+		
+		Window* window = GetWindowObject(hwnd);
+
+		if (window && window->IsGUIWindow() && ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam))
+			return true;
+		
 		switch (uMsg)
 		{
 		case WM_KEYDOWN:
@@ -38,7 +46,7 @@ void env::Window::InitWindowClass()
 			KeyDownEvent event(code, info);
 			GetWindowObject(hwnd)->m_application.PublishEvent(event);
 
-			break;
+			return 0;
 		}
 
 		case WM_KEYUP:
@@ -60,7 +68,7 @@ void env::Window::InitWindowClass()
 			KeyUpEvent event(code, info);
 			GetWindowObject(hwnd)->m_application.PublishEvent(event);
 
-			break;
+			return 0;
 		}
 
 		case WM_MOUSEMOVE:
@@ -86,7 +94,7 @@ void env::Window::InitWindowClass()
 
 			MouseMoveEvent event(posX, posY, deltaX, deltaY, modifiers);
 			GetWindowObject(hwnd)->m_application.PublishEvent(event);
-			break;
+			return 0;
 		}
 
 		case WM_MOUSEWHEEL:
@@ -117,12 +125,12 @@ void env::Window::InitWindowClass()
 
 			MouseScrollEvent event(delta, modifiers);
 			GetWindowObject(hwnd)->m_application.PublishEvent(event);
-			break;
+			return 0;
 		}
 
 		case WM_DESTROY:
 			PostQuitMessage(0);
-			break;
+			return 0;
 		}
 
 		return DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -260,6 +268,16 @@ float env::Window::GetAspectRatio()
 env::Texture2D* env::Window::GetCurrentBackbuffer()
 {
 	return m_backbuffers[m_currentBackbufferindex];
+}
+
+bool env::Window::IsGUIWindow()
+{
+	return m_usingImgui;
+}
+
+void env::Window::InitializeGUI()
+{
+	m_usingImgui = true;
 }
 
 void env::Window::PushTarget(WindowTarget* target)

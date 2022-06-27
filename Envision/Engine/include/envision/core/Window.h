@@ -26,6 +26,9 @@ namespace env
 		// backbuffer and thus needs to be updated during present.
 		std::vector<WindowTarget*> m_targets;
 
+		// Dear ImGui
+		bool m_usingImgui = false;
+
 		void InitWindowClass();
 		static void SetWindowObject(HWND handle, Window* window);
 		static Window* GetWindowObject(HWND handle);
@@ -42,6 +45,11 @@ namespace env
 		int GetHeight() const;
 		float GetAspectRatio();
 		Texture2D* GetCurrentBackbuffer();
+
+		// Returns true if the window requires need to forward
+		// input to GUI library (Dear ImGui)
+		bool IsGUIWindow();
+		void InitializeGUI();
 
 		void PushTarget(WindowTarget* target);
 		void Present();

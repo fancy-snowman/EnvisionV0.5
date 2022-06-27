@@ -141,6 +141,8 @@ namespace env
 		ID3D12PipelineState* State;
 	};
 
+	class Window;
+
 	struct WindowTarget : public Resource
 	{
 		RESOURCE_TYPE(WindowTarget)
@@ -150,6 +152,7 @@ namespace env
 			D3D12_CPU_DESCRIPTOR_HANDLE ShaderResource = { 0 };
 		} Views;
 
+		Window* AppWindow;
 		RECT ScissorRect;
 		D3D12_VIEWPORT Viewport;
 

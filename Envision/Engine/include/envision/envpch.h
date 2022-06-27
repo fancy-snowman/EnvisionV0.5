@@ -13,7 +13,7 @@
 #include <algorithm>
 
 typedef long long ID;
-#define ID_ERROR 0;
+#define ID_ERROR 0
 
 #define PLATFORM_DIRECT3D_12
 
@@ -54,5 +54,9 @@ using Quaternion = DirectX::SimpleMath::Quaternion;
 #include <assimp/postprocess.h>
 
 #include <entt/entt.hpp>
+
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_win32.h>
+#include <imgui/imgui_impl_dx12.h>
 
 #endif

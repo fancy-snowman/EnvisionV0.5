@@ -4,6 +4,7 @@
 #include "envision/core/Time.h"
 #include "envision/graphics/AssetManager.h"
 #include "envision/graphics/Renderer.h"
+#include "envision/graphics/RendererGUI.h"
 #include "envision/resource/ResourceManager.h"
 
 env::Application::Application(int argc, char** argv, const std::string& name) :
@@ -13,6 +14,7 @@ env::Application::Application(int argc, char** argv, const std::string& name) :
 	ResourceManager::Initialize(m_IDGenerator);
 	AssetManager::Initialize(m_IDGenerator);
 	Renderer::Initialize(m_IDGenerator);
+	RendererGUI::Initialize(m_IDGenerator);
 
 	m_activeScene = new Scene();
 }

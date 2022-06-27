@@ -82,8 +82,6 @@ namespace env
 			DescriptorAllocator FrameDescriptorAllocator;
 		} m_frameInfo;
 
-		
-
 	public:
 
 		static Renderer* Initialize(IDGenerator& commonIDGenerator);

@@ -6,6 +6,7 @@
 #include "envision/resource/ResourceManager.h"
 #include "envision/graphics/AssetManager.h"
 #include "envision/graphics/Renderer.h"
+#include "envision/graphics/RendererGUI.h"
 
 class SceneUpdateLayer : public env::System
 {
@@ -150,9 +151,6 @@ class TestApplication : public env::Application
 	env::Window* m_window;
 
 	ID m_target;
-
-	env::CameraSettings m_camera;
-
 	ID m_mainCamera;
 
 public:
@@ -160,11 +158,12 @@ public:
 	TestApplication(int argc, char** argv) :
 		env::Application(argc, argv, "TestApplication")
 	{
+	
 		
-		//m_mesh = env::AssetManager::Get()->LoadMesh("Helicopter", "assets/SM_helicopter_01.fbx");
+		//GetActiveScene()->LoadScene("Helicopter", "assets/SM_helicopter_01.fbx");
 		//m_mesh = env::AssetManager::Get()->LoadMesh("City", "assets/city.fbx");
 
-		GetActiveScene()->LoadScene("City", "assets/city.fbx");
+		GetActiveScene()->LoadScene("City", "assets/Polygon-City Megapolis.fbx");
 		
 		m_window = new env::Window(1200, 800, "Envision", *this);
 
@@ -209,18 +208,34 @@ public:
 			deltaSum -= TARGET_FRAME_TIME;
 
 			env::Scene* scene = GetActiveScene();
-			env::CameraSettings cameraSettings = scene->GetComponent<env::CameraComponent>(m_mainCamera).Settings;
+			env::CameraSettings& cameraSettings = scene->GetComponent<env::CameraComponent>(m_mainCamera).Settings;
 			env::Transform& cameraTransform = scene->GetComponent<env::TransformComponent>(m_mainCamera).Transformation;
 			//env::Transform cameraTransform;
 			env::Transform objectTransform;
 
 			env::Renderer::Get()->BeginFrame(cameraSettings, cameraTransform, m_target);
 
+			int num = 0;
 			scene->ForEach<env::RenderComponent, env::TransformComponent>([&](env::RenderComponent& render, env::TransformComponent& transform) {
-				env::Renderer::Get()->Submit(transform.Transformation, render.Mesh, render.Material);
+					env::Renderer::Get()->Submit(transform.Transformation, render.Mesh, render.Material);
 			});
-			
+
 			env::Renderer::Get()->EndFrame();
+			
+			env::RendererGUI::Get()->BeginFrame(m_target);
+			
+			ImGui::Begin("Camera settings");
+			float fovDegress = (cameraSettings.FieldOfView * 180.0f) / 3.14f;
+			ImGui::SliderFloat("FOV", &fovDegress, 1.0f, 179.0f, "%.0f deg", 1.0f);
+			//ImGui::SliderAngle("FOV", &fovDegress, 30.0f, 180.0f, );
+			cameraSettings.FieldOfView = (fovDegress / 180.0f) * 3.14f;
+			ImGui::End();
+			
+			env::RendererGUI::Get()->EndFrame();
+
+			env::CommandQueue& queue = env::GPU::GetPresentQueue();
+			queue.Execute();
+			queue.WaitForIdle();
 		}
 	}
 

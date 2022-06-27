@@ -336,22 +336,11 @@ void env::Renderer::EndFrame()
 			meshAsset->OffsetVertices);
 	}
 
+	WindowTarget* target = (WindowTarget*)m_frameInfo.WindowTarget;
+	m_directList->TransitionResource(target, D3D12_RESOURCE_STATE_PRESENT);
+
 	m_directList->Close();
 
 	CommandQueue& queue = GPU::GetPresentQueue();
 	queue.QueueList(m_directList);
-	queue.Execute();
-	queue.WaitForIdle();
-
-	if (m_frameInfo.WindowTarget->GetType() == ResourceType::WindowTarget)
-	{
-		WindowTarget* target = (WindowTarget*)m_frameInfo.WindowTarget;
-
-		m_directList->Reset();
-		m_directList->TransitionResource(target, D3D12_RESOURCE_STATE_PRESENT);
-		m_directList->Close();
-		queue.QueueList(m_directList);
-		queue.Execute();
-		queue.WaitForIdle();
-	}
 }
