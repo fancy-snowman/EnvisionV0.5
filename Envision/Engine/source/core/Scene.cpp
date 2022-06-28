@@ -234,6 +234,18 @@ void env::Scene::LoadScene(const std::string& name, const std::string& filePath)
 		BufferBindType::Index,
 		indexData.data());
 
+	std::vector<ID> meshes(scene->mNumMeshes);
+	for (UINT meshIndex = 0; meshIndex < scene->mNumMeshes; meshIndex++) {
+		Submesh& submesh = submeshes[meshIndex];
+		meshes[meshIndex] = AssetManager::Get()->CreateMesh(submesh.Name,
+			vertexBuffer,
+			submesh.OffsetVertices,
+			submesh.NumVertices,
+			indexBuffer,
+			submesh.OffsetIndices,
+			submesh.NumIndices);
+	}
+
 	// Create all entities
 	int numEntities = 0;
 	auto entityFactory = [&](aiNode* node, const Float4x4& parentTransform, auto&& entityFactory) -> void {
@@ -248,15 +260,7 @@ void env::Scene::LoadScene(const std::string& name, const std::string& filePath)
 
 		for (unsigned int meshIndex = 0; meshIndex < node->mNumMeshes; meshIndex++) {
 
-			Submesh& submesh = submeshes[node->mMeshes[meshIndex]];
-			ID meshID = AssetManager::Get()->CreateMesh(submesh.Name,
-				vertexBuffer,
-				submesh.OffsetVertices,
-				submesh.NumVertices,
-				indexBuffer,
-				submesh.OffsetIndices,
-				submesh.NumIndices);
-
+			ID meshID = meshes[node->mMeshes[meshIndex]];
 			UINT materialIndex = scene->mMeshes[node->mMeshes[meshIndex]]->mMaterialIndex;
 
 			RenderComponent renderInfo;

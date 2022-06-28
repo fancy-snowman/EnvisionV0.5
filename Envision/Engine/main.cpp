@@ -215,14 +215,27 @@ public:
 
 			env::Renderer::Get()->BeginFrame(cameraSettings, cameraTransform, m_target);
 
-			int num = 0;
+			// <MeshID, count>
+			std::unordered_map<ID, int> instances;
 			scene->ForEach<env::RenderComponent, env::TransformComponent>([&](env::RenderComponent& render, env::TransformComponent& transform) {
-					env::Renderer::Get()->Submit(transform.Transformation, render.Mesh, render.Material);
+				env::Renderer::Get()->Submit(transform.Transformation, render.Mesh, render.Material);
+				
+				if (instances.count(render.Mesh) == 0)
+					instances[render.Mesh] = 1;
+				else
+					++instances[render.Mesh];
 			});
 
 			env::Renderer::Get()->EndFrame();
 			
 			env::RendererGUI::Get()->BeginFrame(m_target);
+
+			ImGui::Begin("Mesh instances");
+			for (auto& instance : instances) {
+				env::Mesh* mesh = env::AssetManager::Get()->GetMesh(instance.first);
+				ImGui::Text("%i\t%i\t%s", instance.second, instance.first, mesh->Name.c_str());
+			}
+			ImGui::End();
 			
 			ImGui::Begin("Camera settings");
 			float fovDegress = (cameraSettings.FieldOfView * 180.0f) / 3.14f;
