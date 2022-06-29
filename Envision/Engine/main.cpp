@@ -204,6 +204,13 @@ public:
 		static float deltaSum = 0.0f;
 		deltaSum += delta.InSeconds();
 
+		static float FPS_time = 0.f;
+		static int FPS_numFrames = 0;
+		static float FPS_frameTime = 0.0f;
+		static int FPS_fps = 0;
+
+		FPS_time += delta.InSeconds();
+
 		if (deltaSum >= TARGET_FRAME_TIME) {
 			deltaSum -= TARGET_FRAME_TIME;
 
@@ -243,12 +250,26 @@ public:
 			//ImGui::SliderAngle("FOV", &fovDegress, 30.0f, 180.0f, );
 			cameraSettings.FieldOfView = (fovDegress / 180.0f) * 3.14f;
 			ImGui::End();
+
+			if (++FPS_numFrames >= 100) {
+				FPS_fps = (float)FPS_numFrames / FPS_time;
+				FPS_frameTime = FPS_time / (float)FPS_numFrames;
+				FPS_frameTime *= 1000.f;
+
+				FPS_time = 0.0f;
+				FPS_numFrames = 0;
+			}
+			ImGui::Begin("Frame statistics (100 frames)");
+			ImGui::Text("Frametime: %.0f ms (%i FPS)", FPS_frameTime, FPS_fps);
+			ImGui::End();
 			
 			env::RendererGUI::Get()->EndFrame();
 
 			env::CommandQueue& queue = env::GPU::GetPresentQueue();
 			queue.Execute();
 			queue.WaitForIdle();
+
+			
 		}
 	}
 

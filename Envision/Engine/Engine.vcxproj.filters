@@ -161,5 +161,8 @@
     <ClInclude Include="include\envision\graphics\RendererGUI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\envision\graphics\CoreShaderDataStructures.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

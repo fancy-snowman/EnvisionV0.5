@@ -5,8 +5,8 @@
 #include "envision/core/GPU.h"
 #include "envision/core/IDGenerator.h"
 #include "envision/graphics/Assets.h"
+#include "envision/graphics/CoreShaderDataStructures.h"
 #include "envision/resource/Resource.h"
-
 namespace env
 {
 	// Singleton
@@ -18,63 +18,53 @@ namespace env
 
 		DirectList* m_directList;
 
+		const UINT ROOT_INDEX_INSTANCE_OFFSET_CONSTANT = 0;
+		const UINT ROOT_INDEX_INSTANCE_TABLE = 1;
+		const UINT ROOT_INDEX_MATERIAL_TABLE = 2;
+		const UINT ROOT_INDEX_CAMERA_BUFFER = 3;
 		ID m_pipelineState;
 		
 		ID m_intermediateTarget;
 		ID m_depthStencil;
 
 		ID m_cameraBuffer;
-		ID m_objectBuffer;
+		ID m_instanceBuffer;
 		ID m_materialBuffer;
-		
-		struct ObjectBufferData
-		{
-			DirectX::XMFLOAT3 Position;
-			float ID;
-			DirectX::XMFLOAT3 ForwardDirection;
-			float MaterialID;
-			DirectX::XMFLOAT3 UpDirection;
-			float Pad;
-			DirectX::XMFLOAT4X4 WorldMatrix;
-		};
-
-		struct MaterialBufferData
-		{
-			Float3 AmbientFactor;
-			int AmbientMapIndex; // -1 if no map exist
-			Float3 DiffuseFactor;
-			int DiffuseMapIndex; // -1 if no map exist
-			Float3 SpecularFactor;
-			int SpecularMapIndex; // -1 if no map exist
-			float Shininess;
-			int MaterialID;
-			Float2 Padding;
-		};
 
 		struct RenderJob
 		{
 			ID MeshID = ID_ERROR;
-			ID MaterialID = ID_ERROR;
+			UINT MaterialBufferIndex = 0;
+		};
+
+		struct MeshInstanceJobData
+		{
+			ID Mesh = ID_ERROR;
+			UINT InstanceOffset = 0;
+			UINT NumInstances = 0;
 		};
 
 		struct FrameInfo
 		{
 
 			struct {
-				DirectX::XMFLOAT3 Position;
+				Float3 Position;
 				float FieldOfView;
-				DirectX::XMFLOAT3 ForwardDirection;
+				Float3 ForwardDirection;
 				float DistanceNearPlane;
-				DirectX::XMFLOAT3 UpDirection;
+				Float3 UpDirection;
 				float DistanceFarPlane;
-				DirectX::XMFLOAT4X4 ViewMatrix;
-				DirectX::XMFLOAT4X4 ProjectionMatrix;
-				DirectX::XMFLOAT4X4 ViewProjectionMatrix;
+				Float4x4 ViewMatrix;
+				Float4x4 ProjectionMatrix;
+				Float4x4 ViewProjectionMatrix;
 			} CameraBufferInfo;
 
-			std::vector<ObjectBufferData> ObjectData;
-			std::vector<MaterialBufferData> MaterialData;
+			std::vector<InstanceBufferElementData> InstanceData;
+			std::vector<MaterialBufferInstanceData> MaterialData;
 			std::unordered_map<ID, UINT> MaterialIndices;
+
+			// < MeshID, InstanceData >
+			std::unordered_map<ID, std::vector<InstanceBufferElementData>> MeshInstances;
 
 			std::vector<RenderJob> RenderJobs;
 

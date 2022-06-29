@@ -1,18 +1,46 @@
-struct VS_IN
-{
-	float3 Position : POSITION;
-	float3 Normal : NORMAL;
-	float2 Texcoord : TEXCOORD;
-};
+// ######################################################################### //
+// ######################### ROOT SIGNATURE LAYOUT ######################### //
+// ######################################################################### //
 
-struct VS_OUT
-{
-	float4 Position : SV_POSITION;
-	float3 Normal : NORMAL;
-	float2 Texcoord : TEXCOORD;
-};
+/*
+ROOT SIGNATURE
+[i] TYPE		STAGE(S)	REGISTER	SPACE		COMMENT
+-------------------------------------------------------------------------------
+[0] CONSTANT	V|P			b0			0			InstanceOffset, 1 constant
+[1] TABLE		V|P									Instance buffer array
+[2] TABLE		P									Material buffer array
+[3] CBV			V|P			b1			0			Camera buffer
+-------------------------------------------------------------------------------
 
-cbuffer CameraBuffer : register(b0)
+
+
+RANGES IN TABLE INDEX [1] (Instance buffer array)
+[i] TYPE	NUM DESCS	BASE REG	SPACE	COMMENT
+-------------------------------------------------------------------------------
+[0] SRV		1			t0			0		
+-------------------------------------------------------------------------------
+
+
+
+RANGES IN TABLE INDEX [2] (Material buffer array)
+[i] TYPE	NUM DESCS	BASE REG	SPACE	COMMENT
+-------------------------------------------------------------------------------
+[0] SRV		1			t1			0
+-------------------------------------------------------------------------------
+*/
+
+
+
+// ######################################################################### //
+// ###################### COMMON SHADER STAGE BINDINGS ##################### //
+// ######################################################################### //
+
+cbuffer RootConstants : register(b0)
+{
+	unsigned int InstanceOffset;
+}
+
+cbuffer CameraBuffer : register(b1)
 {
 	struct {
 		float3 Position;
@@ -27,42 +55,24 @@ cbuffer CameraBuffer : register(b0)
 	} Camera;
 }
 
-cbuffer RootConstants : register(b1)
-{
-	unsigned int ObjectBufferIndex;
-}
-
-struct ObjectData
+struct InstanceData
 {
 	float3 Position;
-	float ID;
+	unsigned int ID;
 	float3 ForwardDirection;
-	float MaterialID;
+	unsigned int MaterialIndex;
 	float3 UpDirection;
 	float Pad;
-
 	float4x4 WorldMatrix;
 };
 
-StructuredBuffer<ObjectData> ObjectBuffers : register (t0);
+StructuredBuffer<InstanceData> InstanceBuffers : register (t0);
 
-VS_OUT VS_main(VS_IN input)
-{
-	ObjectData object = ObjectBuffers[ObjectBufferIndex];
 
-	VS_OUT output;
-	output.Position = float4(input.Position, 1.0f);
-	output.Position = mul(output.Position, object.WorldMatrix);
-	output.Position = mul(output.Position, Camera.ViewProjectionMatrix);
 
-	output.Normal = normalize(mul(float4(input.Normal, 0.f), object.WorldMatrix));
-
-	output.Texcoord = input.Texcoord;
-
-	return output;
-}
-
-// --------------------------------------------------------
+// ######################################################################### //
+// ###################### PIXEL SHADER STAGE BINDINGS ###################### //
+// ######################################################################### //
 
 struct MaterialData
 {
@@ -77,16 +87,61 @@ struct MaterialData
 	float2 Padding;
 };
 
-cbuffer RootConstants : register(b0)
+StructuredBuffer<MaterialData> MaterialBuffers : register (t1);
+
+
+
+// ######################################################################### //
+// ##################### COMMON SHADER DATA STRUCTURES ##################### //
+// ######################################################################### //
+
+struct VS_IN
 {
-	unsigned int MaterialBufferIndex;
+	float3 Position : POSITION;
+	float3 Normal : NORMAL;
+	float2 Texcoord : TEXCOORD;
+};
+
+struct VS_OUT
+{
+	float4 Position : SV_POSITION;
+	float3 Normal : NORMAL;
+	float2 Texcoord : TEXCOORD;
+	uint InstanceIndex : INSTANCEINDEX;
+};
+
+
+
+// ######################################################################### //
+// ###################### VERTEX SHADER STAGE PROGRAM ###################### //
+// ######################################################################### //
+
+VS_OUT VS_main(VS_IN input, uint instanceIndex : SV_InstanceID)
+{
+	VS_OUT output;
+	output.InstanceIndex = InstanceOffset + instanceIndex;
+
+	InstanceData instance = InstanceBuffers[output.InstanceIndex];
+
+	output.Position = float4(input.Position, 1.0f);
+	output.Position = mul(output.Position, instance.WorldMatrix);
+	output.Position = mul(output.Position, Camera.ViewProjectionMatrix);
+	output.Normal = normalize(mul(float4(input.Normal, 0.f), instance.WorldMatrix));
+	output.Texcoord = input.Texcoord;
+
+	return output;
 }
 
-StructuredBuffer<MaterialData> MaterialBuffers : register (t0);
+
+
+// ######################################################################### //
+// ####################### PIXEL SHADER STAGE PROGRAM ###################### //
+// ######################################################################### //
 
 float4 PS_main(VS_OUT input) : SV_TARGET
 {
-	MaterialData material = MaterialBuffers[MaterialBufferIndex];
+	InstanceData instance = InstanceBuffers[input.InstanceIndex];
+	MaterialData material = MaterialBuffers[instance.MaterialIndex];
 
 	float3 dirToSun = -1.f * normalize(float3(-1.0f, -2.f, 0.8f));
 
