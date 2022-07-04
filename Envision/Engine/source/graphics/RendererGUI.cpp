@@ -86,11 +86,9 @@ void env::RendererGUI::EndFrame()
 	ImGui::Render();
 
 	WindowTarget* target = ResourceManager::Get()->GetTarget(m_target);
-	m_directList->TransitionResource(target, D3D12_RESOURCE_STATE_RENDER_TARGET);
 	m_directList->SetTarget(target);
 	m_directList->SetDescriptorHeaps(1, &m_imguiDescriptorHeap);
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_directList->GetNative());
-	m_directList->TransitionResource(target, D3D12_RESOURCE_STATE_PRESENT);
 	
 	m_directList->Close();
 	CommandQueue& queue = GPU::GetPresentQueue();

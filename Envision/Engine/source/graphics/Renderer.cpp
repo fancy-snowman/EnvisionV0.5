@@ -386,10 +386,6 @@ void env::Renderer::EndFrame()
 			meshAsset->OffsetVertices,
 			0);
 	}
-
-	WindowTarget* target = (WindowTarget*)m_frameInfo.WindowTarget;
-	m_directList->TransitionResource(target, D3D12_RESOURCE_STATE_PRESENT);
-
 	m_directList->Close();
 
 	CommandQueue& queue = GPU::GetPresentQueue();

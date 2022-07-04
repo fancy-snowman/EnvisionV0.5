@@ -153,6 +153,8 @@ class TestApplication : public env::Application
 	ID m_target;
 	ID m_mainCamera;
 
+	env::DirectList* m_presentList;
+
 public:
 
 	TestApplication(int argc, char** argv) :
@@ -196,6 +198,8 @@ public:
 
 		PushSystem(new SceneUpdateLayer());
 		PushWindow(m_window);
+
+		m_presentList = env::GPU::CreateDirectCommandList();
 	}
 
 	void OnUpdate(const env::Duration& delta) override
@@ -219,6 +223,16 @@ public:
 			env::Transform& cameraTransform = scene->GetComponent<env::TransformComponent>(m_mainCamera).Transformation;
 			//env::Transform cameraTransform;
 			env::Transform objectTransform;
+
+			// Set target to state RENDER TARGET
+			env::WindowTarget* target = env::ResourceManager::Get()->GetTarget(m_target);
+			m_presentList->Reset();
+			m_presentList->TransitionResource(target, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			m_presentList->Close();
+			env::CommandQueue& presentQueue = env::GPU::GetPresentQueue();
+			presentQueue.QueueList(m_presentList);
+			presentQueue.Execute();
+			presentQueue.WaitForIdle();
 
 			env::Renderer::Get()->BeginFrame(cameraSettings, cameraTransform, m_target);
 
@@ -265,11 +279,13 @@ public:
 			
 			env::RendererGUI::Get()->EndFrame();
 
-			env::CommandQueue& queue = env::GPU::GetPresentQueue();
-			queue.Execute();
-			queue.WaitForIdle();
-
-			
+			// Set target to state PRESENT
+			m_presentList->Reset();
+			m_presentList->TransitionResource(target, D3D12_RESOURCE_STATE_PRESENT);
+			m_presentList->Close();
+			presentQueue.QueueList(m_presentList);
+			presentQueue.Execute();
+			presentQueue.WaitForIdle();
 		}
 	}
 
