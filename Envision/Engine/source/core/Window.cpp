@@ -112,7 +112,7 @@ void env::Window::InitWindowClass()
 			WORD eventMods = LOWORD(wParam);
 			short eventDelta = HIWORD(wParam);
 
-			float delta = eventDelta / WHEEL_DELTA;
+			float delta = (float)eventDelta / WHEEL_DELTA;
 
 			MouseModifiers modifiers;
 			ZeroMemory(&modifiers, sizeof(modifiers));

@@ -43,7 +43,7 @@ namespace env
 		Float3 AmbientFactor;
 		Float3 DiffuseFactor;
 		Float3 SpecularFactor;
-		float Shininess;
+		float Shininess = 0.f;
 
 		ID DiffuseMap = ID_ERROR;
 		ID AmbientMap = ID_ERROR;

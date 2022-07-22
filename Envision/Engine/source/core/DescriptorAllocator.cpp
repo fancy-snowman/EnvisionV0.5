@@ -7,9 +7,11 @@ env::DescriptorAllocator::DescriptorAllocator() :
     m_stride(0),
     m_heap(nullptr),
     m_beginCPU({ 0 }),
+    m_beginGPU({ 0 }),
     m_nextIndex(0),
     m_endIndex(0)
 {
+    //
 }
 
 env::DescriptorAllocator::DescriptorAllocator(D3D12_DESCRIPTOR_HEAP_TYPE type, UINT numDescriptors, bool isShaderVisible) :

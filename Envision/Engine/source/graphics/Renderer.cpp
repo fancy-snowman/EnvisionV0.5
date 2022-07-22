@@ -42,97 +42,45 @@ env::Renderer::Renderer(env::IDGenerator& commonIDGenerator) :
 			ROOT_TABLE(ShaderStage::Vertex | ShaderStage::Pixel, SRV_RANGE(1, 0, 0)),	// Instance buffer array
 			ROOT_TABLE(ShaderStage::Pixel, SRV_RANGE(1, 1, 0)),							// Material buffer array
 			ROOT_CBV_DESCRIPTOR(ShaderStage::Vertex | ShaderStage::Pixel, 1, 0),		// Camera buffer
-
-			//{ ParameterType::Constant, ShaderStage::Vertex, D3D12_ROOT_CONSTANTS{ 1, 0, 1 } },
-			//{ ParameterType::CBV, ShaderStage::Vertex, D3D12_ROOT_DESCRIPTOR{0, 0} },
-			//{ ParameterType::Table, ShaderStage::Vertex, {
-			//	{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, 0 },
-			//}},
-			//{ ParameterType::Constant, ShaderStage::Pixel, D3D12_ROOT_CONSTANTS{ 0, 0, 1 } },
-			//{ ParameterType::Table, ShaderStage::Pixel, {
-			//	{ D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, 0 },
-			//}}
 		});
 
-	m_intermediateTarget = ResourceManager::Get()->CreateTexture2D("IntermediateTarget",
-		1200,
-		800,
-		DXGI_FORMAT_R8G8B8A8_UNORM,
-		TextureBindType::RenderTarget);
+	const int DEFAULT_TARGET_WIDTH = 1200;
+	const int DEFAULT_TARGET_HEIGHT = 800;
+	const UINT DEFAULT_INSTANCE_CAPACITY = 6000;
+	const UINT DEFAULT_MATERIAL_CAPACITY = 50;
 
-	m_depthStencil = ResourceManager::Get()->CreateTexture2D("DepthStencil",
-		1200,
-		800,
-		DXGI_FORMAT_D32_FLOAT,
-		TextureBindType::DepthStencil);
+	// Initialize all frame packets. All packets need their own set of buffers as
+	// multiple buffers can be "in flight" at the same time.
+	for (int i = 0; i < NUM_FRAME_PACKETS; i++) {
+		FramePacket& packet = m_framePackets[i];
 
-	using namespace DirectX;
+		// Frame targets
+		packet.Targets.Intermediate = ResourceManager::Get()->CreateTexture2D("IntermediateTarget",
+			DEFAULT_TARGET_WIDTH,
+			DEFAULT_TARGET_HEIGHT,
+			DXGI_FORMAT_R8G8B8A8_UNORM,
+			TextureBindType::RenderTarget);
+		packet.Targets.Depth = ResourceManager::Get()->CreateTexture2D("DepthStencil",
+			DEFAULT_TARGET_WIDTH,
+			DEFAULT_TARGET_HEIGHT,
+			DXGI_FORMAT_D32_FLOAT,
+			TextureBindType::DepthStencil);
 
-	{		
-		float aspect = 1200.f / 800.f;	
-
-		m_frameInfo.CameraBufferInfo;
-		m_frameInfo.CameraBufferInfo.Position = { 0.0f, 250.f, -500.0 };
-		m_frameInfo.CameraBufferInfo.FieldOfView = 3.14f / 2.0f;
-		m_frameInfo.CameraBufferInfo.ForwardDirection = { 0.0f, 0.0f, 1.0f };
-		m_frameInfo.CameraBufferInfo.DistanceNearPlane = 10.0f;
-		m_frameInfo.CameraBufferInfo.UpDirection = { 0.0f, 1.0f, 0.0f };
-		m_frameInfo.CameraBufferInfo.DistanceFarPlane = 1000.0f;
-
-		XMMATRIX view = XMMatrixLookToLH(
-			XMLoadFloat3(&m_frameInfo.CameraBufferInfo.Position),
-			XMLoadFloat3(&m_frameInfo.CameraBufferInfo.ForwardDirection),
-			XMLoadFloat3(&m_frameInfo.CameraBufferInfo.UpDirection));
-		XMMATRIX projection = XMMatrixPerspectiveFovLH(
-			m_frameInfo.CameraBufferInfo.FieldOfView,
-			aspect,
-			m_frameInfo.CameraBufferInfo.DistanceNearPlane,
-			m_frameInfo.CameraBufferInfo.DistanceFarPlane);
-		XMMATRIX viewProjection = view * projection;
-
-		view = XMMatrixTranspose(view);
-		projection = XMMatrixTranspose(projection);
-		viewProjection = XMMatrixTranspose(viewProjection);
-
-		XMStoreFloat4x4(&m_frameInfo.CameraBufferInfo.ViewMatrix, view);
-		XMStoreFloat4x4(&m_frameInfo.CameraBufferInfo.ProjectionMatrix, projection);
-		XMStoreFloat4x4(&m_frameInfo.CameraBufferInfo.ViewProjectionMatrix, viewProjection);
-
-		m_cameraBuffer = ResourceManager::Get()->CreateBuffer("CameraBuffer", {
-			{ "Position", ShaderDataType::Float3 },
-			{ "FieldOfView", ShaderDataType::Float },
-			{ "ForwardDirection", ShaderDataType::Float3 },
-			{ "DistanceNearPlane", ShaderDataType::Float },
-			{ "UpDirection", ShaderDataType::Float3 },
-			{ "DistanceFarPlane", ShaderDataType::Float },
-			{ "ViewMatrix", ShaderDataType::Float4x4 },
-			{ "ProjectionMatrix", ShaderDataType::Float4x4 },
-			{ "ViewProjectionMatrix", ShaderDataType::Float4x4 } },
-			BufferBindType::Constant,
-			&m_frameInfo.CameraBufferInfo);
-	}
-
-	{
-		XMMATRIX translation = XMMatrixTranslation(0.0f, 0.0f, 0.0f);
-		XMMATRIX rotation = XMMatrixRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
-		XMMATRIX scale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
-
-		XMFLOAT4X4 transform;
-		//XMStoreFloat4x4(&transform, XMMatrixTranspose(scale * rotation * translation));
-		XMStoreFloat4x4(&transform, XMMatrixIdentity());
-
-		InstanceBufferElementData data;
-		data.Position = { 0.0f, 0.0f, 0.0f };
-		data.ID = 0;
-		data.ForwardDirection = { 0.0f, 0.0f, 1.0f };
-		data.MaterialIndex = 0;
-		data.UpDirection = { 0.0f, 1.0f, 0.0f };
-		data.Pad = 0;
-		data.WorldMatrix = transform;
-
-		std::vector<InstanceBufferElementData> initialData(6000, data);
-
-		m_instanceBuffer = ResourceManager::Get()->CreateBufferArray("ObjectBuffer",
+		// Frame buffers
+		packet.Buffers.Camera = ResourceManager::Get()->CreateBuffer("CameraBuffer",
+			BufferLayout({
+				{ "Position", ShaderDataType::Float3 },
+				{ "FieldOfView", ShaderDataType::Float },
+				{ "ForwardDirection", ShaderDataType::Float3 },
+				{ "DistanceNearPlane", ShaderDataType::Float },
+				{ "UpDirection", ShaderDataType::Float3 },
+				{ "DistanceFarPlane", ShaderDataType::Float },
+				{ "ViewMatrix", ShaderDataType::Float4x4 },
+				{ "ProjectionMatrix", ShaderDataType::Float4x4 },
+				{ "ViewProjectionMatrix", ShaderDataType::Float4x4 }
+			}),
+			BufferBindType::Constant);
+		packet.Buffers.Instance = ResourceManager::Get()->CreateBufferArray("InstanceBuffer",
 			BufferLayout({
 				{ "Position", ShaderDataType::Float3 },
 				{ "ID", ShaderDataType::Float },
@@ -141,26 +89,26 @@ env::Renderer::Renderer(env::IDGenerator& commonIDGenerator) :
 				{ "UpDirection", ShaderDataType::Float3 },
 				{ "Pad", ShaderDataType::Float },
 				{ "WorldMatrix", ShaderDataType::Float4x4 } },
-				(UINT)initialData.size()),
-			BufferBindType::ShaderResource,
-			initialData.data());
+				DEFAULT_INSTANCE_CAPACITY),
+			BufferBindType::ShaderResource);
+		packet.Buffers.Material = ResourceManager::Get()->CreateBufferArray("MaterialBuffer", 
+			BufferLayout({
+				{ "AmbientFactor", ShaderDataType::Float3 },
+				{ "AmbientMapIndex", ShaderDataType::Int },
+				{ "DiffuseFactor", ShaderDataType::Float3 },
+				{ "DiffuseMapIndex", ShaderDataType::Int },
+				{ "SpecularFactor", ShaderDataType::Float3 },
+				{ "SpecularMapIndex", ShaderDataType::Int },
+				{ "Shininess", ShaderDataType::Float },
+				{ "Shininess", ShaderDataType::Int },
+				{ "Padding", ShaderDataType::Float2 }},
+				DEFAULT_MATERIAL_CAPACITY),
+			BufferBindType::ShaderResource);
+
+		// Init a descriptor heap allocator for the frame packet
+		DescriptorAllocator& allocator = m_descriptorAllocators[i];
+		allocator.Initialize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 32, true);
 	}
-
-	m_materialBuffer = ResourceManager::Get()->CreateBufferArray("MaterialBuffer", 
-		BufferLayout({
-			{ "AmbientFactor", ShaderDataType::Float3 },
-			{ "AmbientMapIndex", ShaderDataType::Int },
-			{ "DiffuseFactor", ShaderDataType::Float3 },
-			{ "DiffuseMapIndex", ShaderDataType::Int },
-			{ "SpecularFactor", ShaderDataType::Float3 },
-			{ "SpecularMapIndex", ShaderDataType::Int },
-			{ "Shininess", ShaderDataType::Float },
-			{ "Shininess", ShaderDataType::Int },
-			{ "Padding", ShaderDataType::Float2 }},
-			50),
-		BufferBindType::ShaderResource);
-
-	m_frameInfo.FrameDescriptorAllocator.Initialize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 32, true);
 }
 
 env::Renderer::~Renderer()
@@ -168,139 +116,78 @@ env::Renderer::~Renderer()
 	//
 }
 
+int env::Renderer::StepCurrentFramePacketIndex()
+{
+	m_currentFramePacketIndex = (m_currentFramePacketIndex + 1) % NUM_FRAME_PACKETS;
+	return m_currentFramePacketIndex;
+}
+
+void env::Renderer::ClearCurrentFramePacket()
+{
+	FramePacket& packet = GetCurrentFramePacket();
+
+	packet.Camera.Settings.DistanceNearPlane = 1.0f;
+	packet.Camera.Settings.DistanceFarPlane = 100.0f;
+	packet.Camera.Settings.FieldOfView = 3.14f / 2.0f;
+	packet.Camera.Settings.Orthographic = false;
+
+	packet.Camera.Transform.SetPosition(Float3::Zero);
+	packet.Camera.Transform.SetRotation(Quaternion::Identity);
+	packet.Camera.Transform.SetScale(Float3::One);
+
+	packet.MeshOpaqueInstances.clear();
+}
+
+env::FramePacket& env::Renderer::GetCurrentFramePacket()
+{
+	return m_framePackets[m_currentFramePacketIndex];
+}
+
 void env::Renderer::Initialize()
 {
+	//
 }
 
 void env::Renderer::BeginFrame(const CameraSettings& cameraSettings, Transform& cameraTransform, ID target)
 {
-	WindowTarget* targetResource = ResourceManager::Get()->GetTarget(target);
-	PipelineState* pipeline = ResourceManager::Get()->GetPipelineState(m_pipelineState);
+	StepCurrentFramePacketIndex();
+	ClearCurrentFramePacket();
 
-	float aspectRatio = targetResource->Viewport.Width / targetResource->Viewport.Height;
+	FramePacket& packet = GetCurrentFramePacket();
 
-	m_frameInfo.WindowTarget = targetResource;
-	m_frameInfo.FrameDescriptorAllocator.Clear();
-	m_frameInfo.InstanceData.clear();
-	m_frameInfo.MaterialData.clear();
-	m_frameInfo.MaterialIndices.clear();
-	m_frameInfo.RenderJobs.clear();
-	m_frameInfo.MeshInstances.clear();
+	// Initialize camera
+	packet.Camera.Settings = cameraSettings;
+	packet.Camera.Transform = cameraTransform;
 
-	m_directList->Reset();
-
-	Texture2D* depthStencil = ResourceManager::Get()->GetTexture2D(m_depthStencil);
-
-	m_directList->SetTarget(targetResource, depthStencil);
-	m_directList->ClearRenderTarget(targetResource->Views.RenderTarget, 0.2f, 0.2f, 0.2f);
-	m_directList->ClearDepthStencil(depthStencil->Views.DepthStencil, true, false, 1.0f, 0);
-
-	m_directList->SetPipelineState(pipeline);
-
-	ID3D12DescriptorHeap* descriptorHeap = m_frameInfo.FrameDescriptorAllocator.GetHeap();
-	m_directList->SetDescriptorHeaps(1, &descriptorHeap);
-
-	{ // Set up camera
-		
-		using namespace DirectX;
-
-		Float4x4 cameraView = XMMatrixLookToLH(
-			cameraTransform.GetPosition(),
-			cameraTransform.GetForward(),
-			cameraTransform.GetUp());
-
-		Float4x4 cameraProjection = XMMatrixPerspectiveFovLH(
-			cameraSettings.FieldOfView,
-			aspectRatio,
-			cameraSettings.DistanceNearPlane,
-			cameraSettings.DistanceFarPlane);
-
-		Float4x4 cameraViewProjection = cameraView * cameraProjection;
-		
-		cameraView = cameraView.Transpose();
-		cameraProjection = cameraProjection.Transpose();
-		cameraViewProjection = cameraViewProjection.Transpose();
-
-		m_frameInfo.CameraBufferInfo.Position = cameraTransform.GetPosition();
-		m_frameInfo.CameraBufferInfo.ForwardDirection = cameraTransform.GetForward();
-		m_frameInfo.CameraBufferInfo.UpDirection = cameraTransform.GetUp();
-		m_frameInfo.CameraBufferInfo.ViewMatrix = cameraView;
-		m_frameInfo.CameraBufferInfo.ProjectionMatrix = cameraProjection;
-		m_frameInfo.CameraBufferInfo.ViewProjectionMatrix = cameraViewProjection;
-
-		m_frameInfo.CameraBufferInfo.FieldOfView = cameraSettings.FieldOfView;
-		m_frameInfo.CameraBufferInfo.DistanceNearPlane = cameraSettings.DistanceNearPlane;
-		m_frameInfo.CameraBufferInfo.DistanceFarPlane = cameraSettings.DistanceFarPlane;
-		
-		Buffer* cameraBuffer = ResourceManager::Get()->GetBuffer(m_cameraBuffer);
-
-		ResourceManager::Get()->UploadBufferData(m_cameraBuffer,
-			&m_frameInfo.CameraBufferInfo,
-			sizeof(m_frameInfo.CameraBufferInfo));
-
-		//D3D12_CPU_DESCRIPTOR_HANDLE cameraBufferSource = cameraBuffer->Views.Constant;
-		//D3D12_CPU_DESCRIPTOR_HANDLE cameraBufferDest = m_frameInfo.FrameDescriptorAllocator.Allocate();
-		//GPU::GetDevice()->CopyDescriptorsSimple(1,
-		//	cameraBufferDest,
-		//	cameraBufferSource,
-		//	D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-		m_directList->GetNative()->SetGraphicsRootConstantBufferView(ROOT_INDEX_CAMERA_BUFFER,
-			cameraBuffer->Native->GetGPUVirtualAddress());
-	}
-
-	{ // Set up object
-		BufferArray* objectBuffer = ResourceManager::Get()->GetBufferArray(m_instanceBuffer);
-
-		D3D12_CPU_DESCRIPTOR_HANDLE objectBufferSource = objectBuffer->Views.ShaderResource;
-		DescriptorAllocation frameAllocation = m_frameInfo.FrameDescriptorAllocator.Allocate();
-		GPU::GetDevice()->CopyDescriptorsSimple(1,
-			frameAllocation.CPUHandle,
-			objectBufferSource,
-			D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-		m_directList->GetNative()->SetGraphicsRootDescriptorTable(ROOT_INDEX_INSTANCE_TABLE,
-			frameAllocation.GPUHandle);
-	}
-
-	{
-		BufferArray* materialBuffer = ResourceManager::Get()->GetBufferArray(m_materialBuffer);
-
-		D3D12_CPU_DESCRIPTOR_HANDLE objectBufferSource = materialBuffer->Views.ShaderResource;
-		DescriptorAllocation frameAllocation = m_frameInfo.FrameDescriptorAllocator.Allocate();
-		GPU::GetDevice()->CopyDescriptorsSimple(1,
-			frameAllocation.CPUHandle,
-			objectBufferSource,
-			D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-		m_directList->GetNative()->SetGraphicsRootDescriptorTable(ROOT_INDEX_MATERIAL_TABLE,
-			frameAllocation.GPUHandle);
-	}
+	// Initialize targets
+	packet.Targets.Result = target;
 }
 
 void env::Renderer::Submit(Transform& transform, ID mesh, ID material)
 {
-	UINT materialIndex = 0;
-	if (m_frameInfo.MaterialIndices.count(material) == 0) {
-		Material* materialData = AssetManager::Get()->GetMaterial(material);
-		
-		MaterialBufferInstanceData bufferData;
-		bufferData.AmbientFactor = materialData->AmbientFactor;
-		bufferData.AmbientMapIndex = materialData->AmbientMap;
-		bufferData.DiffuseFactor = materialData->DiffuseFactor;
-		bufferData.DiffuseMapIndex = materialData->DiffuseMap;
-		bufferData.SpecularFactor = materialData->SpecularFactor;
-		bufferData.SpecularMapIndex = materialData->SpecularMap;
-		bufferData.Shininess = materialData->Shininess;
-		bufferData.MaterialID = (int)material;
-		bufferData.Padding = Float2::Zero;
+	FramePacket& packet = GetCurrentFramePacket();
 
-		materialIndex = (UINT)m_frameInfo.MaterialData.size();
-		m_frameInfo.MaterialData.push_back(std::move(bufferData));
-		m_frameInfo.MaterialIndices[material] = materialIndex;
+	UINT materialIndex = 0;
+	if (packet.MaterialInstanceIndices.count(material)) {
+		materialIndex = packet.MaterialInstanceIndices[material];
 	}
 	else {
-		materialIndex = m_frameInfo.MaterialIndices[material];
+		Material* materialData = AssetManager::Get()->GetMaterial(material);
+
+		MaterialBufferInstanceData instanceData;
+		instanceData.AmbientFactor = materialData->AmbientFactor;
+		instanceData.AmbientMapIndex = materialData->AmbientMap;
+		instanceData.DiffuseFactor = materialData->DiffuseFactor;
+		instanceData.DiffuseMapIndex = materialData->DiffuseMap;
+		instanceData.SpecularFactor = materialData->SpecularFactor;
+		instanceData.SpecularMapIndex = materialData->SpecularMap;
+		instanceData.Shininess = materialData->Shininess;
+		instanceData.MaterialID = (int)material;
+		instanceData.Padding = Float2::Zero;
+
+		materialIndex = (UINT)packet.MaterialInstanceIndices.size();
+		packet.MaterialInstances.push_back(instanceData);
+		packet.MaterialInstanceIndices[material] = materialIndex;
 	}
 
 	InstanceBufferElementData objectData;
@@ -312,65 +199,140 @@ void env::Renderer::Submit(Transform& transform, ID mesh, ID material)
 	objectData.Pad = 0;
 	objectData.WorldMatrix = transform.GetMatrixTransposed();
 
-	//m_frameInfo.InstanceData.push_back(objectData);
-	//m_frameInfo.RenderJobs.push_back(RenderJob({ mesh, materialIndex }));
-
-	//if (MeshInstance)
-	if (m_frameInfo.MeshInstances.count(mesh) == 0) {
-		std::vector<InstanceBufferElementData>& meshInstances = m_frameInfo.MeshInstances[mesh];
+	if (packet.MeshOpaqueInstances.count(mesh) == 0) {
+		std::vector<InstanceBufferElementData>& meshInstances = packet.MeshOpaqueInstances[mesh];
 		meshInstances.push_back(objectData);
 	}
 	else {
-		m_frameInfo.MeshInstances[mesh].push_back(objectData);
+		packet.MeshOpaqueInstances[mesh].push_back(objectData);
 	}
 }
 
 void env::Renderer::EndFrame()
 {
-	std::vector<MeshInstanceJobData> instanceJobs;
-	UINT instanceOffset = 0;
-	for (auto& [meshID, meshInstances] : m_frameInfo.MeshInstances) {
-		MeshInstanceJobData job;
-		job.Mesh = meshID;
-		job.InstanceOffset = instanceOffset;
-		job.NumInstances = (UINT)meshInstances.size();
-		instanceJobs.push_back(job);
+	ResourceManager* resourceManager = ResourceManager::Get();
+	FramePacket& packet = GetCurrentFramePacket();
 
-		m_frameInfo.InstanceData.insert(m_frameInfo.InstanceData.end(), meshInstances.begin(), meshInstances.end());
-		//std::copy(meshInstances.begin(), meshInstances.end(), m_frameInfo.InstanceData.end());
-		instanceOffset += job.NumInstances;
+	DescriptorAllocator& currentDescriptorAllocator = m_descriptorAllocators[m_currentFramePacketIndex];
+	currentDescriptorAllocator.Clear();
+
+	PipelineState* pipeline = resourceManager->GetPipelineState(m_pipelineState);
+	WindowTarget* target = resourceManager->GetTarget(packet.Targets.Result);
+	Texture2D* depth = resourceManager->GetTexture2D(packet.Targets.Depth);
+
+	const Float4 TARGET_CLEAR_COLOR = { 0.2f, 0.2f, 0.2f, 1.0f };
+	const float DEPTH_CLEAR_VALUE = 1.0f;
+
+	m_directList->Reset();
+	m_directList->ClearRenderTarget(target->Views.RenderTarget, TARGET_CLEAR_COLOR);
+	m_directList->ClearDepthStencil(depth, true, false, DEPTH_CLEAR_VALUE, 0);
+	m_directList->SetTarget(target, depth);
+	m_directList->SetPipelineState(pipeline);
+
+	ID3D12DescriptorHeap* descriptorHeap = currentDescriptorAllocator.GetHeap();
+	m_directList->SetDescriptorHeaps(1, &descriptorHeap);
+
+	{ // Update and set camera buffer
+		using namespace DirectX;
+
+		Float4x4 cameraView = XMMatrixLookToLH(
+			packet.Camera.Transform.GetPosition(),
+			packet.Camera.Transform.GetForward(),
+			packet.Camera.Transform.GetUp());
+
+		Float4x4 cameraProjection = XMMatrixPerspectiveFovLH(
+			packet.Camera.Settings.FieldOfView,
+			target->Viewport.Width / target->Viewport.Height,
+			packet.Camera.Settings.DistanceNearPlane,
+			packet.Camera.Settings.DistanceFarPlane);
+
+		Float4x4 cameraViewProjection = cameraView * cameraProjection;
+			
+		cameraView = cameraView.Transpose();
+		cameraProjection = cameraProjection.Transpose();
+		cameraViewProjection = cameraViewProjection.Transpose();
+
+		CameraBufferData bufferData;
+		bufferData.Position = packet.Camera.Transform.GetPosition();
+		bufferData.ForwardDirection = packet.Camera.Transform.GetForward();
+		bufferData.UpDirection = packet.Camera.Transform.GetUp();
+		bufferData.ViewMatrix = cameraView;
+		bufferData.ProjectionMatrix = cameraProjection;
+		bufferData.ViewProjectionMatrix = cameraViewProjection;
+		bufferData.FieldOfView = packet.Camera.Settings.FieldOfView;
+		bufferData.DistanceNearPlane = packet.Camera.Settings.DistanceNearPlane;
+		bufferData.DistanceFarPlane = packet.Camera.Settings.DistanceFarPlane;
+			
+		Buffer* cameraBuffer = ResourceManager::Get()->GetBuffer(packet.Buffers.Camera);
+
+		ResourceManager::Get()->UploadBufferData(packet.Buffers.Camera,
+			&bufferData,
+			sizeof(bufferData));
+
+		m_directList->GetNative()->SetGraphicsRootConstantBufferView(ROOT_INDEX_CAMERA_BUFFER,
+			cameraBuffer->Native->GetGPUVirtualAddress());
 	}
 
-	ResourceManager::Get()->UploadBufferData(m_instanceBuffer,
-		m_frameInfo.InstanceData.data(),
-		m_frameInfo.InstanceData.size() * sizeof(InstanceBufferElementData));
+	{ // Update and set material buffer
+		ResourceManager::Get()->UploadBufferData(packet.Buffers.Material,
+		packet.MaterialInstances.data(),
+		packet.MaterialInstances.size() * sizeof(MaterialBufferInstanceData));
 
-	ResourceManager::Get()->UploadBufferData(m_materialBuffer,
-		m_frameInfo.MaterialData.data(),
-		m_frameInfo.MaterialData.size() * sizeof(MaterialBufferInstanceData));
+		BufferArray* materialBuffer = ResourceManager::Get()->GetBufferArray(packet.Buffers.Material);
+		D3D12_CPU_DESCRIPTOR_HANDLE bufferShaderResource = materialBuffer->Views.ShaderResource;
+		DescriptorAllocation frameAllocation = currentDescriptorAllocator.Allocate();
+		GPU::GetDevice()->CopyDescriptorsSimple(1,
+			frameAllocation.CPUHandle,
+			bufferShaderResource,
+			D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
-	//for (UINT i = 0; i < (UINT)m_frameInfo.RenderJobs.size(); i++) {
+		m_directList->GetNative()->SetGraphicsRootDescriptorTable(ROOT_INDEX_MATERIAL_TABLE,
+			frameAllocation.GPUHandle);
+	}
 
-	//	const RenderJob& job = m_frameInfo.RenderJobs[i];
+	struct RenderJob {
+		ID Mesh;
+		UINT InstanceOffset;
+		UINT NumInstances;
+	};
+	std::vector<RenderJob> jobs;
 
-	//	const Mesh* meshAsset = AssetManager::Get()->GetMesh(job.MeshID);
+	{ // Update and set instance buffer, create render jobs
+		std::vector<InstanceBufferElementData> intermediateInstanceData;
 
-	//	Buffer* vertexBuffer = ResourceManager::Get()->GetBuffer(meshAsset->VertexBuffer);
-	//	Buffer* indexBuffer = ResourceManager::Get()->GetBuffer(meshAsset->IndexBuffer);
+		// Iterate all submission and
+		//	A. Copy memory to intermediate instance buffer (CPU, to be uploaded to GPU)
+		//	B. Create instance render jobs
 
-	//	m_directList->SetVertexBuffer(vertexBuffer, 0);
-	//	m_directList->SetIndexBuffer(indexBuffer);
+		UINT instanceOffset = 0;
+		for (auto& [meshID, meshInstances] : packet.MeshOpaqueInstances) {
+			RenderJob job;
+			job.Mesh = meshID;
+			job.InstanceOffset = instanceOffset;
+			job.NumInstances = (UINT)meshInstances.size();
+			jobs.push_back(job);
 
-	//	m_directList->GetNative()->SetGraphicsRoot32BitConstant(1, i, 0);
-	//	m_directList->GetNative()->SetGraphicsRoot32BitConstant(3, job.MaterialBufferIndex, 0);
+			intermediateInstanceData.insert(intermediateInstanceData.end(), meshInstances.begin(), meshInstances.end());
+			instanceOffset += job.NumInstances;
+		}
 
-	//	// Used to be 5609 for the whole city scene
-	//	m_directList->DrawIndexed(meshAsset->NumIndices,
-	//		meshAsset->OffsetIndices,
-	//		meshAsset->OffsetVertices);
-	//}
+		ResourceManager::Get()->UploadBufferData(packet.Buffers.Instance,
+			intermediateInstanceData.data(),
+			intermediateInstanceData.size() * sizeof(InstanceBufferElementData));
 
-	for (auto& job : instanceJobs) {
+		BufferArray* instanceBuffer = ResourceManager::Get()->GetBufferArray(packet.Buffers.Instance);
+		D3D12_CPU_DESCRIPTOR_HANDLE bufferShaderResource = instanceBuffer->Views.ShaderResource;
+		DescriptorAllocation frameAllocation = currentDescriptorAllocator.Allocate();
+		GPU::GetDevice()->CopyDescriptorsSimple(1,
+			frameAllocation.CPUHandle,
+			bufferShaderResource,
+			D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+		m_directList->GetNative()->SetGraphicsRootDescriptorTable(ROOT_INDEX_INSTANCE_TABLE,
+			frameAllocation.GPUHandle);
+	}
+
+	for (auto& job : jobs) {
 		const Mesh* meshAsset = AssetManager::Get()->GetMesh(job.Mesh);
 		Buffer* vertexBuffer = ResourceManager::Get()->GetBuffer(meshAsset->VertexBuffer);
 		Buffer* indexBuffer = ResourceManager::Get()->GetBuffer(meshAsset->IndexBuffer);
@@ -386,6 +348,8 @@ void env::Renderer::EndFrame()
 			meshAsset->OffsetVertices,
 			0);
 	}
+
+
 	m_directList->Close();
 
 	CommandQueue& queue = GPU::GetPresentQueue();

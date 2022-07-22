@@ -171,12 +171,19 @@ void env::DirectList::ClearRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE target, floa
 	m_list->ClearRenderTargetView(target, clearColor, 0, NULL);
 }
 
-void env::DirectList::ClearDepthStencil(D3D12_CPU_DESCRIPTOR_HANDLE stencil, bool clearDepth, bool clearStencil, FLOAT depthValue, UINT8 stencilValue)
+void env::DirectList::ClearRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE target, const Float4& color)
 {
+	m_list->ClearRenderTargetView(target, (const FLOAT*)&color, 0, NULL);
+}
+
+void env::DirectList::ClearDepthStencil(Texture2D* stencil, bool clearDepth, bool clearStencil, FLOAT depthValue, UINT8 stencilValue)
+{
+	TransitionResource(stencil, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+
 	UINT flags = 0;
 	if (clearDepth) flags |= (UINT)D3D12_CLEAR_FLAG_DEPTH;
 	if (clearStencil) flags |= (UINT)D3D12_CLEAR_FLAG_STENCIL;
-	m_list->ClearDepthStencilView(stencil, (D3D12_CLEAR_FLAGS)flags, depthValue, stencilValue, 0, nullptr);
+	m_list->ClearDepthStencilView(stencil->Views.DepthStencil, (D3D12_CLEAR_FLAGS)flags, depthValue, stencilValue, 0, nullptr);
 }
 
 void env::DirectList::Draw(UINT numVertices, UINT vertexOffset)
@@ -246,6 +253,6 @@ void env::DirectList::SetVertexBuffer(Buffer* buffer, UINT slot)
 
 	if (m_state.VertexBuffers[slot] != buffer->Native) {
 		m_list->IASetVertexBuffers(slot, 1, &buffer->Views.Vertex);
-		m_state.VertexBuffers[slot] == buffer->Native;
+		m_state.VertexBuffers[slot] = buffer->Native;
 	}
 }

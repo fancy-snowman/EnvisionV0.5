@@ -457,7 +457,7 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, int width, int
 	Texture2D textureDesc;
 
 	textureDesc.Name = name;
-	textureDesc.State = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+	textureDesc.State = D3D12_RESOURCE_STATE_COMMON;
 
 	textureDesc.Width = width;
 	textureDesc.Height = height;
@@ -493,8 +493,10 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, int width, int
 		//	resourceDescription.Flags = resourceDescription.Flags | D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE;
 		if (isUnorderedAccess)
 			resourceDescription.Flags = resourceDescription.Flags | D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
-		if (isDepthStencil)
+		if (isDepthStencil) {
 			resourceDescription.Flags = resourceDescription.Flags | D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+			textureDesc.State = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+		}
 
 		D3D12_CLEAR_VALUE clearValue = {};
 		D3D12_CLEAR_VALUE* clearValuePtr = nullptr;
@@ -534,8 +536,9 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, int width, int
 			textureDesc.Views.ShaderResource = CreateSRV(&textureDesc);
 		if (any(bindType & TextureBindType::UnorderedAccess))
 			textureDesc.Views.UnorderedAccess = CreateUAV(&textureDesc);
-		if (any(bindType & TextureBindType::DepthStencil))
+		if (any(bindType & TextureBindType::DepthStencil)) {
 			textureDesc.Views.DepthStencil = CreateDSV(&textureDesc);
+		}
 	}
 
 	ID resourceID = m_commonIDGenerator.GenerateUnique();
@@ -557,16 +560,23 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, TextureBindTyp
 	D3D12_RESOURCE_DESC existingDesc = existingTexture->GetDesc();
 	Texture2D textureDesc;
 
+	bool isRenderTarget = any(bindType & TextureBindType::RenderTarget) || (bindType == TextureBindType::Unknown);
+	bool isShaderResource = any(bindType & TextureBindType::ShaderResource) || (bindType == TextureBindType::Unknown);
+	bool isUnorderedAccess = any(bindType & TextureBindType::UnorderedAccess) || (bindType == TextureBindType::Unknown);
+	bool isDepthStencil = any(bindType & TextureBindType::DepthStencil);
+
 	{
 		textureDesc.Name = name;
 		textureDesc.Native = existingTexture;
 
-		if (any(bindType | TextureBindType::RenderTarget))
+		if (isRenderTarget)
 			textureDesc.State = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		else if (any(bindType | TextureBindType::ShaderResource))
+		else if (isShaderResource)
 			textureDesc.State = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-		else if (any(bindType | TextureBindType::UnorderedAccess))
+		else if (isUnorderedAccess)
 			textureDesc.State = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+		else if (isDepthStencil)
+			textureDesc.State = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 		else
 			textureDesc.State = D3D12_RESOURCE_STATE_COMMON;
 

@@ -14,6 +14,18 @@ namespace env
 		Float4x4 WorldMatrix;
 	};
 
+	struct CameraBufferData {
+		Float3 Position;
+		float FieldOfView;
+		Float3 ForwardDirection;
+		float DistanceNearPlane;
+		Float3 UpDirection;
+		float DistanceFarPlane;
+		Float4x4 ViewMatrix;
+		Float4x4 ProjectionMatrix;
+		Float4x4 ViewProjectionMatrix;
+	};
+
 	struct MaterialBufferInstanceData
 	{
 		Float3 AmbientFactor;

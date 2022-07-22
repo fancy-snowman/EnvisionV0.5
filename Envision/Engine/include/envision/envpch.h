@@ -49,9 +49,13 @@ using Float4 = DirectX::SimpleMath::Vector4;
 using Float4x4 = DirectX::SimpleMath::Matrix;
 using Quaternion = DirectX::SimpleMath::Quaternion;
 
+#pragma warning(push)
+#pragma warning(disable : 26451)
+#pragma warning(disable : 26812)
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#pragma warning(pop) 
 
 #include <entt/entt.hpp>
 

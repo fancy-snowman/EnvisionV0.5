@@ -223,6 +223,7 @@
     <ClInclude Include="include\envision\graphics\AssetManager.h" />
     <ClInclude Include="include\envision\graphics\Assets.h" />
     <ClInclude Include="include\envision\graphics\CoreShaderDataStructures.h" />
+    <ClInclude Include="include\envision\graphics\FramePacket.h" />
     <ClInclude Include="include\envision\graphics\Renderer.h" />
     <ClInclude Include="include\envision\graphics\RendererGUI.h" />
     <ClInclude Include="include\envision\graphics\RootSignature.h" />

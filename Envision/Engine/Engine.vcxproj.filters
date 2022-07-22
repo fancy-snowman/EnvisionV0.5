@@ -164,5 +164,8 @@
     <ClInclude Include="include\envision\graphics\CoreShaderDataStructures.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\envision\graphics\FramePacket.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
