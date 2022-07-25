@@ -26,7 +26,8 @@ void env::AssetManager::Finalize()
 env::AssetManager::AssetManager(env::IDGenerator& commonIDGenerator) :
 	m_commonIDGenerator(commonIDGenerator)
 {
-	//
+	const float white[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	m_defaultTexture_white = ResourceManager::Get()->CreateTexture2D("DefaultWhite1x1", 1, 1, DXGI_FORMAT_R32G32B32A32_FLOAT, TextureBindType::ShaderResource, (void*)white);
 }
 
 env::AssetManager::~AssetManager()
@@ -141,6 +142,37 @@ ID env::AssetManager::CreatePhongMaterial(const std::string& name, Float3 ambien
 	material->DiffuseFactor = diffuse;
 	material->SpecularFactor = specular;
 	material->Shininess = shininess;
+
+	m_materials[materialID] = material;
+
+	return materialID;
+}
+
+ID env::AssetManager::CreatePhongMaterial(const std::string& name, Float3 ambient, Float3 diffuse, Float3 specular, float shininess,
+	const std::string& ambientMap, const std::string& diffuseMap, const std::string& specularMap)
+{
+	ID materialID = m_commonIDGenerator.GenerateUnique();
+	Material* material = new Material(materialID, name);
+	material->AmbientFactor = ambient;
+	material->DiffuseFactor = diffuse;
+	material->SpecularFactor = specular;
+	material->Shininess = shininess;
+
+	// Set default maps
+	material->DiffuseMap = m_defaultTexture_white;
+
+	// Override default maps if possible
+	if (!diffuseMap.empty()) {
+		int width;
+		int height;
+		float* data = stbi_loadf(diffuseMap.c_str(), &width, &height, nullptr, 4);
+		material->DiffuseMap = ResourceManager::Get()->CreateTexture2D(material->Name + "_diffuse",
+			width,
+			height,
+			DXGI_FORMAT_R32G32B32A32_FLOAT,
+			TextureBindType::ShaderResource,
+			data);
+	}
 
 	m_materials[materialID] = material;
 

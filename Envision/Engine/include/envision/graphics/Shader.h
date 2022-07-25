@@ -26,6 +26,7 @@ namespace env
 	{
 		Unknown = 0,
 		V5_0,
+		V5_1,
 	};
 
 	struct ShaderDesc

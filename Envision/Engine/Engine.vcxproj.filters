@@ -167,5 +167,11 @@
     <ClInclude Include="include\envision\graphics\FramePacket.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="external\stb\include\stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="external\include\stb\stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

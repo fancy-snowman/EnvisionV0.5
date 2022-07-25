@@ -55,6 +55,7 @@ using Quaternion = DirectX::SimpleMath::Quaternion;
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <assimp/../../contrib/stb/stb_image.h>
 #pragma warning(pop) 
 
 #include <entt/entt.hpp>
@@ -62,5 +63,6 @@ using Quaternion = DirectX::SimpleMath::Quaternion;
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_win32.h>
 #include <imgui/imgui_impl_dx12.h>
+
 
 #endif

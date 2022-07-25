@@ -17,6 +17,8 @@ namespace env
 
 		env::IDGenerator& m_commonIDGenerator;
 
+		ID m_defaultTexture_white = ID_ERROR;
+
 		std::unordered_map<ID, Mesh*> m_meshes;
 		std::unordered_map<ID, Material*> m_materials;
 
@@ -53,5 +55,7 @@ namespace env
 		ID CreateMesh(const std::string& name, ID vertexBuffer, UINT offsetVertices, UINT numVertices, ID indexBuffer, UINT offsetIndices, UINT numIndices);
 		ID LoadMesh(const std::string& name, const std::string& filePath);
 		ID CreatePhongMaterial(const std::string& name, Float3 ambient, Float3 diffuse, Float3 specular, float shininess);
+		ID CreatePhongMaterial(const std::string& name, Float3 ambient, Float3 diffuse, Float3 specular, float shininess,
+			const std::string& ambientMap, const std::string& diffuseMap, const std::string& specularMap);
 	};
 }

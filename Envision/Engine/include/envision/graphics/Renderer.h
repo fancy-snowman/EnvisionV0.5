@@ -24,12 +24,17 @@ namespace env
 		const UINT ROOT_INDEX_INSTANCE_TABLE = 1;
 		const UINT ROOT_INDEX_MATERIAL_TABLE = 2;
 		const UINT ROOT_INDEX_CAMERA_BUFFER = 3;
+		const UINT ROOT_INDEX_SAMPLER_TABLE = 4;
+		const UINT ROOT_INDEX_TEXTURE_TABLE = 5;
+
 		ID m_pipelineState;
+		ID m_sampler;
 
 		static const int NUM_FRAME_PACKETS = 2;
 		int m_currentFramePacketIndex = 0;
 		std::array<FramePacket, NUM_FRAME_PACKETS> m_framePackets;
 		std::array<DescriptorAllocator, NUM_FRAME_PACKETS> m_descriptorAllocators;
+		std::array<DescriptorAllocator, NUM_FRAME_PACKETS> m_samplerAllocators;
 
 	public:
 
@@ -62,6 +67,5 @@ namespace env
 		void BeginFrame(const CameraSettings& cameraSettings, Transform& cameraTransform, ID target);
 		void Submit(Transform& transform, ID mesh, ID material);
 		void EndFrame();
-
 	};
 }

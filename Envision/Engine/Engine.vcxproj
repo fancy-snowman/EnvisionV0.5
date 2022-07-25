@@ -74,28 +74,28 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(ProjectDir)build/</OutDir>
     <IntDir>$(ProjectDir)int/</IntDir>
-    <ExternalIncludePath>$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(SolutionDir)Thirdparty/include;$(SolutionDir)DirectXTK/include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(ProjectDir)external/include;$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(SolutionDir)Thirdparty/include;$(SolutionDir)DirectXTK/include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</ExternalIncludePath>
     <LibraryPath>$(SolutionDir)Assimp/lib;$(SolutionDir)DirectXTK/lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(ProjectDir)build/</OutDir>
     <IntDir>$(ProjectDir)int/</IntDir>
-    <ExternalIncludePath>$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(SolutionDir)Thirdparty/include;$(SolutionDir)DirectXTK/include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(ProjectDir)external/include;$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(SolutionDir)Thirdparty/include;$(SolutionDir)DirectXTK/include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</ExternalIncludePath>
     <LibraryPath>$(SolutionDir)Assimp/lib;$(SolutionDir)DirectXTK/lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(ProjectDir)build/</OutDir>
     <IntDir>$(ProjectDir)int/</IntDir>
-    <ExternalIncludePath>$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(SolutionDir)ImGui/include;$(SolutionDir)Thirdparty/include;$(SolutionDir)DirectXTK/include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(ProjectDir)external/include;$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(SolutionDir)ImGui/include;$(SolutionDir)Thirdparty/include;$(SolutionDir)DirectXTK/include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</ExternalIncludePath>
     <LibraryPath>$(SolutionDir)Assimp/lib;$(SolutionDir)ImGui/lib;$(SolutionDir)DirectXTK/lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(ProjectDir)build/</OutDir>
     <IntDir>$(ProjectDir)int/</IntDir>
-    <ExternalIncludePath>$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(SolutionDir)ImGui/include;$(SolutionDir)Thirdparty/include;$(SolutionDir)DirectXTK/include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(ProjectDir)external/include;$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(SolutionDir)ImGui/include;$(SolutionDir)Thirdparty/include;$(SolutionDir)DirectXTK/include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</ExternalIncludePath>
     <LibraryPath>$(SolutionDir)Assimp/lib;$(SolutionDir)ImGui/lib;$(SolutionDir)DirectXTK/lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -204,6 +204,8 @@
     <ClCompile Include="source\core\Scene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="external\include\stb\stb_image.h" />
+    <ClInclude Include="external\stb\include\stb_image.h" />
     <ClInclude Include="include\envision\core\Application.h" />
     <ClInclude Include="include\envision\core\Camera.h" />
     <ClInclude Include="include\envision\core\Command.h" />

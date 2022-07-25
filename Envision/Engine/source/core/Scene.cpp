@@ -50,6 +50,9 @@ void env::Scene::LoadScene(const std::string& name, const std::string& filePath)
 		Float3 Diffuse = Float3::Zero;
 		Float3 Specular = Float3::Zero;
 		float Shininess = 1.f;
+		std::string AmbientMapPath;
+		std::string DiffuseMapPath;
+		std::string SpecularMapPath;
 	};
 
 	std::vector<ID> materialIDs(scene->mNumMaterials);
@@ -110,18 +113,13 @@ void env::Scene::LoadScene(const std::string& name, const std::string& filePath)
 
 		aiString name;
 		aiColor3D ambient;
-		aiString ambientMap;
 		aiColor3D diffuse;
-		aiString diffuseMap;
 		aiColor3D specular;
-		aiString specularMap;
-		ai_real shininess;
+		ai_real shininess;	
 
 		if (material->Get(AI_MATKEY_NAME, name) != AI_SUCCESS)
 			name = "Unkown";
 		if (material->Get(AI_MATKEY_COLOR_AMBIENT, ambient) != AI_SUCCESS)
-			ambient = { 0.0f, 0.0f, 0.0f };
-		if (material->Get(AI_MATKEY_MAPPING_AMBIENT(0), ambientMap) != AI_SUCCESS)
 			ambient = { 0.0f, 0.0f, 0.0f };
 		if (material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse) != AI_SUCCESS)
 			diffuse = { 0.0f, 0.0f, 0.0f };
@@ -130,6 +128,14 @@ void env::Scene::LoadScene(const std::string& name, const std::string& filePath)
 		if (material->Get(AI_MATKEY_SHININESS, shininess) != AI_SUCCESS)
 			shininess = 0.0f;
 
+		aiString aiAmbientMap;
+		aiString aiDiffuseMap;
+		aiString aiSpecularMap;
+
+		material->GetTexture(aiTextureType::aiTextureType_AMBIENT, 0, &aiAmbientMap);
+		material->GetTexture(aiTextureType::aiTextureType_DIFFUSE, 0, &aiDiffuseMap);
+		material->GetTexture(aiTextureType::aiTextureType_SPECULAR, 0, &aiSpecularMap);
+
 		MaterialInfo info;
 		info.Name = name.C_Str();
 		info.Ambient = { ambient.r, ambient.g, ambient.b };
@@ -137,15 +143,62 @@ void env::Scene::LoadScene(const std::string& name, const std::string& filePath)
 		info.Specular = { specular.r, specular.g, specular.b };
 		info.Shininess = shininess;
 
+		{
+			size_t subSize = filePath.rfind('/');
+
+			if (subSize == std::string::npos) {
+				subSize = filePath.size() - 1;
+			}
+
+			std::string directory = filePath.substr(0, subSize);
+
+			if (directory.size() && directory.back() != '/') {
+				directory += '/';
+			}
+
+			info.AmbientMapPath = aiAmbientMap.C_Str();
+			info.DiffuseMapPath = aiDiffuseMap.C_Str();
+			info.SpecularMapPath = aiSpecularMap.C_Str();
+
+			{
+				// Replace all occurrences of "\\" with "/"
+				size_t pos = 0;
+
+				while ((pos = info.AmbientMapPath.find("\\")) != std::string::npos) {
+					auto it = info.AmbientMapPath.begin() + pos;
+					info.AmbientMapPath.replace(it, it + 2, "/");
+				}
+
+				while ((pos = info.DiffuseMapPath.find("\\")) != std::string::npos) {
+					auto it = info.DiffuseMapPath.begin() + pos;
+					info.DiffuseMapPath.replace(it, it + 1, "/");
+				}
+
+				while ((pos = info.SpecularMapPath.find("\\")) != std::string::npos) {
+					auto it = info.SpecularMapPath.begin() + pos;
+					info.SpecularMapPath.replace(it, it + 2, "/");
+				}
+			}
+
+			if (info.AmbientMapPath != "") info.AmbientMapPath = directory + info.AmbientMapPath;
+			if (info.DiffuseMapPath != "") info.DiffuseMapPath = directory + info.DiffuseMapPath;
+			if (info.SpecularMapPath != "") info.SpecularMapPath = directory + info.SpecularMapPath;
+		}
+
 		std::cout << "\tCOLOR ambient: (" << ambient.r << ", " << ambient.g << ", " << ambient.b << ")\n";
 		std::cout << "\tCOLOR diffuse: (" << diffuse.r << ", " << diffuse.g << ", " << diffuse.b << ")\n";
 		std::cout << "\tCOLOR specular: (" << specular.r << ", " << specular.g << ", " << specular.b << ")\n";
+		std::cout << "\tCOLOR shininess: " << info.Shininess << "\n";
+
 
 		materialIDs[materialIndex] = AssetManager::Get()->CreatePhongMaterial(info.Name,
 			info.Ambient,
 			info.Diffuse,
 			info.Specular,
-			info.Shininess);
+			info.Shininess,
+			info.AmbientMapPath,
+			info.DiffuseMapPath,
+			info.SpecularMapPath);
 	}
 
 	struct Submesh {

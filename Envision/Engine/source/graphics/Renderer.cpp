@@ -33,15 +33,17 @@ env::Renderer::Renderer(env::IDGenerator& commonIDGenerator) :
 
 	m_pipelineState = ResourceManager::Get()->CreatePipelineState("PipelineState",
 		{
-			{ ShaderStage::Vertex, ShaderModel::V5_0, "shader.hlsl", "VS_main" },
-			{ ShaderStage::Pixel, ShaderModel::V5_0, "shader.hlsl", "PS_main" }
+			{ ShaderStage::Vertex, ShaderModel::V5_1, "shader.hlsl", "VS_main" },
+			{ ShaderStage::Pixel, ShaderModel::V5_1, "shader.hlsl", "PS_main" }
 		},
 		true,
 		{
 			ROOT_CONSTANTS(ShaderStage::Vertex | ShaderStage::Pixel, 0, 0, 1),			// Instance offset
-			ROOT_TABLE(ShaderStage::Vertex | ShaderStage::Pixel, SRV_RANGE(1, 0, 0)),	// Instance buffer array
-			ROOT_TABLE(ShaderStage::Pixel, SRV_RANGE(1, 1, 0)),							// Material buffer array
+			ROOT_TABLE(ShaderStage::Vertex | ShaderStage::Pixel, SRV_RANGE(1, 0, 0, 0)),// Instance buffer array
+			ROOT_TABLE(ShaderStage::Pixel, SRV_RANGE(1, 1, 0, 0)),						// Material buffer array
 			ROOT_CBV_DESCRIPTOR(ShaderStage::Vertex | ShaderStage::Pixel, 1, 0),		// Camera buffer
+			ROOT_TABLE(ShaderStage::Pixel, SAMPLER_RANGE(1, 0, 0, 0)),					// Samplers
+			ROOT_TABLE(ShaderStage::Pixel, SRV_RANGE(50, 0, 1, 0))						// Diffuse textures
 		});
 
 	const int DEFAULT_TARGET_WIDTH = 1200;
@@ -108,6 +110,27 @@ env::Renderer::Renderer(env::IDGenerator& commonIDGenerator) :
 		// Init a descriptor heap allocator for the frame packet
 		DescriptorAllocator& allocator = m_descriptorAllocators[i];
 		allocator.Initialize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 32, true);
+
+		// Init a sampler heap allocator for the frame packet
+		DescriptorAllocator& samplerAllocator = m_samplerAllocators[i];
+		samplerAllocator.Initialize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, 32, true);
+	}
+
+	{
+		D3D12_SAMPLER_DESC desc;
+		ZeroMemory(&desc, sizeof(desc));
+		desc.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+		desc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+		desc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+		desc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+		desc.MipLODBias = 0;
+		desc.MaxAnisotropy = (desc.Filter == D3D12_FILTER_ANISOTROPIC) ? 16 : 1;
+		desc.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+		//desc.BorderColor
+		desc.MinLOD = 0;
+		desc.MaxLOD = D3D12_FLOAT32_MAX;
+
+		m_sampler = ResourceManager::Get()->CreateSampler("DefaultSampler", desc);
 	}
 }
 
@@ -136,6 +159,10 @@ void env::Renderer::ClearCurrentFramePacket()
 	packet.Camera.Transform.SetScale(Float3::One);
 
 	packet.MeshOpaqueInstances.clear();
+	packet.MaterialInstanceIndices.clear();
+	packet.MaterialInstances.clear();
+	packet.SamplerInstanceIndices.clear();
+	packet.SamplerInstances.clear();
 }
 
 env::FramePacket& env::Renderer::GetCurrentFramePacket()
@@ -174,11 +201,21 @@ void env::Renderer::Submit(Transform& transform, ID mesh, ID material)
 	else {
 		Material* materialData = AssetManager::Get()->GetMaterial(material);
 
+		UINT diffuseMapIndex = 0;
+		if (packet.TextureInstanceIndices.count(materialData->DiffuseMap)) {
+			diffuseMapIndex = packet.TextureInstanceIndices[materialData->DiffuseMap];
+		}
+		else {
+			diffuseMapIndex = (UINT)packet.TextureInstances.size();
+			packet.TextureInstances.push_back(materialData->DiffuseMap);
+			packet.TextureInstanceIndices[materialData->DiffuseMap] = diffuseMapIndex;
+		}
+
 		MaterialBufferInstanceData instanceData;
 		instanceData.AmbientFactor = materialData->AmbientFactor;
 		instanceData.AmbientMapIndex = materialData->AmbientMap;
 		instanceData.DiffuseFactor = materialData->DiffuseFactor;
-		instanceData.DiffuseMapIndex = materialData->DiffuseMap;
+		instanceData.DiffuseMapIndex = diffuseMapIndex;
 		instanceData.SpecularFactor = materialData->SpecularFactor;
 		instanceData.SpecularMapIndex = materialData->SpecularMap;
 		instanceData.Shininess = materialData->Shininess;
@@ -214,7 +251,9 @@ void env::Renderer::EndFrame()
 	FramePacket& packet = GetCurrentFramePacket();
 
 	DescriptorAllocator& currentDescriptorAllocator = m_descriptorAllocators[m_currentFramePacketIndex];
+	DescriptorAllocator& currentSamplerAllocator = m_samplerAllocators[m_currentFramePacketIndex];
 	currentDescriptorAllocator.Clear();
+	currentSamplerAllocator.Clear();
 
 	PipelineState* pipeline = resourceManager->GetPipelineState(m_pipelineState);
 	WindowTarget* target = resourceManager->GetTarget(packet.Targets.Result);
@@ -229,8 +268,11 @@ void env::Renderer::EndFrame()
 	m_directList->SetTarget(target, depth);
 	m_directList->SetPipelineState(pipeline);
 
-	ID3D12DescriptorHeap* descriptorHeap = currentDescriptorAllocator.GetHeap();
-	m_directList->SetDescriptorHeaps(1, &descriptorHeap);
+	ID3D12DescriptorHeap* heaps[] = {
+		currentDescriptorAllocator.GetHeap(),
+		currentSamplerAllocator.GetHeap()
+	};
+	m_directList->SetDescriptorHeaps(2, heaps);
 
 	{ // Update and set camera buffer
 		using namespace DirectX;
@@ -288,6 +330,38 @@ void env::Renderer::EndFrame()
 
 		m_directList->GetNative()->SetGraphicsRootDescriptorTable(ROOT_INDEX_MATERIAL_TABLE,
 			frameAllocation.GPUHandle);
+	}
+
+	if (packet.TextureInstances.size() > 0) { // Fill texture resource descriptors in heap
+
+		DescriptorAllocation allocationBundle = currentDescriptorAllocator.Allocate(packet.TextureInstances.size());
+
+		UINT stride = currentDescriptorAllocator.GetStride();
+		for (int i = 0; i < packet.TextureInstances.size(); i++) {
+			ID textureID = packet.TextureInstances[i];
+			Texture2D* texture = ResourceManager::Get()->GetTexture2D(textureID);
+
+			D3D12_CPU_DESCRIPTOR_HANDLE allocation = { allocationBundle.CPUHandle.ptr + stride * i };
+			GPU::GetDevice()->CopyDescriptorsSimple(1,
+				allocation,
+				texture->Views.ShaderResource,
+				D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		}
+
+		m_directList->GetNative()->SetGraphicsRootDescriptorTable(ROOT_INDEX_TEXTURE_TABLE,
+			allocationBundle.GPUHandle);
+	}
+
+	{ // Fill the sampler descriptor heap
+		Sampler* sampler = ResourceManager::Get()->GetSampler(m_sampler);
+		DescriptorAllocation allocation = currentSamplerAllocator.Allocate();
+		GPU::GetDevice()->CopyDescriptorsSimple(1,
+			allocation.CPUHandle,
+			sampler->View,
+			D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+
+		m_directList->GetNative()->SetGraphicsRootDescriptorTable(ROOT_INDEX_SAMPLER_TABLE,
+			allocation.GPUHandle);
 	}
 
 	struct RenderJob {

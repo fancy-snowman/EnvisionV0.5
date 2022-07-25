@@ -20,6 +20,8 @@ namespace env
 		IndexBuffer,
 		VertexBuffer,
 
+		Sampler,
+
 		Texture2D,
 		Texture2DArray,
 
@@ -96,15 +98,23 @@ namespace env
 		} Views;
 	};
 
+	struct Sampler : public Resource
+	{
+		RESOURCE_TYPE(Sampler)
+		D3D12_SAMPLER_DESC Description;
+		D3D12_CPU_DESCRIPTOR_HANDLE View;
+	};
+
 	struct Texture2D : public Resource
 	{
 		RESOURCE_TYPE(Texture2D)
-		UINT GetByteWidth() final { return (UINT)(ByteWidth); }
+		UINT GetByteWidth() final { return (UINT)(GPUByteWidth); }
 
 		int Width;
 		int Height;
-		UINT64 RowPitch;
-		UINT64 ByteWidth;
+		UINT64 CPURowPitch;
+		UINT64 GPUByteWidth;
+		UINT NumGPURows;
 		DXGI_FORMAT Format;
 
 		struct {
@@ -118,13 +128,13 @@ namespace env
 	struct Texture2DArray : public Resource
 	{
 		RESOURCE_TYPE(Texture2DArray)
-		UINT GetByteWidth() final { return (UINT)(ByteWidth); }
+		UINT GetByteWidth() final { return (UINT)(GPUByteWidth); }
 
 		int NumTextures;
 		int Width;
 		int Height;
-		int ByteWidth;
-		int RowPitch;
+		int GPUByteWidth;
+		int CPURowPitch;
 		DXGI_FORMAT Format;
 
 		struct {
@@ -136,9 +146,9 @@ namespace env
 	{
 		RESOURCE_TYPE(PipelineState)
 
-		ShaderStage ShaderStages;
-		ID3D12RootSignature* RootSignature;
-		ID3D12PipelineState* State;
+		ShaderStage ShaderStages = ShaderStage::Unknown;
+		ID3D12RootSignature* RootSignature = nullptr;
+		ID3D12PipelineState* State = nullptr;
 	};
 
 	class Window;
@@ -152,13 +162,13 @@ namespace env
 			D3D12_CPU_DESCRIPTOR_HANDLE ShaderResource = { 0 };
 		} Views;
 
-		Window* AppWindow;
-		RECT ScissorRect;
-		D3D12_VIEWPORT Viewport;
+		Window* AppWindow = nullptr;
+		RECT ScissorRect = { 0 };
+		D3D12_VIEWPORT Viewport = { 0 };
 
-		float startXFactor;
-		float startYFactor;
-		float widthFactor;
-		float heightFactor;
+		float startXFactor = 0.0f;
+		float startYFactor = 0.0f;
+		float widthFactor = 1.0f;
+		float heightFactor = 1.0f;
 	};
 }

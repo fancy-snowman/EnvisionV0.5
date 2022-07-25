@@ -91,3 +91,8 @@ void env::DescriptorAllocator::Clear()
     m_freeList.clear();
     m_nextIndex = 0;
 }
+
+UINT env::DescriptorAllocator::GetStride()
+{
+    return m_stride;
+}

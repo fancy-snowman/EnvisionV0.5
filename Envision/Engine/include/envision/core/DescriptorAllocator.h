@@ -45,5 +45,6 @@ namespace env
 		DescriptorAllocation Allocate(UINT numDescriptors = 1);
 		void Free(DescriptorAllocation handle);
 		void Clear();
+		UINT GetStride();
 	};
 }

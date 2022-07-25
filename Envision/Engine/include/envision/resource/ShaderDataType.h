@@ -89,4 +89,5 @@ namespace env
 
 	size_t GetShaderDataTypeSize(ShaderDataType type);
 	DXGI_FORMAT GetDXGIFormat(ShaderDataType type);
+	ShaderDataType GetShaderDataType(DXGI_FORMAT format);
 }

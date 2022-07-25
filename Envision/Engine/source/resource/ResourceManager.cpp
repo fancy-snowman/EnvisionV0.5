@@ -176,6 +176,7 @@ D3D12_CPU_DESCRIPTOR_HANDLE env::ResourceManager::CreateSRV(Resource* resource)
 		desc.Texture2D.MipLevels = 1;
 		desc.Texture2D.PlaneSlice = 0;
 		desc.Texture2D.ResourceMinLODClamp = 0.0f; // Correct?
+		desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 		break;
 	}
 
@@ -218,14 +219,16 @@ D3D12_CPU_DESCRIPTOR_HANDLE env::ResourceManager::CreateSRV(Resource* resource)
 
 D3D12_CPU_DESCRIPTOR_HANDLE env::ResourceManager::CreateUAV(Resource* resource)
 {
-
 	//GPU::GetDevice()->CreateUnorderedAccessView()
 	return D3D12_CPU_DESCRIPTOR_HANDLE();
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE env::ResourceManager::CreateSampler(Resource* resource)
 {
-	return D3D12_CPU_DESCRIPTOR_HANDLE();
+	Sampler* sampler = (Sampler*)resource;
+	DescriptorAllocation allocation = m_SamplerAllocator.Allocate();
+	GPU::GetDevice()->CreateSampler(&sampler->Description, allocation.CPUHandle);
+	return allocation.CPUHandle;
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE env::ResourceManager::CreateRTV(Resource* resource)
@@ -462,6 +465,9 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, int width, int
 	textureDesc.Width = width;
 	textureDesc.Height = height;
 	textureDesc.Format = format;
+	textureDesc.NumGPURows = 0;
+
+	D3D12_PLACED_SUBRESOURCE_FOOTPRINT footprint = { 0 };
 
 	{ // Create the resource
 		D3D12_HEAP_PROPERTIES heapProperties;
@@ -508,16 +514,14 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, int width, int
 			clearValuePtr = &clearValue;
 		}
 
-		D3D12_PLACED_SUBRESOURCE_FOOTPRINT footprint = { 0 };
-		UINT numRows = 0;
 		GPU::GetDevice()->GetCopyableFootprints(&resourceDescription,
 			0,
 			1,
 			0,
 			&footprint,
-			&numRows,
-			&textureDesc.RowPitch,
-			&textureDesc.ByteWidth);
+			&textureDesc.NumGPURows,
+			&textureDesc.CPURowPitch,
+			&textureDesc.GPUByteWidth);
 
 		hr = GPU::GetDevice()->CreateCommittedResource(&heapProperties,
 			D3D12_HEAP_FLAG_NONE,
@@ -550,6 +554,72 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, int width, int
 	{
 		// TODO: UploadTextureData
 		//UploadBufferData(resourceID, initialData, bufferWidth);
+
+		// In DirectX 12, uploading a textures has to be done through a buffer.
+		// The data of a texture on the CPU is continuous, each row after the other.
+		// On the GPU this is not necessarily the case. We have to consider padding of
+		// each row.
+		// We now have to options:
+		//	a.	Copy all data as-is to the upload buffer, and work with the padding when
+		//		copying each row individually from the buffer to the actual texture.
+		//	b.	Copy each row individually and work with padding while copying to the
+		//		upload buffer, then copy the whole buffer resource to the texture as-is.
+		// We will do the latter.
+
+		{ // Upload data to the upload buffer
+			void* destination = nullptr;
+			D3D12_RANGE readRange = { 0,0 };
+
+			HRESULT hr = S_OK;
+			hr = m_uploadBuffer.Native->Map(0, &readRange, &destination);
+			ASSERT_HR(hr, "Could not map upload buffer");
+
+			size_t sourceOffset = 0;
+			size_t destinationOffset = 0;
+			char* srcBegin = (char*)initialData;
+			char* destBegin = (char*)destination;
+			size_t texelStride = GetShaderDataTypeSize(GetShaderDataType(format));
+			for (int row = 0; row < textureDesc.NumGPURows; row++) {
+				memcpy(destBegin + destinationOffset, srcBegin + sourceOffset, textureDesc.CPURowPitch);
+				sourceOffset += texelStride * footprint.Footprint.Width;
+				destinationOffset += footprint.Footprint.RowPitch;
+			}
+
+			m_uploadBuffer.Native->Unmap(0, NULL);
+		}
+
+		{ // Copy data to the actual texture resource
+
+			CommandQueue& directQueue = GPU::GetDirectQueue();
+
+			D3D12_RESOURCE_STATES initialState = texture->State;
+
+			{
+				m_transitionList->Reset();
+				m_transitionList->TransitionResource(texture, D3D12_RESOURCE_STATE_COPY_DEST);
+
+				D3D12_TEXTURE_COPY_LOCATION source;
+				ZeroMemory(&source, sizeof(source));
+				source.pResource = m_uploadBuffer.Native;
+				source.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+				source.PlacedFootprint.Footprint = footprint.Footprint;
+				source.PlacedFootprint.Offset = 0;
+
+				D3D12_TEXTURE_COPY_LOCATION destination;
+				ZeroMemory(&destination, sizeof(destination));
+				destination.pResource = textureDesc.Native;
+				destination.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+				destination.SubresourceIndex = 0;
+
+				m_transitionList->GetNative()->CopyTextureRegion(&destination, 0, 0, 0, &source, NULL);
+
+				m_transitionList->TransitionResource(texture, initialState);
+				m_transitionList->Close();
+				directQueue.QueueList(m_transitionList);
+				directQueue.Execute();
+				directQueue.WaitForIdle();
+			}
+		}
 	}
 
 	return resourceID;
@@ -590,8 +660,8 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, TextureBindTyp
 			0, 1, 0,
 			&footprint,
 			&numRows,
-			&textureDesc.RowPitch,
-			&textureDesc.ByteWidth);
+			&textureDesc.CPURowPitch,
+			&textureDesc.GPUByteWidth);
 	}
 
 	{
@@ -613,6 +683,22 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, TextureBindTyp
 ID env::ResourceManager::CreateTexture2DArray(const std::string& name, int numTextures, int width, int height, DXGI_FORMAT format, void* initialData)
 {
 	return ID();
+}
+
+ID env::ResourceManager::CreateSampler(const std::string& name, const D3D12_SAMPLER_DESC& description)
+{
+	Sampler samplerDesc;
+
+	samplerDesc.Name = name;
+	samplerDesc.Native = nullptr;
+	samplerDesc.Description = description;
+	samplerDesc.View = CreateSampler(&samplerDesc);
+
+	ID resourceID = m_commonIDGenerator.GenerateUnique();
+	Sampler* sampler = new Sampler(std::move(samplerDesc));
+	m_samplers[resourceID] = sampler;
+
+	return resourceID;
 }
 
 ID env::ResourceManager::CreatePipelineState(const std::string& name, std::initializer_list<ShaderDesc> shaderDescs, bool useInputLayout, const RootSignature& rootSignature)
@@ -809,6 +895,13 @@ env::Buffer* env::ResourceManager::GetBuffer(ID resourceID)
 	if (m_buffers.count(resourceID) == 0)
 		return nullptr;
 	return m_buffers[resourceID];
+}
+
+env::Sampler* env::ResourceManager::GetSampler(ID resourceID)
+{
+	if (m_samplers.count(resourceID) == 0)
+		return nullptr;
+	return m_samplers[resourceID];
 }
 
 env::Texture2D* env::ResourceManager::GetTexture2D(ID resourceID)

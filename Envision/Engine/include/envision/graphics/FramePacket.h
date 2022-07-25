@@ -34,5 +34,11 @@ namespace env
 
 		std::unordered_map<ID, UINT> MaterialInstanceIndices;
 		std::vector<MaterialBufferInstanceData> MaterialInstances;
+
+		std::unordered_map<ID, UINT> TextureInstanceIndices;
+		std::vector<ID> TextureInstances;
+
+		std::unordered_map<ID, UINT> SamplerInstanceIndices;
+		std::vector<ID> SamplerInstances;
 	};
 }

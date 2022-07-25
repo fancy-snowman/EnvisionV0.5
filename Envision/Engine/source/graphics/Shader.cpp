@@ -76,6 +76,9 @@ std::string env::GetTargetModelString(ShaderStage stage, ShaderModel model)
 	case ShaderModel::V5_0:
 		target += "5_0";
 		break;
+	case ShaderModel::V5_1:
+		target += "5_1";
+		break;
 	}
 
 	return target;
