@@ -159,14 +159,40 @@ ID env::AssetManager::CreatePhongMaterial(const std::string& name, Float3 ambien
 	material->Shininess = shininess;
 
 	// Set default maps
+	material->AmbientMap = m_defaultTexture_white;
 	material->DiffuseMap = m_defaultTexture_white;
+	material->SpecularMap = m_defaultTexture_white;
 
 	// Override default maps if possible
+	if (!ambientMap.empty()) {
+		int width;
+		int height;
+		float* data = stbi_loadf(ambientMap.c_str(), &width, &height, nullptr, 4);
+		material->AmbientMap = ResourceManager::Get()->CreateTexture2D(material->Name + "_ambient",
+			width,
+			height,
+			DXGI_FORMAT_R32G32B32A32_FLOAT,
+			TextureBindType::ShaderResource,
+			data);
+	}
+
 	if (!diffuseMap.empty()) {
 		int width;
 		int height;
 		float* data = stbi_loadf(diffuseMap.c_str(), &width, &height, nullptr, 4);
 		material->DiffuseMap = ResourceManager::Get()->CreateTexture2D(material->Name + "_diffuse",
+			width,
+			height,
+			DXGI_FORMAT_R32G32B32A32_FLOAT,
+			TextureBindType::ShaderResource,
+			data);
+	}
+
+	if (!specularMap.empty()) {
+		int width;
+		int height;
+		float* data = stbi_loadf(specularMap.c_str(), &width, &height, nullptr, 4);
+		material->SpecularMap = ResourceManager::Get()->CreateTexture2D(material->Name + "_specular",
 			width,
 			height,
 			DXGI_FORMAT_R32G32B32A32_FLOAT,

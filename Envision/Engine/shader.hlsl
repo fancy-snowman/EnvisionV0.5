@@ -184,11 +184,11 @@ float4 PS_main(VS_OUT input) : SV_TARGET
 	float3 R_dirLightReflection = -1.0f * normalize(reflect(L_dirToLight, input.Normal));
 	float3 V_dirToEye = normalize(Camera.Position - input.WorldPosition);
 
-	//float3 ambient = DiffuseTextures[material.ambientMapIndex].Sample(Sampler, float2(input.Texcoord)).xyz;
+	float3 ambient = DiffuseTextures[material.AmbientMapIndex].Sample(Sampler, float2(input.Texcoord)).xyz;
 	float3 diffuse = DiffuseTextures[material.DiffuseMapIndex].Sample(Sampler, float2(input.Texcoord)).xyz;
-	//float3 specular = DiffuseTextures[material.SpecularMapIndex].Sample(Sampler, float2(input.Texcoord)).xyz;
-	float3 ambient = float3(1.0f, 1.0f, 1.0f);
-	float3 specular = float3(1.0f, 1.0f, 1.0f);
+	float3 specular = DiffuseTextures[material.SpecularMapIndex].Sample(Sampler, float2(input.Texcoord)).xyz;
+	//float3 ambient = float3(1.0f, 1.0f, 1.0f);
+	//float3 specular = float3(1.0f, 1.0f, 1.0f);
 	ambient = ambient * float4(material.AmbientFactor, 1.0f);
 	diffuse = diffuse * float4(material.DiffuseFactor, 1.0f);
 	specular = specular * float4(material.SpecularFactor, 1.0f);
