@@ -251,32 +251,38 @@ public:
 			
 			env::RendererGUI::Get()->BeginFrame(m_target);
 
-			ImGui::Begin("Mesh instances");
-			for (auto& instance : instances) {
-				env::Mesh* mesh = env::AssetManager::Get()->GetMesh(instance.first);
-				ImGui::Text("%i\t%i\t%s", instance.second, instance.first, mesh->Name.c_str());
-			}
-			ImGui::End();
-			
+			//ImGui::Begin("Mesh instances");
+			//for (auto& instance : instances) {
+			//	env::Mesh* mesh = env::AssetManager::Get()->GetMesh(instance.first);
+			//	ImGui::Text("%i\t%i\t%s", instance.second, instance.first, mesh->Name.c_str());
+			//}
+			//ImGui::End();
+			//
 			ImGui::Begin("Camera settings");
+
 			float fovDegress = (cameraSettings.FieldOfView * 180.0f) / 3.14f;
 			ImGui::SliderFloat("FOV", &fovDegress, 1.0f, 179.0f, "%.0f deg", 1.0f);
-			//ImGui::SliderAngle("FOV", &fovDegress, 30.0f, 180.0f, );
 			cameraSettings.FieldOfView = (fovDegress / 180.0f) * 3.14f;
+
+			const Float3& camPos = cameraTransform.GetPosition();
+			const Quaternion& camQuat = cameraTransform.GetRotation();
+			ImGui::Text("Position\t(%.f, %.f, %.f)", camPos.x, camPos.y, camPos.z);
+			ImGui::Text("Rotation\t(%.2f, %.2f, %.2f, %.2f)", camQuat.x, camQuat.y, camQuat.z, camQuat.w);
+
 			ImGui::End();
 
-			if (++FPS_numFrames >= 100) {
-				FPS_fps = (float)FPS_numFrames / FPS_time;
-				FPS_frameTime = FPS_time / (float)FPS_numFrames;
-				FPS_frameTime *= 1000.f;
+			//if (++FPS_numFrames >= 100) {
+			//	FPS_fps = (float)FPS_numFrames / FPS_time;
+			//	FPS_frameTime = FPS_time / (float)FPS_numFrames;
+			//	FPS_frameTime *= 1000.f;
 
-				FPS_time = 0.0f;
-				FPS_numFrames = 0;
-			}
-			ImGui::Begin("Frame statistics (100 frames)");
-			ImGui::Text("Frametime: %.0f ms (%i FPS)", FPS_frameTime, FPS_fps);
-			ImGui::End();
-			
+			//	FPS_time = 0.0f;
+			//	FPS_numFrames = 0;
+			//}
+			//ImGui::Begin("Frame statistics (100 frames)");
+			//ImGui::Text("Frametime: %.0f ms (%i FPS)", FPS_frameTime, FPS_fps);
+			//ImGui::End();
+			//
 			env::RendererGUI::Get()->EndFrame();
 
 			// Set target to state PRESENT

@@ -82,27 +82,6 @@ void env::Scene::LoadScene(const std::string& name, const std::string& filePath)
 		int numSpecularTextures = material->GetTextureCount(aiTextureType_SPECULAR);
 		int numTransmissionTextures = material->GetTextureCount(aiTextureType_TRANSMISSION);
 
-		//std::cout << "\t" << numAmbientTextures << " ambient textures: " << std::endl;
-		//std::cout << "\t" << numAmbientOcclusion << " ambient occlusion textures: " << std::endl;
-		//std::cout << "\t" << numBaseColor << " base color textures: " << std::endl;
-		//std::cout << "\t" << numClearCoat << " clear coat textures: " << std::endl;
-		//std::cout << "\t" << numDiffuseTextures << " diffuse textures: " << std::endl;
-		//std::cout << "\t" << numDiffuseRoughness << " diffuse roughness textures: " << std::endl;
-		//std::cout << "\t" << numDisplacementTextures << " displacement textures: " << std::endl;
-		//std::cout << "\t" << numEmissionColor << " emission color textures: " << std::endl;
-		//std::cout << "\t" << numEmissiveTextures << " emissive textures: " << std::endl;
-		//std::cout << "\t" << numHeightTextures << " height textures: " << std::endl;
-		//std::cout << "\t" << numLightmapTextures << " lightmap textures: " << std::endl;
-		//std::cout << "\t" << numMetalnessTextures << " metalness textures: " << std::endl;
-		//std::cout << "\t" << numNormalsTextures << " normals textures: " << std::endl;
-		//std::cout << "\t" << numNormalCamera << " normal camera textures: " << std::endl;
-		//std::cout << "\t" << numOpacityTextures << " opacity textures: " << std::endl;
-		//std::cout << "\t" << numReflectionTextures << " reflection textures: " << std::endl;
-		//std::cout << "\t" << numSheenTextures << " sheen textures: " << std::endl;
-		//std::cout << "\t" << numShininessTextures << " shininess textures: " << std::endl;
-		//std::cout << "\t" << numSpecularTextures << " specular textures: " << std::endl;
-		//std::cout << "\t" << numTransmissionTextures << " transmission textures: " << std::endl;
-
 		if (numDiffuseTextures > 0) {
 			aiString path;
 			aiReturn ret = material->GetTexture(aiTextureType::aiTextureType_DIFFUSE, 0, &path);
