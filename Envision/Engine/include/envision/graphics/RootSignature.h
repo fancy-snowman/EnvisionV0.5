@@ -14,6 +14,8 @@
 	ROOT_DESCRIPTOR(ParameterType::RTV, stages, shaderRegister, registerSpace)
 #define TABLE_RANGE(type, numDescriptors, baseShaderRegister, registerSpace, offsetDescTable) \
 	{ type, numDescriptors, baseShaderRegister, registerSpace, offsetDescTable }
+#define CBV_RANGE(numDescriptors, baseShaderRegister, registerSpace, offsetDescTable) \
+	TABLE_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, numDescriptors, baseShaderRegister, registerSpace, offsetDescTable)
 #define SRV_RANGE(numDescriptors, baseShaderRegister, registerSpace, offsetDescTable) \
 	TABLE_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, numDescriptors, baseShaderRegister, registerSpace, offsetDescTable)
 #define UAV_RANGE(numDescriptors, baseShaderRegister, registerSpace, offsetDescTable) \

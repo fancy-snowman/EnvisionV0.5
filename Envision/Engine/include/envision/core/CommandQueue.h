@@ -42,6 +42,8 @@ namespace env
 
 		void WaitForIdle();
 		void WaitForFence(ID3D12Fence* fence, UINT64 value);
+		void WaitForFenceValueCPUSide(UINT64 value);
+		void WaitForFenceValueGPUSide(UINT64 value);
 		void WaitForQueue(CommandQueue* queue, UINT64 value);
 
 		UINT64 GetFenceValue() const;

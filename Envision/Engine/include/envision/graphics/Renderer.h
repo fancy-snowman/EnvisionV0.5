@@ -18,12 +18,10 @@ namespace env
 
 		env::IDGenerator& m_commonIDGenerator;
 
-		DirectList* m_directList;
-
 		const UINT ROOT_INDEX_INSTANCE_OFFSET_CONSTANT = 0;
 		const UINT ROOT_INDEX_INSTANCE_TABLE = 1;
 		const UINT ROOT_INDEX_MATERIAL_TABLE = 2;
-		const UINT ROOT_INDEX_CAMERA_BUFFER = 3;
+		const UINT ROOT_INDEX_CAMERA_TABLE = 3;
 		const UINT ROOT_INDEX_SAMPLER_TABLE = 4;
 		const UINT ROOT_INDEX_TEXTURE_TABLE = 5;
 
@@ -35,6 +33,13 @@ namespace env
 		std::array<FramePacket, NUM_FRAME_PACKETS> m_framePackets;
 		std::array<DescriptorAllocator, NUM_FRAME_PACKETS> m_descriptorAllocators;
 		std::array<DescriptorAllocator, NUM_FRAME_PACKETS> m_samplerAllocators;
+		std::array<ID, NUM_FRAME_PACKETS> m_uploadBuffers;
+
+		std::array<CopyList*, NUM_FRAME_PACKETS> m_copyLists;
+		std::array<DirectList*, NUM_FRAME_PACKETS> m_directLists;
+
+		char* m_intermediateUploadMemory = nullptr;
+		UINT m_intermediateUploadMemoryByteWidth = 0;
 
 	public:
 

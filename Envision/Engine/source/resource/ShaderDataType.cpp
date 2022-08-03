@@ -74,6 +74,8 @@ size_t env::GetShaderDataTypeSize(ShaderDataType type)
 	case ShaderDataType::Double4x2:		return sizeof(double) * 4 * 2;
 	case ShaderDataType::Double4x3:		return sizeof(double) * 4 * 3;
 	case ShaderDataType::Double4x4:		return sizeof(double) * 4 * 4;
+
+	case ShaderDataType::Unknown:		return sizeof(char);
 	}
 	return 0;
 }

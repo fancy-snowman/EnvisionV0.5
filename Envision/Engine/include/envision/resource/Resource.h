@@ -39,6 +39,7 @@ namespace env
 		Vertex				= 1 << 2,
 		ShaderResource		= 1 << 3,
 		UnorderedAccess		= 1 << 4,
+		Upload				= 1 << 5,
 	};
 	BufferBindType operator|(BufferBindType a, BufferBindType b);
 	BufferBindType operator&(BufferBindType a, BufferBindType b);
@@ -89,6 +90,7 @@ namespace env
 		UINT GetByteWidth() final { return (UINT)(Layout.GetByteWidth() + 255) & ~255; }
 
 		BufferLayout Layout;
+		BufferBindType BindType;
 
 		struct {
 			D3D12_CPU_DESCRIPTOR_HANDLE Constant = { 0 };

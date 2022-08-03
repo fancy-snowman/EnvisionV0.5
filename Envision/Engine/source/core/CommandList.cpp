@@ -115,6 +115,28 @@ void env::CopyList::CopyResource(Resource* dest, Resource* src)
 	m_list->CopyResource(dest->Native, src->Native);
 }
 
+void env::CopyList::UploadBufferData(Buffer* buffer, const void* data, UINT numBytes, UINT destinationOffset)
+{
+	assert(buffer);
+	assert(data);
+	assert(any(buffer->BindType & BufferBindType::Upload));
+	if (numBytes == 0)
+		numBytes = buffer->GetByteWidth();
+
+	// Upload buffers require D3D12_RESOURCE_STATE_GENERIC_READ, which
+	// can not be changed
+	//TransitionResource(buffer, D3D12_RESOURCE_STATE_COPY_DEST);
+
+	void* destination = nullptr;
+	D3D12_RANGE readRange = { 0, 0 };
+
+	HRESULT hr = buffer->Native->Map(0, &readRange, &destination);
+	ASSERT_HR(hr, "Could no map buffer for upload");
+	destination = ((char*)destination) + destinationOffset;
+	memcpy(destination, data, numBytes);
+	buffer->Native->Unmap(0, NULL);
+}
+
 
 
 // ######################################################################### //

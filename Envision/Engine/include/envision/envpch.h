@@ -64,5 +64,6 @@ using Quaternion = DirectX::SimpleMath::Quaternion;
 #include <imgui/imgui_impl_win32.h>
 #include <imgui/imgui_impl_dx12.h>
 
+#define ALIGN(value, alignment) (value + alignment-1) & ~(alignment-1)
 
 #endif

@@ -380,12 +380,14 @@ ID env::ResourceManager::CreateBuffer(const std::string& name, const BufferLayou
 	bool isIndexBuffer = any(bindType & BufferBindType::Index) || (bindType == BufferBindType::Unknown);
 	bool isVertexBuffer = any(bindType & BufferBindType::Vertex) || (bindType == BufferBindType::Unknown);
 	bool isUnorderedAccess = any(bindType & BufferBindType::UnorderedAccess) || (bindType == BufferBindType::Unknown);
+	bool isUpload = any(bindType & BufferBindType::Upload);
 
 	Buffer bufferDesc;
 
 	bufferDesc.Name = name;
-	bufferDesc.State = D3D12_RESOURCE_STATE_COMMON;
 	bufferDesc.Layout = layout;
+	bufferDesc.BindType = bindType;
+	bufferDesc.State = (isUpload) ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COMMON;
 
 	UINT bufferWidth = (UINT)bufferDesc.Layout.GetByteWidth() * bufferDesc.Layout.GetNumRepetitions();
 
@@ -396,9 +398,9 @@ ID env::ResourceManager::CreateBuffer(const std::string& name, const BufferLayou
 	{ // Create the resource
 		D3D12_HEAP_PROPERTIES heapProperties;
 		ZeroMemory(&heapProperties, sizeof(heapProperties));
-		heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
 		heapProperties.CreationNodeMask = 1;
 		heapProperties.VisibleNodeMask = 1;
+		heapProperties.Type = (isUpload) ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_DEFAULT;
 
 		D3D12_RESOURCE_DESC resourceDescription;
 		ZeroMemory(&resourceDescription, sizeof(resourceDescription));
@@ -958,7 +960,7 @@ void env::ResourceManager::UploadBufferData(ID resourceID, void* data, UINT numB
 
 		HRESULT hr = S_OK;
 		hr = m_uploadBuffer.Native->Map(0, &readRange, &destination);
-		ASSERT_HR(hr, "Could not map constant buffer");
+		ASSERT_HR(hr, "Could not map buffer");
 
 		destination = ((char*)destination) + destinationOffset;
 		memcpy(destination, data, numBytes);

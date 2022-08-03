@@ -40,5 +40,7 @@ namespace env
 
 		std::unordered_map<ID, UINT> SamplerInstanceIndices;
 		std::vector<ID> SamplerInstances;
+
+		UINT64 FinishedFenceValue = 0;
 	};
 }

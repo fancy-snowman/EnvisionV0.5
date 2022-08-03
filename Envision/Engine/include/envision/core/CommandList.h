@@ -94,6 +94,8 @@ namespace env
 
 		void CopyBufferRegion(Resource* dest, UINT64 destOffset, Resource* src, UINT64 srcOffset, UINT64 numBytes);
 		void CopyResource(Resource* dest, Resource* src);
+
+		void UploadBufferData(Buffer* buffer, const void* data, UINT numBytes = 0, UINT destinationOffset = 0);
 	};
 
 

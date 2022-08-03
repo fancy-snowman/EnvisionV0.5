@@ -72,6 +72,17 @@ void env::CommandQueue::WaitForFence(ID3D12Fence* fence, UINT64 value)
     m_queue->Wait(fence, value);
 }
 
+void env::CommandQueue::WaitForFenceValueCPUSide(UINT64 value)
+{
+    m_fence->SetEventOnCompletion(value, m_fenceEvent);
+    WaitForSingleObject(m_fenceEvent, INFINITE);
+}
+
+void env::CommandQueue::WaitForFenceValueGPUSide(UINT64 value)
+{
+    m_queue->Wait(m_fence, value);
+}
+
 void env::CommandQueue::WaitForQueue(CommandQueue* queue, UINT64 value)
 {
     m_queue->Wait(queue->m_fence, value);
