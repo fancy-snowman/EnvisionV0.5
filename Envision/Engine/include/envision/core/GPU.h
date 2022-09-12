@@ -50,9 +50,9 @@ namespace env
 		static CommandQueue& GetCopyQueue();
 		static CommandQueue& GetPresentQueue();
 
-		static DirectList* CreateDirectCommandList(bool recordDirectly = false);
-		static ComputeList* CreateComputeCommandList(bool recordDirectly = false);
-		static CopyList* CreateCopyCommandList(bool recordDirectly = false);
+		static DirectList* CreateDirectCommandList(const std::string& name, bool recordDirectly = false);
+		static ComputeList* CreateComputeCommandList(const std::string& name, bool recordDirectly = false);
+		static CopyList* CreateCopyCommandList(const std::string& name, bool recordDirectly = false);
 
 	private:
 

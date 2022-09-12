@@ -1,9 +1,10 @@
 #include "envision/envpch.h"
 #include "envision/core/CommandList.h"
 
-env::CommandList::CommandList(D3D12_COMMAND_LIST_TYPE type) :
+env::CommandList::CommandList(D3D12_COMMAND_LIST_TYPE type, const std::string& name) :
 	m_state(ListState::Unknown),
 	m_type(type),
+	m_name(name),
 	m_list(nullptr),
 	m_allocator(nullptr)
 {
@@ -16,9 +17,11 @@ void env::CommandList::Initialize(ID3D12Device* device)
 
 	hr = device->CreateCommandAllocator(m_type, IID_PPV_ARGS(&m_allocator));
 	ASSERT_HR(hr, "Could not create command allocator");
+	m_allocator->SetName((std::wstring(m_name.begin(), m_name.end()) + L"_allocator").c_str());
 
 	hr = device->CreateCommandList(NULL, m_type, m_allocator, NULL, IID_PPV_ARGS(&m_list));
 	ASSERT_HR(hr, "Could not create command list");
+	m_list->SetName((std::wstring(m_name.begin(), m_name.end()) + L"_list").c_str());
 
 	m_state = ListState::Recording;
 }
@@ -34,6 +37,7 @@ D3D12_COMMAND_LIST_TYPE env::CommandList::GetType()
 	return m_type;
 }
 
+#include <system_error>
 void env::CommandList::Reset()
 {
 	m_allocator->Reset();
@@ -51,6 +55,11 @@ void env::CommandList::Close()
 env::ListState env::CommandList::GetState()
 {
 	return m_state;
+}
+
+const std::string& env::CommandList::GetName() const
+{
+	return m_name;
 }
 
 ID3D12GraphicsCommandList* env::CommandList::GetNative()
@@ -86,12 +95,12 @@ void env::CommandList::SetDescriptorHeaps(UINT numHeaps, ID3D12DescriptorHeap* c
 // ############################### COPY LIST ############################### //
 // ######################################################################### //
 
-env::CopyList::CopyList(D3D12_COMMAND_LIST_TYPE type) : env::CommandList(type)
+env::CopyList::CopyList(D3D12_COMMAND_LIST_TYPE type, const std::string& name) : env::CommandList(type, name)
 {
 	//
 }
 
-env::CopyList::CopyList() : env::CommandList(D3D12_COMMAND_LIST_TYPE_COPY)
+env::CopyList::CopyList(const std::string& name) : env::CommandList(D3D12_COMMAND_LIST_TYPE_COPY, name)
 {
 	//
 }
@@ -143,12 +152,12 @@ void env::CopyList::UploadBufferData(Buffer* buffer, const void* data, UINT numB
 // ############################## COMPUTE LIST ############################# //
 // ######################################################################### //
 
-env::ComputeList::ComputeList(D3D12_COMMAND_LIST_TYPE type) : env::CopyList(type)
+env::ComputeList::ComputeList(D3D12_COMMAND_LIST_TYPE type, const std::string& name) : env::CopyList(type, name)
 {
 	//
 }
 
-env::ComputeList::ComputeList() : env::CopyList(D3D12_COMMAND_LIST_TYPE_COMPUTE)
+env::ComputeList::ComputeList(const std::string& name) : env::CopyList(D3D12_COMMAND_LIST_TYPE_COMPUTE, name)
 {
 	//
 }
@@ -169,7 +178,7 @@ void env::ComputeList::Dispatch(UINT numThreadGroupsX, UINT numThreadGroupsY, UI
 // ############################## DIRECT LIST ############################## //
 // ######################################################################### //
 
-env::DirectList::DirectList() : env::ComputeList(D3D12_COMMAND_LIST_TYPE_DIRECT)
+env::DirectList::DirectList(const std::string& name) : env::ComputeList(D3D12_COMMAND_LIST_TYPE_DIRECT, name)
 {
 	//
 }

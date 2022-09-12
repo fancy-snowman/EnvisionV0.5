@@ -67,8 +67,8 @@ env::ResourceManager::ResourceManager(IDGenerator& commonIDGenerator) :
 		ASSERT_HR(hr, "Could not create upload buffer");
 	}
 
-	m_transitionList = GPU::CreateDirectCommandList();
-	m_copyList = GPU::CreateCopyCommandList();
+	m_transitionList = GPU::CreateDirectCommandList("ResourceManager::directList");
+	m_copyList = GPU::CreateCopyCommandList("ResourceManager::copyList");
 }
 
 env::ResourceManager::~ResourceManager()

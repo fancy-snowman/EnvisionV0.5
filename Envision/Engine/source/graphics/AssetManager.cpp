@@ -303,3 +303,45 @@ ID env::AssetManager::LoadMesh(const std::string& name, const std::string& fileP
 
 	return meshID;
 }
+
+int env::AssetManager::GetNumMeshes() const
+{
+	return static_cast<int>(m_meshes.size());
+}
+
+int env::AssetManager::GetNumMaterials() const
+{
+	return static_cast<int>(m_materials.size());
+}
+
+void env::AssetManager::GetMeshes(std::vector<Mesh*>& outMeshes) const
+{
+	outMeshes.clear();
+	outMeshes.reserve(m_meshes.size());
+	for (auto& idMesh : m_meshes)
+		outMeshes.push_back(idMesh.second);
+}
+
+void env::AssetManager::GetMaterials(std::vector<Material*>& outMaterials) const
+{
+	outMaterials.clear();
+	outMaterials.reserve(m_materials.size());
+	for (auto& idMaterial : m_materials)
+		outMaterials.push_back(idMaterial.second);
+}
+
+void env::AssetManager::GetMeshIDs(std::vector<ID>& outIDs) const
+{
+	outIDs.clear();
+	outIDs.reserve(m_meshes.size());
+	for (auto& idMesh : m_meshes)
+		outIDs.push_back(idMesh.first);
+}
+
+void env::AssetManager::GetMaterialIDs(std::vector<ID>& outIDs) const
+{
+	outIDs.clear();
+	outIDs.reserve(m_materials.size());
+	for (auto& idMaterial : m_materials)
+		outIDs.push_back(idMaterial.first);
+}

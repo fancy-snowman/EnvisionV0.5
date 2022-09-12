@@ -45,6 +45,15 @@ namespace env
 		Mesh* GetMesh(ID resourceID);
 		Material* GetMaterial(ID resourceID);
 
+		int GetNumMeshes() const;
+		int GetNumMaterials() const;
+
+		void GetMeshes(std::vector<Mesh*>& outMeshes) const;
+		void GetMaterials(std::vector<Material*>& outMaterials) const;
+
+		void GetMeshIDs(std::vector<ID>& outIDs) const;
+		void GetMaterialIDs(std::vector<ID>& outIDs) const;
+
 	public:
 
 		//ID CreateMesh(const std::string& name, const std::string& filePath);

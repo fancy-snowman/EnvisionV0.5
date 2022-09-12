@@ -67,9 +67,9 @@ env::CommandQueue& env::GPU::GetPresentQueue()
 	return Get()->m_presentQueue;
 }
 
-env::DirectList* env::GPU::CreateDirectCommandList(bool recordDirectly)
+env::DirectList* env::GPU::CreateDirectCommandList(const std::string& name, bool recordDirectly)
 {
-	DirectList* list = new DirectList();
+	DirectList* list = new DirectList(name);
 	list->Initialize(Get()->m_device);
 
 	if (!recordDirectly)
@@ -78,9 +78,9 @@ env::DirectList* env::GPU::CreateDirectCommandList(bool recordDirectly)
 	return list;
 }
 
-env::ComputeList* env::GPU::CreateComputeCommandList(bool recordDirectly)
+env::ComputeList* env::GPU::CreateComputeCommandList(const std::string& name, bool recordDirectly)
 {
-	ComputeList* list = new ComputeList();
+	ComputeList* list = new ComputeList(name);
 	list->Initialize(Get()->m_device);
 
 	if (!recordDirectly)
@@ -89,9 +89,9 @@ env::ComputeList* env::GPU::CreateComputeCommandList(bool recordDirectly)
 	return list;
 }
 
-env::CopyList* env::GPU::CreateCopyCommandList(bool recordDirectly)
+env::CopyList* env::GPU::CreateCopyCommandList(const std::string& name, bool recordDirectly)
 {
-	CopyList* list = new CopyList();
+	CopyList* list = new CopyList(name);
 	list->Initialize(Get()->m_device);
 
 	if (!recordDirectly)

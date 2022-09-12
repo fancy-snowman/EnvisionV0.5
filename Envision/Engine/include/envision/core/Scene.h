@@ -34,6 +34,7 @@ namespace env
 		// Component related
 
 		template <typename T> bool HasComponent(ID entity);
+		template <typename... Ts> bool HasComponents(ID entity);
 		template <typename T> void RemoveComponent(ID entity);
 
 		template <typename T> T& GetComponent(ID entity);
@@ -56,6 +57,12 @@ namespace env
 	inline bool Scene::HasComponent(ID entity)
 	{
 		return m_registry.any_of<T>((entt::entity)entity);
+	}
+
+	template<typename ...Ts>
+	inline bool Scene::HasComponents(ID entity)
+	{
+		return m_registry.all_of<Ts...>((entt::entity)entity);
 	}
 
 	template<typename T>

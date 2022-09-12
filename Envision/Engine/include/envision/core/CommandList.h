@@ -30,6 +30,7 @@ namespace env
 	protected:
 
 		const D3D12_COMMAND_LIST_TYPE m_type;
+		std::string m_name;
 
 		ID3D12GraphicsCommandList* m_list;
 		ID3D12CommandAllocator* m_allocator;
@@ -37,7 +38,7 @@ namespace env
 		// class GPU is factory for CommandList
 		friend class env::GPU;
 
-		CommandList(D3D12_COMMAND_LIST_TYPE type);
+		CommandList(D3D12_COMMAND_LIST_TYPE type, const std::string& name);
 		void Initialize(ID3D12Device* device);
 
 		virtual void ResetInherited() {}
@@ -58,6 +59,7 @@ namespace env
 		void Reset();
 		void Close();
 		ListState GetState();
+		const std::string& GetName() const;
 		ID3D12GraphicsCommandList* GetNative();
 
 		void TransitionResource(Resource* resource, D3D12_RESOURCE_STATES newState);
@@ -74,14 +76,14 @@ namespace env
 	{
 	protected:
 
-		CopyList(D3D12_COMMAND_LIST_TYPE type);
+		CopyList(D3D12_COMMAND_LIST_TYPE type, const std::string& name);
 
 	private:
 
 		// class GPU is factory for CopyList
 		friend class env::GPU;
 
-		CopyList();
+		CopyList(const std::string& name);
 
 		CopyList(CopyList&& other) = delete;
 		CopyList(const CopyList& other) = delete;
@@ -108,14 +110,14 @@ namespace env
 	{
 	protected:
 
-		ComputeList(D3D12_COMMAND_LIST_TYPE type);
+		ComputeList(D3D12_COMMAND_LIST_TYPE type, const std::string& name);
 
 	private:
 
 		// class GPU is factory for ComputeList
 		friend class env::GPU;
 
-		ComputeList();
+		ComputeList(const std::string& name);
 
 		ComputeList(ComputeList&& other) = delete;
 		ComputeList(const ComputeList& other) = delete;
@@ -142,7 +144,7 @@ namespace env
 		// class GPU is factory for DirectList
 		friend class env::GPU;
 
-		DirectList();
+		DirectList(const std::string& name);
 
 		DirectList(DirectList&& other) = delete;
 		DirectList(const DirectList& other) = delete;

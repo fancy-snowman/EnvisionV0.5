@@ -16,6 +16,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectXTK", "DirectXTK\Dire
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ImGui", "ImGui\ImGui.vcxproj", "{09957496-6B46-4AC2-BF0F-11BB67E0B5DE}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SandboxApplication", "SandboxApplication\SandboxApplication.vcxproj", "{76AFA424-18A2-4462-A6CC-A65B5A86A2B8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5711CABE-B321-4214-B82C-8DEDFBFC1145} = {5711CABE-B321-4214-B82C-8DEDFBFC1145}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -56,6 +61,14 @@ Global
 		{09957496-6B46-4AC2-BF0F-11BB67E0B5DE}.Release|x64.Build.0 = Release|x64
 		{09957496-6B46-4AC2-BF0F-11BB67E0B5DE}.Release|x86.ActiveCfg = Release|Win32
 		{09957496-6B46-4AC2-BF0F-11BB67E0B5DE}.Release|x86.Build.0 = Release|Win32
+		{76AFA424-18A2-4462-A6CC-A65B5A86A2B8}.Debug|x64.ActiveCfg = Debug|x64
+		{76AFA424-18A2-4462-A6CC-A65B5A86A2B8}.Debug|x64.Build.0 = Debug|x64
+		{76AFA424-18A2-4462-A6CC-A65B5A86A2B8}.Debug|x86.ActiveCfg = Debug|Win32
+		{76AFA424-18A2-4462-A6CC-A65B5A86A2B8}.Debug|x86.Build.0 = Debug|Win32
+		{76AFA424-18A2-4462-A6CC-A65B5A86A2B8}.Release|x64.ActiveCfg = Release|x64
+		{76AFA424-18A2-4462-A6CC-A65B5A86A2B8}.Release|x64.Build.0 = Release|x64
+		{76AFA424-18A2-4462-A6CC-A65B5A86A2B8}.Release|x86.ActiveCfg = Release|Win32
+		{76AFA424-18A2-4462-A6CC-A65B5A86A2B8}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

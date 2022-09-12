@@ -31,14 +31,14 @@ env::Renderer::Renderer(env::IDGenerator& commonIDGenerator) :
 {
 	// Initialize all command lists.
 	for (int i = 0; i < NUM_FRAME_PACKETS; i++) {
-		m_copyLists[i] = GPU::CreateCopyCommandList();
-		m_directLists[i] = GPU::CreateDirectCommandList();
+		m_copyLists[i] = GPU::CreateCopyCommandList("Renderer::copyList_" + std::to_string(i));
+		m_directLists[i] = GPU::CreateDirectCommandList("Renderer::directList_" + std::to_string(i));
 	}
 
 	m_pipelineState = ResourceManager::Get()->CreatePipelineState("PipelineState",
 		{
-			{ ShaderStage::Vertex, ShaderModel::V5_1, "shader.hlsl", "VS_main" },
-			{ ShaderStage::Pixel, ShaderModel::V5_1, "shader.hlsl", "PS_main" }
+			{ ShaderStage::Vertex, ShaderModel::V5_1, "../Engine/shader.hlsl", "VS_main" },
+			{ ShaderStage::Pixel, ShaderModel::V5_1, "../Engine/shader.hlsl", "PS_main" }
 		},
 		true,
 		{
@@ -357,7 +357,7 @@ void env::Renderer::EndFrame()
 
 	cameraUploadInfo.offset = numBytesTotal;
 	cameraUploadInfo.numBytes = sizeof(CameraBufferData);
-	numBytesTotal += ALIGN(materialUploadInfo.numBytes, 16);
+	numBytesTotal += ALIGN(cameraUploadInfo.numBytes, 16);
 
 	// Retrieve all data to be uploaded through the upload buffer
 	Buffer* uploadBuffer = ResourceManager::Get()->GetBuffer(m_uploadBuffers[m_currentFramePacketIndex]);

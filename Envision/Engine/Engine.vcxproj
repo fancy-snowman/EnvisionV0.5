@@ -27,26 +27,26 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -65,9 +65,11 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="EngineIncludeAndLinker_d.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="EngineIncludeAndLinker.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -75,28 +77,30 @@
     <OutDir>$(ProjectDir)build/</OutDir>
     <IntDir>$(ProjectDir)int/</IntDir>
     <ExternalIncludePath>$(ProjectDir)external/include;$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(SolutionDir)Thirdparty/include;$(SolutionDir)DirectXTK/include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</ExternalIncludePath>
-    <LibraryPath>$(SolutionDir)Assimp/lib;$(SolutionDir)DirectXTK/lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
+    <LibraryPath>$(SolutionDir)Assimp/lib;$(SolutionDir)ImGui/lib;$(SolutionDir)DirectXTK/lib;$(SolutionDir)DirectXTK/lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
+    <TargetName>$(ProjectName)_d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(ProjectDir)build/</OutDir>
     <IntDir>$(ProjectDir)int/</IntDir>
     <ExternalIncludePath>$(ProjectDir)external/include;$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(SolutionDir)Thirdparty/include;$(SolutionDir)DirectXTK/include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</ExternalIncludePath>
-    <LibraryPath>$(SolutionDir)Assimp/lib;$(SolutionDir)DirectXTK/lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
+    <LibraryPath>$(SolutionDir)Assimp/lib;$(SolutionDir)ImGui/lib;$(SolutionDir)DirectXTK/lib;$(SolutionDir)DirectXTK/lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(ProjectDir)build/</OutDir>
     <IntDir>$(ProjectDir)int/</IntDir>
     <ExternalIncludePath>$(ProjectDir)external/include;$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(SolutionDir)ImGui/include;$(SolutionDir)Thirdparty/include;$(SolutionDir)DirectXTK/include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</ExternalIncludePath>
-    <LibraryPath>$(SolutionDir)Assimp/lib;$(SolutionDir)ImGui/lib;$(SolutionDir)DirectXTK/lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <LibraryPath>$(SolutionDir)Assimp/lib;$(SolutionDir)ImGui/lib;$(SolutionDir)DirectXTK/lib;$(SolutionDir)ImGui/lib;$(SolutionDir)DirectXTK/lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <TargetName>$(ProjectName)_d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(ProjectDir)build/</OutDir>
     <IntDir>$(ProjectDir)int/</IntDir>
     <ExternalIncludePath>$(ProjectDir)external/include;$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(SolutionDir)ImGui/include;$(SolutionDir)Thirdparty/include;$(SolutionDir)DirectXTK/include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</ExternalIncludePath>
-    <LibraryPath>$(SolutionDir)Assimp/lib;$(SolutionDir)ImGui/lib;$(SolutionDir)DirectXTK/lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <LibraryPath>$(SolutionDir)Assimp/lib;$(SolutionDir)ImGui/lib;$(SolutionDir)DirectXTK/lib;$(SolutionDir)ImGui/lib;$(SolutionDir)DirectXTK/lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -206,6 +210,7 @@
   <ItemGroup>
     <ClInclude Include="external\include\stb\stb_image.h" />
     <ClInclude Include="external\stb\include\stb_image.h" />
+    <ClInclude Include="include\envision\Envision.h" />
     <ClInclude Include="include\envision\core\Application.h" />
     <ClInclude Include="include\envision\core\Camera.h" />
     <ClInclude Include="include\envision\core\Command.h" />

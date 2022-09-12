@@ -35,7 +35,7 @@ env::RendererGUI::RendererGUI(env::IDGenerator& commonIDGenerator) :
 	}
 
 	{ // Init rendering API for ImGui
-		m_directList = GPU::CreateDirectCommandList();
+		m_directList = GPU::CreateDirectCommandList("RenderGUI::directList");
 		
 		D3D12_DESCRIPTOR_HEAP_DESC desc;
 		ZeroMemory(&desc, sizeof(desc));

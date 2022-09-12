@@ -47,6 +47,11 @@ namespace env
 		RenderComponent(const RenderComponent& other) = default;
 	};
 
+	struct TargetComponent
+	{
+		ID TargetID;
+	};
+
 	struct TransformComponent
 	{
 		Transform Transformation;
