@@ -175,6 +175,7 @@ namespace env
 		void SetPrimitiveTopology(D3D12_PRIMITIVE_TOPOLOGY topology);
 		void SetPipelineState(PipelineState* state);
 		void SetTarget(WindowTarget* target, Texture2D* depthStencil = nullptr);
+		void SetTarget(Texture2D* target, Texture2D* depthStencil = nullptr);
 		void SetIndexBuffer(Buffer* buffer);
 		void SetVertexBuffer(Buffer* buffer, UINT slot);
 	};

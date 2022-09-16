@@ -310,11 +310,11 @@ void env::Renderer::EndFrame()
 			packet.Camera.Transform.GetForward(),
 			packet.Camera.Transform.GetUp());
 
-		WindowTarget* target = ResourceManager::Get()->GetTarget(packet.Targets.Result);
+		Texture2D* target = ResourceManager::Get()->GetTexture2D(packet.Targets.Intermediate);
 
 		Float4x4 cameraProjection = XMMatrixPerspectiveFovLH(
 			packet.Camera.Settings.FieldOfView,
-			target->Viewport.Width / target->Viewport.Height,
+			target->Width / target->Height,
 			packet.Camera.Settings.DistanceNearPlane,
 			packet.Camera.Settings.DistanceFarPlane);
 
@@ -413,7 +413,7 @@ void env::Renderer::EndFrame()
 	currentSamplerAllocator.Clear();
 
 	PipelineState* pipeline = resourceManager->GetPipelineState(m_pipelineState);
-	WindowTarget* target = resourceManager->GetTarget(packet.Targets.Result);
+	Texture2D* target = resourceManager->GetTexture2D(packet.Targets.Intermediate);
 	Texture2D* depth = resourceManager->GetTexture2D(packet.Targets.Depth);
 
 	const Float4 TARGET_CLEAR_COLOR = { 0.2f, 0.2f, 0.2f, 1.0f };
@@ -494,6 +494,27 @@ void env::Renderer::EndFrame()
 	presentQueue.QueueList(presentList);
 	presentQueue.WaitForQueue(&copyQueue, copyQueue.GetFenceValue());
 	presentQueue.Execute();
+
+	// --------------------
+	WindowTarget* finalTarget = ResourceManager::Get()->GetTarget(packet.Targets.Result);
+
+	presentQueue.WaitForIdle();
+	presentList->Reset();
+	presentList->CopyResource(finalTarget, target);
+
+	{
+		//D3D12_TEXTURE_COPY_LOCATION dest;
+		//dest.
+
+		//GPU::GetDevice()->GetCopyableFootprints(&finalTarget->Native->GetDesc(), 0, 1, 0, &dest.PlacedFootprint, finalTarget.)
+
+		//presentList->GetNative()->CopyTextureRegion()
+	}
+
+	presentList->Close();
+	presentQueue.QueueList(presentList);
+	presentQueue.Execute();
+	// --------------------
 
 	packet.FinishedFenceValue = presentQueue.IncrementFence();
 }

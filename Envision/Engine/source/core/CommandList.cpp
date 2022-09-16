@@ -265,6 +265,37 @@ void env::DirectList::SetTarget(WindowTarget* target, Texture2D* depthStencil)
 	m_list->OMSetRenderTargets(1, &target->Views.RenderTarget, FALSE, depthDescriptor);
 }
 
+void env::DirectList::SetTarget(Texture2D* target, Texture2D* depthStencil)
+{
+	D3D12_VIEWPORT viewport;
+	viewport.TopLeftX = 0.0f;
+	viewport.TopLeftY = 0.0f;
+	viewport.Width = target->Width;
+	viewport.Height = target->Height; 
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+
+	D3D12_RECT scissorRect;
+	scissorRect.left = 0;
+	scissorRect.top = 0;
+	scissorRect.right = target->Width;
+	scissorRect.bottom = target->Height;
+
+	m_list->RSSetViewports(1, &viewport);
+	m_list->RSSetScissorRects(1, &scissorRect);
+
+	TransitionResource(target, D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+	D3D12_CPU_DESCRIPTOR_HANDLE* depthDescriptor = nullptr;
+
+	if (depthStencil) {
+		TransitionResource(depthStencil, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+		depthDescriptor = &depthStencil->Views.DepthStencil;
+	}
+
+	m_list->OMSetRenderTargets(1, &target->Views.RenderTarget, FALSE, depthDescriptor);
+}
+
 void env::DirectList::SetIndexBuffer(Buffer* buffer)
 {
 	assert(buffer->Views.Index.Format != DXGI_FORMAT_UNKNOWN);
