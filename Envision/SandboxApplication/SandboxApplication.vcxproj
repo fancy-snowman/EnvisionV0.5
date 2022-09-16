@@ -76,22 +76,30 @@
     <OutDir>$(ProjectDir)build/</OutDir>
     <IntDir>$(ProjectDir)int/</IntDir>
     <TargetName>$(ProjectName)_d</TargetName>
+    <ExternalIncludePath>$(ProjectDir)external/include;$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(SolutionDir)ImGui/include;$(SolutionDir)Thirdparty/include;$(SolutionDir)DirectXTK/include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
+    <LibraryPath>$(SolutionDir)Engine/build;$(SolutionDir)Assimp/lib;$(SolutionDir)ImGui/lib;$(SolutionDir)DirectXTK/lib;$(SolutionDir)ImGui/lib;$(SolutionDir)DirectXTK/lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(ProjectDir)build/</OutDir>
     <IntDir>$(ProjectDir)int/</IntDir>
+    <ExternalIncludePath>$(ProjectDir)external/include;$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(SolutionDir)ImGui/include;$(SolutionDir)Thirdparty/include;$(SolutionDir)DirectXTK/include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
+    <LibraryPath>$(SolutionDir)Engine/build;$(SolutionDir)Assimp/lib;$(SolutionDir)ImGui/lib;$(SolutionDir)DirectXTK/lib;$(SolutionDir)ImGui/lib;$(SolutionDir)DirectXTK/lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(ProjectDir)build/</OutDir>
     <IntDir>$(ProjectDir)int/</IntDir>
     <TargetName>$(ProjectName)_d</TargetName>
+    <ExternalIncludePath>$(ProjectDir)external/include;$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(SolutionDir)ImGui/include;$(SolutionDir)Thirdparty/include;$(SolutionDir)DirectXTK/include;$(ProjectDir)external/include;$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(SolutionDir)ImGui/include;$(SolutionDir)Thirdparty/include;$(SolutionDir)DirectXTK/include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
+    <LibraryPath>$(SolutionDir)Engine/build;$(SolutionDir)Assimp/lib;$(SolutionDir)ImGui/lib;$(SolutionDir)DirectXTK/lib;$(SolutionDir)ImGui/lib;$(SolutionDir)DirectXTK/lib;$(SolutionDir)Assimp/lib;$(SolutionDir)ImGui/lib;$(SolutionDir)DirectXTK/lib;$(SolutionDir)Engine/build;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(ProjectDir)build/</OutDir>
     <IntDir>$(ProjectDir)int/</IntDir>
+    <ExternalIncludePath>$(ProjectDir)external/include;$(SolutionDir)Assimp/include;$(SolutionDir)Assimp/build;$(SolutionDir)ImGui/include;$(SolutionDir)Thirdparty/include;$(SolutionDir)DirectXTK/include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
+    <LibraryPath>$(SolutionDir)Engine/build;$(SolutionDir)Assimp/lib;$(SolutionDir)ImGui/lib;$(SolutionDir)DirectXTK/lib;$(SolutionDir)ImGui/lib;$(SolutionDir)DirectXTK/lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -107,6 +115,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
+      <AdditionalDependencies>Engine_d.lib;Assimp_d.lib;DirectXTK_d.lib;ImGui_d.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -127,6 +136,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
+      <AdditionalDependencies>Engine.lib;Assimp.lib;DirectXTK.lib;ImGui.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -143,6 +153,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
+      <AdditionalDependencies>Engine_d.lib;Assimp_d.lib;DirectXTK_d.lib;ImGui_d.lib;Assimp_d.lib;ImGui_d.lib;DirectXTK_d.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -163,6 +174,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
+      <AdditionalDependencies>Engine.lib;Assimp.lib;DirectXTK.lib;ImGui.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
