@@ -420,7 +420,7 @@ void env::Renderer::EndFrame()
 	const float DEPTH_CLEAR_VALUE = 1.0f;
 
 	presentList->Reset();
-	presentList->ClearRenderTarget(target->Views.RenderTarget, TARGET_CLEAR_COLOR);
+	presentList->ClearRenderTarget(target, TARGET_CLEAR_COLOR);
 	presentList->ClearDepthStencil(depth, true, false, DEPTH_CLEAR_VALUE, 0);
 	presentList->SetTarget(target, depth);
 	presentList->SetPipelineState(pipeline);

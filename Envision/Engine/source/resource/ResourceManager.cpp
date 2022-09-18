@@ -330,26 +330,26 @@ ID env::ResourceManager::CreateBufferArray(const std::string& name, const Buffer
 		heapProperties.CreationNodeMask = 1;
 		heapProperties.VisibleNodeMask = 1;
 
-		D3D12_RESOURCE_DESC resourceDescription;
-		ZeroMemory(&resourceDescription, sizeof(resourceDescription));
-		resourceDescription.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-		resourceDescription.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
-		resourceDescription.Width = (UINT64)bufferWidth;
-		resourceDescription.Height = 1;
-		resourceDescription.DepthOrArraySize = 1;
-		resourceDescription.MipLevels = 1;
-		resourceDescription.Format = DXGI_FORMAT_UNKNOWN;
-		resourceDescription.SampleDesc.Count = 1;
-		resourceDescription.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+		ZeroMemory(&bufferDesc.Description, sizeof(bufferDesc.Description));
+		bufferDesc.Description.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+		bufferDesc.Description.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+		bufferDesc.Description.Width = (UINT64)bufferWidth;
+		bufferDesc.Description.Height = 1;
+		bufferDesc.Description.DepthOrArraySize = 1;
+		bufferDesc.Description.MipLevels = 1;
+		bufferDesc.Description.Format = DXGI_FORMAT_UNKNOWN;
+		bufferDesc.Description.SampleDesc.Count = 1;
+		bufferDesc.Description.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
 		hr = GPU::GetDevice()->CreateCommittedResource(&heapProperties,
 			D3D12_HEAP_FLAG_NONE,
-			&resourceDescription,
+			&bufferDesc.Description,
 			bufferDesc.State,
 			NULL,
 			IID_PPV_ARGS(&bufferDesc.Native));
 
 		ASSERT_HR(hr, "Could not create buffer array");
+		bufferDesc.Native->SetName(std::wstring(name.begin(), name.end()).c_str());
 	}
 
 	{ // Create views
@@ -402,28 +402,27 @@ ID env::ResourceManager::CreateBuffer(const std::string& name, const BufferLayou
 		heapProperties.VisibleNodeMask = 1;
 		heapProperties.Type = (isUpload) ? D3D12_HEAP_TYPE_UPLOAD : D3D12_HEAP_TYPE_DEFAULT;
 
-		D3D12_RESOURCE_DESC resourceDescription;
-		ZeroMemory(&resourceDescription, sizeof(resourceDescription));
-		resourceDescription.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-		resourceDescription.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
-		resourceDescription.Width = (UINT64)bufferWidth;
-		resourceDescription.Height = 1;
-		resourceDescription.DepthOrArraySize = 1;
-		resourceDescription.MipLevels = 1;
-		resourceDescription.Format = DXGI_FORMAT_UNKNOWN;
-		resourceDescription.SampleDesc.Count = 1;
-		resourceDescription.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+		ZeroMemory(&bufferDesc.Description, sizeof(bufferDesc.Description));
+		bufferDesc.Description.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+		bufferDesc.Description.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+		bufferDesc.Description.Width = (UINT64)bufferWidth;
+		bufferDesc.Description.Height = 1;
+		bufferDesc.Description.DepthOrArraySize = 1;
+		bufferDesc.Description.MipLevels = 1;
+		bufferDesc.Description.Format = DXGI_FORMAT_UNKNOWN;
+		bufferDesc.Description.SampleDesc.Count = 1;
+		bufferDesc.Description.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
 
 		hr = GPU::GetDevice()->CreateCommittedResource(&heapProperties,
 			D3D12_HEAP_FLAG_NONE,
-			&resourceDescription,
+			&bufferDesc.Description,
 			bufferDesc.State,
 			NULL,
 			IID_PPV_ARGS(&bufferDesc.Native));
 
 		ASSERT_HR(hr, "Could not create buffer");
-	}
+		bufferDesc.Native->SetName(std::wstring(name.begin(), name.end()).c_str());	}
 
 	{ // Create views
 		if (isConstantBuffer) {
@@ -469,8 +468,6 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, int width, int
 	textureDesc.Format = format;
 	textureDesc.NumGPURows = 0;
 
-	D3D12_PLACED_SUBRESOURCE_FOOTPRINT footprint = { 0 };
-
 	{ // Create the resource
 		D3D12_HEAP_PROPERTIES heapProperties;
 		ZeroMemory(&heapProperties, sizeof(heapProperties));
@@ -478,61 +475,72 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, int width, int
 		heapProperties.CreationNodeMask = 1;
 		heapProperties.VisibleNodeMask = 1;
 
-		D3D12_RESOURCE_DESC resourceDescription;
-		ZeroMemory(&resourceDescription, sizeof(resourceDescription));
-		resourceDescription.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-		resourceDescription.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
-		resourceDescription.Width = (UINT64)textureDesc.Width;
-		resourceDescription.Height = textureDesc.Height;
-		resourceDescription.DepthOrArraySize = 1;
-		resourceDescription.MipLevels = 1;
-		resourceDescription.Format = format;
-		resourceDescription.SampleDesc.Count = 1;
-		resourceDescription.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+		ZeroMemory(&textureDesc.Description, sizeof(textureDesc.Description));
+		textureDesc.Description.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		textureDesc.Description.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+		textureDesc.Description.Width = (UINT64)textureDesc.Width;
+		textureDesc.Description.Height = textureDesc.Height;
+		textureDesc.Description.DepthOrArraySize = 1;
+		textureDesc.Description.MipLevels = 1;
+		textureDesc.Description.Format = format;
+		textureDesc.Description.SampleDesc.Count = 1;
+		textureDesc.Description.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 
 		bool isRenderTarget = any(bindType & TextureBindType::RenderTarget) || (bindType == TextureBindType::Unknown);
 		bool isShaderResource = any(bindType & TextureBindType::ShaderResource) || (bindType == TextureBindType::Unknown);
 		bool isUnorderedAccess = any(bindType & TextureBindType::UnorderedAccess) || (bindType == TextureBindType::Unknown);
 		bool isDepthStencil = any(bindType & TextureBindType::DepthStencil);
 
-		if (isRenderTarget)
-			resourceDescription.Flags = resourceDescription.Flags | D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+		if (isRenderTarget) {
+			textureDesc.Description.Flags = textureDesc.Description.Flags | D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+			textureDesc.State = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		}
 		//if (!any(bindType & BindType::ShaderResource)) // requires D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL or D3D12_RESOURCE_FLAG_VIDEO_DECODE_REFERENCE_ONLY
 		//	resourceDescription.Flags = resourceDescription.Flags | D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE;
 		if (isUnorderedAccess)
-			resourceDescription.Flags = resourceDescription.Flags | D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+			textureDesc.Description.Flags = textureDesc.Description.Flags | D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 		if (isDepthStencil) {
-			resourceDescription.Flags = resourceDescription.Flags | D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+			textureDesc.Description.Flags = textureDesc.Description.Flags | D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 			textureDesc.State = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 		}
 
 		D3D12_CLEAR_VALUE clearValue = {};
-		D3D12_CLEAR_VALUE* clearValuePtr = nullptr;
+		D3D12_CLEAR_VALUE* pClearValue = nullptr;
 
-		if (isDepthStencil) {
-			clearValue.Format = resourceDescription.Format;
-			clearValue.DepthStencil.Depth = 1.0f;
-			clearValue.DepthStencil.Stencil = 0;
-			clearValuePtr = &clearValue;
+		ZeroMemory(&clearValue, sizeof(clearValue));
+
+		if (isRenderTarget) {
+			clearValue.Format = textureDesc.Description.Format;
+			Float4 color = Float4(0.2f, 0.2f, 0.2f, 1.0f);
+			memcpy(&clearValue.Color, &color, sizeof(Float4));
+			pClearValue = &clearValue;
 		}
 
-		GPU::GetDevice()->GetCopyableFootprints(&resourceDescription,
+		if (isDepthStencil) {
+			clearValue.Format = textureDesc.Description.Format;
+			clearValue.DepthStencil.Depth = 1.0f;
+			clearValue.DepthStencil.Stencil = 0;
+			pClearValue = &clearValue;
+		}
+
+		GPU::GetDevice()->GetCopyableFootprints(&textureDesc.Description,
 			0,
 			1,
 			0,
-			&footprint,
+			&textureDesc.PlacedFootprint,
 			&textureDesc.NumGPURows,
 			&textureDesc.CPURowPitch,
 			&textureDesc.GPUByteWidth);
 
 		hr = GPU::GetDevice()->CreateCommittedResource(&heapProperties,
 			D3D12_HEAP_FLAG_NONE,
-			&resourceDescription,
+			&textureDesc.Description,
 			textureDesc.State,
-			clearValuePtr,
+			pClearValue,
 			IID_PPV_ARGS(&textureDesc.Native));
 
 		ASSERT_HR(hr, "Could not create texture 2D buffer");
+		textureDesc.Native->SetName(std::wstring(name.begin(), name.end()).c_str());
 	}
 
 	{
@@ -583,8 +591,8 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, int width, int
 			size_t texelStride = GetShaderDataTypeSize(GetShaderDataType(format));
 			for (int row = 0; row < textureDesc.NumGPURows; row++) {
 				memcpy(destBegin + destinationOffset, srcBegin + sourceOffset, textureDesc.CPURowPitch);
-				sourceOffset += texelStride * footprint.Footprint.Width;
-				destinationOffset += footprint.Footprint.RowPitch;
+				sourceOffset += texelStride * textureDesc.PlacedFootprint.Footprint.Width;
+				destinationOffset += textureDesc.PlacedFootprint.Footprint.RowPitch;
 			}
 
 			m_uploadBuffer.Native->Unmap(0, NULL);
@@ -604,7 +612,7 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, int width, int
 				ZeroMemory(&source, sizeof(source));
 				source.pResource = m_uploadBuffer.Native;
 				source.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
-				source.PlacedFootprint.Footprint = footprint.Footprint;
+				source.PlacedFootprint.Footprint = textureDesc.PlacedFootprint.Footprint;
 				source.PlacedFootprint.Offset = 0;
 
 				D3D12_TEXTURE_COPY_LOCATION destination;
@@ -631,6 +639,7 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, TextureBindTyp
 {
 	D3D12_RESOURCE_DESC existingDesc = existingTexture->GetDesc();
 	Texture2D textureDesc;
+	textureDesc.Description = existingDesc;
 
 	bool isRenderTarget = any(bindType & TextureBindType::RenderTarget) || (bindType == TextureBindType::Unknown);
 	bool isShaderResource = any(bindType & TextureBindType::ShaderResource) || (bindType == TextureBindType::Unknown);
@@ -656,11 +665,10 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, TextureBindTyp
 		textureDesc.Height = (int)existingDesc.Height;
 		textureDesc.Format = existingDesc.Format;
 
-		D3D12_PLACED_SUBRESOURCE_FOOTPRINT footprint;
 		UINT numRows;
 		GPU::GetDevice()->GetCopyableFootprints(&existingDesc,
 			0, 1, 0,
-			&footprint,
+			&textureDesc.PlacedFootprint,
 			&numRows,
 			&textureDesc.CPURowPitch,
 			&textureDesc.GPUByteWidth);
@@ -684,7 +692,7 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, TextureBindTyp
 
 ID env::ResourceManager::CreateTexture2DArray(const std::string& name, int numTextures, int width, int height, DXGI_FORMAT format, void* initialData)
 {
-	return ID();
+	return ID_ERROR;
 }
 
 ID env::ResourceManager::CreateSampler(const std::string& name, const D3D12_SAMPLER_DESC& description)
@@ -783,6 +791,10 @@ ID env::ResourceManager::CreatePipelineState(const std::string& name, std::initi
 
 		ASSERT_HR(hr, "Could not create root signature");
 
+		std::wstring resourceName(name.begin(), name.end());
+		resourceName += L"_root_signature";
+		resourceDesc.RootSignature->SetName(resourceName.c_str());
+
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelineDesc;
 		ZeroMemory(&pipelineDesc, sizeof(pipelineDesc));
 		pipelineDesc.pRootSignature = resourceDesc.RootSignature;
@@ -852,6 +864,10 @@ ID env::ResourceManager::CreatePipelineState(const std::string& name, std::initi
 
 		hr = GPU::GetDevice()->CreateGraphicsPipelineState(&pipelineDesc, IID_PPV_ARGS(&resourceDesc.State));
 		ASSERT_HR(hr, "Could not create pipeline state");
+
+		resourceName = std::wstring(name.begin(), name.end());
+		resourceName += L"_pipeline_state";
+		resourceDesc.State->SetName(resourceName.c_str());
 	}
 
 	ID resourceID = m_commonIDGenerator.GenerateUnique();

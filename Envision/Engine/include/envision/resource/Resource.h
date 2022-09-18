@@ -68,6 +68,7 @@ namespace env
 
 		std::string Name;
 		ID3D12Resource* Native = nullptr;
+		D3D12_RESOURCE_DESC Description = {};
 		D3D12_RESOURCE_STATES State = D3D12_RESOURCE_STATE_COMMON;
 	};
 
@@ -118,6 +119,8 @@ namespace env
 		UINT64 GPUByteWidth;
 		UINT NumGPURows;
 		DXGI_FORMAT Format;
+
+		D3D12_PLACED_SUBRESOURCE_FOOTPRINT PlacedFootprint;
 
 		struct {
 			D3D12_CPU_DESCRIPTOR_HANDLE RenderTarget = { 0 };

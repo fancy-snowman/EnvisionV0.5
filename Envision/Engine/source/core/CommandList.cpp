@@ -121,6 +121,12 @@ void env::CopyList::CopyBufferRegion(Resource* dest, UINT64 destOffset, Resource
 
 void env::CopyList::CopyResource(Resource* dest, Resource* src)
 {
+	assert(dest);
+	assert(src);
+
+	TransitionResource(src, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	TransitionResource(dest, D3D12_RESOURCE_STATE_COPY_DEST);
+
 	m_list->CopyResource(dest->Native, src->Native);
 }
 
@@ -196,15 +202,25 @@ env::DirectList::~DirectList()
 	//
 }
 
-void env::DirectList::ClearRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE target, float red, float green, float blue, float alpha)
+void env::DirectList::ClearRenderTarget(Texture2D* target, float red, float green, float blue, float alpha)
 {
+	assert(target);
+	assert(target->Views.RenderTarget.ptr);
+
+	TransitionResource(target, D3D12_RESOURCE_STATE_RENDER_TARGET);
+
 	const FLOAT clearColor[] = {red, green, blue, alpha};
-	m_list->ClearRenderTargetView(target, clearColor, 0, NULL);
+	m_list->ClearRenderTargetView(target->Views.RenderTarget, clearColor, 0, NULL);
 }
 
-void env::DirectList::ClearRenderTarget(D3D12_CPU_DESCRIPTOR_HANDLE target, const Float4& color)
+void env::DirectList::ClearRenderTarget(Texture2D* target, const Float4& color)
 {
-	m_list->ClearRenderTargetView(target, (const FLOAT*)&color, 0, NULL);
+	assert(target);
+	assert(target->Views.RenderTarget.ptr);
+
+	TransitionResource(target, D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+	m_list->ClearRenderTargetView(target->Views.RenderTarget, (const FLOAT*)&color, 0, NULL);
 }
 
 void env::DirectList::ClearDepthStencil(Texture2D* stencil, bool clearDepth, bool clearStencil, FLOAT depthValue, UINT8 stencilValue)
