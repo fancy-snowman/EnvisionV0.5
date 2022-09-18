@@ -264,23 +264,6 @@ void env::DirectList::SetPipelineState(PipelineState* state)
 	m_list->SetPipelineState(state->State);
 }
 
-void env::DirectList::SetTarget(WindowTarget* target, Texture2D* depthStencil)
-{
-	m_list->RSSetViewports(1, &target->Viewport);
-	m_list->RSSetScissorRects(1, &target->ScissorRect);
-
-	TransitionResource(target, D3D12_RESOURCE_STATE_RENDER_TARGET);
-
-	D3D12_CPU_DESCRIPTOR_HANDLE* depthDescriptor = nullptr;
-
-	if (depthStencil) {
-		TransitionResource(depthStencil, D3D12_RESOURCE_STATE_DEPTH_WRITE);
-		depthDescriptor = &depthStencil->Views.DepthStencil;
-	}
-
-	m_list->OMSetRenderTargets(1, &target->Views.RenderTarget, FALSE, depthDescriptor);
-}
-
 void env::DirectList::SetTarget(Texture2D* target, Texture2D* depthStencil)
 {
 	D3D12_VIEWPORT viewport;

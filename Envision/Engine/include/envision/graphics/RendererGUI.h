@@ -13,9 +13,6 @@ namespace env
 		env::IDGenerator& m_commonIDGenerator;
 
 		DirectList* m_directList = nullptr;
-		ID3D12DescriptorHeap* m_imguiDescriptorHeap = nullptr;
-		ImGuiContext* m_imguiContext = nullptr;
-
 		ID m_target = ID_ERROR;
 
 	public:

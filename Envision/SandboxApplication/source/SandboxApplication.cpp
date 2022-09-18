@@ -15,9 +15,6 @@ SandboxApplication::SandboxApplication(int argc, char** argv) :
 	m_mainWindow = new env::Window(1200, 800, "Sandbox", *this);
 	PushWindow(m_mainWindow);
 
-	// TODO: This seems unecessary... put this into a window asset or something.
-	m_mainTargetResource = env::ResourceManager::Get()->CreateWindowTarget("MainTarget", m_mainWindow);
-
 	// TODO: Force the application to CREATE a scene.
 	env::Scene* scene = GetActiveScene();
 	//scene->LoadScene("Helicopter", "assets/SM_helicopter_01.fbx");
@@ -48,7 +45,7 @@ SandboxApplication::SandboxApplication(int argc, char** argv) :
 	scene->SetComponent<env::TransformComponent>(m_mainCameraEntity, cameraTransform);
 
 	PushSystem(new CameraSystem(m_mainCameraEntity));
-	PushSystem(new RenderLayer(m_mainCameraEntity, m_mainTargetResource));
+	PushSystem(new RenderLayer(m_mainCameraEntity, m_mainWindow));
 }
 
 SandboxApplication::~SandboxApplication()

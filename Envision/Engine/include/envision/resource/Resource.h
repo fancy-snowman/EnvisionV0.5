@@ -155,25 +155,4 @@ namespace env
 		ID3D12RootSignature* RootSignature = nullptr;
 		ID3D12PipelineState* State = nullptr;
 	};
-
-	class Window;
-
-	struct WindowTarget : public Resource
-	{
-		RESOURCE_TYPE(WindowTarget)
-
-		struct {
-			D3D12_CPU_DESCRIPTOR_HANDLE RenderTarget = { 0 };
-			D3D12_CPU_DESCRIPTOR_HANDLE ShaderResource = { 0 };
-		} Views;
-
-		Window* AppWindow = nullptr;
-		RECT ScissorRect = { 0 };
-		D3D12_VIEWPORT Viewport = { 0 };
-
-		float startXFactor = 0.0f;
-		float startYFactor = 0.0f;
-		float widthFactor = 1.0f;
-		float heightFactor = 1.0f;
-	};
 }

@@ -17,17 +17,13 @@ namespace env
 		Application& m_application;
 		HWND m_handle = NULL;
 
+		ID3D12DescriptorHeap* m_imguiDescriptorHeap = nullptr;
+		ImGuiContext* m_imguiContext = nullptr;
+
 		static const UINT NUM_BACK_BUFFERS = 2;
 		UINT m_currentBackbufferindex;
 		IDXGISwapChain1* m_swapchain;
-		Texture2D* m_backbuffers[NUM_BACK_BUFFERS];
-
-		// Not "owned" by the window, but holds a pointer to the current
-		// backbuffer and thus needs to be updated during present.
-		std::vector<WindowTarget*> m_targets;
-
-		// Dear ImGui
-		bool m_usingImgui = false;
+		ID m_backbuffers[NUM_BACK_BUFFERS];
 
 		void InitWindowClass();
 		static void SetWindowObject(HWND handle, Window* window);
@@ -44,14 +40,8 @@ namespace env
 		int GetWidth() const;
 		int GetHeight() const;
 		float GetAspectRatio();
-		Texture2D* GetCurrentBackbuffer();
+		ID GetCurrentBackbuffer();
 
-		// Returns true if the window requires need to forward
-		// input to GUI library (Dear ImGui)
-		bool IsGUIWindow();
-		void InitializeGUI();
-
-		void PushTarget(WindowTarget* target);
 		void Present();
 
 		void OnEventUpdate();

@@ -1,7 +1,7 @@
 #include "systems/RenderSystem.h"
 
-RenderLayer::RenderLayer(ID mainCameraEntity, ID mainTargetResource) :
-	m_mainCameraEntity(mainCameraEntity), m_mainTargetResource(mainTargetResource)
+RenderLayer::RenderLayer(ID mainCameraEntity, env::Window* mainWindow) :
+	m_mainCameraEntity(mainCameraEntity), m_mainWindow(mainWindow)
 {
 	for (int i = 0; i < NUM_FRAME_PACKETS; i++) {
 		m_presentLists[i] =
@@ -27,8 +27,7 @@ void RenderLayer::OnUpdate(env::Scene& scene, const env::Duration& delta)
 		return;
 	deltaSum -= targetFrameTime;
 
-	env::WindowTarget* target =
-		env::ResourceManager::Get()->GetTarget(m_mainTargetResource);
+	ID targetID =	m_mainWindow->GetCurrentBackbuffer();
 	env::CameraSettings& cameraSettings =
 		scene.GetComponent<env::CameraComponent>(m_mainCameraEntity).Settings;
 	env::Transform& cameraTransform =
@@ -36,7 +35,7 @@ void RenderLayer::OnUpdate(env::Scene& scene, const env::Duration& delta)
 
 	env::DirectList* presentList = m_presentLists[m_currentFramePacket];
 
-	env::Renderer::Get()->BeginFrame(cameraSettings, cameraTransform, m_mainTargetResource);
+	env::Renderer::Get()->BeginFrame(cameraSettings, cameraTransform, targetID);
 
 	// <MeshID, count>
 	std::unordered_map<ID, int> instances;
@@ -48,6 +47,8 @@ void RenderLayer::OnUpdate(env::Scene& scene, const env::Duration& delta)
 		else
 			++instances[render.Mesh];
 	});
+
+	env::Texture2D* target = env::ResourceManager::Get()->GetTexture2D(targetID);
 
 	env::CommandQueue& presentQueue = env::GPU::GetPresentQueue();
 	presentQueue.WaitForFenceValueGPUSide(presentQueue.GetFenceValue()); // TODO: Wait for render queue instead when that's implemented

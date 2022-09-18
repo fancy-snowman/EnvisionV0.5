@@ -12,9 +12,7 @@ class SandboxApplication : public env::Application
 private:
 
 	env::Window* m_mainWindow;
-
 	ID m_mainCameraEntity;
-	ID m_mainTargetResource;
 
 public:
 

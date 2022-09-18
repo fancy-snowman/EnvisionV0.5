@@ -23,7 +23,6 @@ namespace env
 		std::unordered_map<ID, Texture2D*> m_texture2Ds;
 		std::unordered_map<ID, Texture2DArray*> m_texture2DArrays;
 		std::unordered_map<ID, PipelineState*> m_pipelineStates;
-		std::unordered_map<ID, WindowTarget*> m_targets;
 
 		DescriptorAllocator m_CBVAllocator;
 		DescriptorAllocator m_SRVAllocator;
@@ -56,7 +55,6 @@ namespace env
 		ResourceManager& operator=(const ResourceManager&& other) = delete;
 
 		Resource* GetResourceNonConst(ID resourceID);
-		void AdjustViewportAndScissorRect(WindowTarget& target, const Window& window);
 
 		D3D12_CPU_DESCRIPTOR_HANDLE CreateCBV(Resource* resource);
 		D3D12_CPU_DESCRIPTOR_HANDLE CreateSRV(Resource* resource);
@@ -74,7 +72,6 @@ namespace env
 		ID CreateTexture2DArray(const std::string& name, int numTextures, int width, int height, DXGI_FORMAT format, void* initialData = nullptr);
 		ID CreateSampler(const std::string& name, const D3D12_SAMPLER_DESC& description);
 		ID CreatePipelineState(const std::string& name, std::initializer_list<ShaderDesc> shaderDescs, bool useInputLayout, const RootSignature& rootSignature);
-		ID CreateWindowTarget(const std::string& name, Window* window, float startXFactor = 0.f, float startYFactor = 0.f, float widthFactor = 1.f, float heightFactor = 1.f);
 
 		BufferArray* GetBufferArray(ID resourceID);
 		Buffer* GetBuffer(ID resourceID);
@@ -82,7 +79,6 @@ namespace env
 		Texture2D* GetTexture2D(ID resourceID);
 		Texture2DArray* GetTexture2DArray(ID resourceID);
 		PipelineState* GetPipelineState(ID resourceID);
-		WindowTarget* GetTarget(ID resourceID);
 		Resource* GetResource(ID resourceID);
 
 		void UploadBufferData(ID resourceID, void* data, UINT numBytes = 0, UINT destinationOffset = 0);

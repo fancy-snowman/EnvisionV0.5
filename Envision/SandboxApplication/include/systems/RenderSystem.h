@@ -6,7 +6,7 @@ class RenderLayer : public env::System
 private:
 
 	ID m_mainCameraEntity;
-	ID m_mainTargetResource;
+	env::Window* m_mainWindow;
 
 	// Should this be sent to the renderer? Should a "bundle of lists" be created to hide this? Not desided yet..
 	static const int NUM_FRAME_PACKETS = 2;
@@ -15,7 +15,7 @@ private:
 
 public:
 
-	RenderLayer(ID mainCameraEntity, ID mainTargetResource);
+	RenderLayer(ID mainCameraEntity, env::Window* mainWindow);
 	~RenderLayer() final;
 
 public:

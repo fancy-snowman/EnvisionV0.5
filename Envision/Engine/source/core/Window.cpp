@@ -22,7 +22,7 @@ void env::Window::InitWindowClass()
 		
 		Window* window = GetWindowObject(hwnd);
 
-		if (window && window->IsGUIWindow() && ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam))
+		if (window && ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam))
 			return true;
 		
 		switch (uMsg)
@@ -224,9 +224,35 @@ env::Window::Window(int width, int height, const std::string& title, Application
 				TextureBindType::RenderTarget,
 				buffer);
 
-			m_backbuffers[i] = (Texture2D*)ResourceManager::Get()->GetTexture2D(backbufferID);
-			m_backbuffers[i]->State = D3D12_RESOURCE_STATE_PRESENT;
+			m_backbuffers[i] = backbufferID;
 		}
+	}
+
+	{ // Initialize ImGui
+		IMGUI_CHECKVERSION();
+		m_imguiContext = ImGui::CreateContext();
+
+		ImGuiIO& io = ImGui::GetIO(); (void)io;
+		//io.ConfigFlags |= ImGuiConfigFlags_
+
+		D3D12_DESCRIPTOR_HEAP_DESC desc;
+		ZeroMemory(&desc, sizeof(desc));
+		desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+		desc.NumDescriptors = NUM_BACK_BUFFERS;
+		desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+
+		HRESULT hr = GPU::GetDevice()->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_imguiDescriptorHeap));
+		ASSERT_HR(hr, "Could not create descriptor heap for ImGui");
+
+		ImGui_ImplWin32_Init(m_handle);
+
+		Texture2D* backbuffer = env::ResourceManager::Get()->GetTexture2D(m_backbuffers[0]);
+		ImGui_ImplDX12_Init(GPU::GetDevice(),
+			NUM_BACK_BUFFERS,
+			backbuffer->Format,
+			m_imguiDescriptorHeap,
+			m_imguiDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
+			m_imguiDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 	}
 }
 
@@ -265,42 +291,15 @@ float env::Window::GetAspectRatio()
 	return width / height;
 }
 
-env::Texture2D* env::Window::GetCurrentBackbuffer()
+ID env::Window::GetCurrentBackbuffer()
 {
 	return m_backbuffers[m_currentBackbufferindex];
-}
-
-bool env::Window::IsGUIWindow()
-{
-	return m_usingImgui;
-}
-
-void env::Window::InitializeGUI()
-{
-	m_usingImgui = true;
-}
-
-void env::Window::PushTarget(WindowTarget* target)
-{
-	Texture2D* backbuffer = m_backbuffers[m_currentBackbufferindex];
-	target->Native = backbuffer->Native;
-	target->Views.RenderTarget = backbuffer->Views.RenderTarget;
-	target->Views.ShaderResource = backbuffer->Views.ShaderResource;
-
-	m_targets.push_back(target);
 }
 
 void env::Window::Present()
 {
 	m_swapchain->Present(0, 0);
-
 	m_currentBackbufferindex = (m_currentBackbufferindex + 1) % NUM_BACK_BUFFERS;
-	Texture2D* backbuffer = m_backbuffers[m_currentBackbufferindex];
-	for (auto& t : m_targets) {
-		t->Native = backbuffer->Native;
-		t->Views.RenderTarget = backbuffer->Views.RenderTarget;
-		t->Views.ShaderResource = backbuffer->Views.ShaderResource;
-	}
 }
 
 void env::Window::OnEventUpdate()

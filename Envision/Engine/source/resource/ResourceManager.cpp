@@ -87,12 +87,6 @@ env::ResourceManager::~ResourceManager()
 
 	for (auto& pair : m_pipelineStates) { delete pair.second; }
 	m_pipelineStates.clear();
-
-	//for (auto& pair : m_windowTargets) { delete pair.second; }
-	//m_windowTargets.clear();
-
-	for (auto& pair : m_targets) { delete pair.second; }
-	m_targets.clear();
 }
 
 env::Resource* env::ResourceManager::GetResourceNonConst(ID resourceID)
@@ -107,26 +101,7 @@ env::Resource* env::ResourceManager::GetResourceNonConst(ID resourceID)
 		return m_texture2DArrays[resourceID];
 	else if (m_pipelineStates.count(resourceID) > 0)
 		return m_pipelineStates[resourceID];
-	else if (m_targets.count(resourceID) > 0)
-		return m_targets[resourceID];
 	return nullptr;
-}
-
-void env::ResourceManager::AdjustViewportAndScissorRect(WindowTarget& target, const Window& window)
-{
-	const int windowWidth = window.GetWidth();
-	const int windowHeight = window.GetHeight();
-	target.Viewport.TopLeftX = windowWidth * target.startXFactor;
-	target.Viewport.TopLeftY = windowHeight * target.startYFactor;
-	target.Viewport.Width = windowWidth * target.widthFactor;
-	target.Viewport.Height = windowHeight * target.heightFactor;
-	target.Viewport.MinDepth = 0.0f;
-	target.Viewport.MaxDepth = 1.0f;
-
-	target.ScissorRect.left = (LONG)target.Viewport.TopLeftX;
-	target.ScissorRect.top = (LONG)target.Viewport.TopLeftY;
-	target.ScissorRect.right = (LONG)target.Viewport.TopLeftX + (LONG)target.Viewport.Width;
-	target.ScissorRect.bottom = (LONG)target.Viewport.TopLeftY + (LONG)target.Viewport.Height;
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE env::ResourceManager::CreateCBV(Resource* resource)
@@ -641,29 +616,13 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, TextureBindTyp
 	Texture2D textureDesc;
 	textureDesc.Description = existingDesc;
 
-	bool isRenderTarget = any(bindType & TextureBindType::RenderTarget) || (bindType == TextureBindType::Unknown);
-	bool isShaderResource = any(bindType & TextureBindType::ShaderResource) || (bindType == TextureBindType::Unknown);
-	bool isUnorderedAccess = any(bindType & TextureBindType::UnorderedAccess) || (bindType == TextureBindType::Unknown);
-	bool isDepthStencil = any(bindType & TextureBindType::DepthStencil);
-
 	{
 		textureDesc.Name = name;
 		textureDesc.Native = existingTexture;
-
-		if (isRenderTarget)
-			textureDesc.State = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		else if (isShaderResource)
-			textureDesc.State = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-		else if (isUnorderedAccess)
-			textureDesc.State = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-		else if (isDepthStencil)
-			textureDesc.State = D3D12_RESOURCE_STATE_DEPTH_WRITE;
-		else
-			textureDesc.State = D3D12_RESOURCE_STATE_COMMON;
-
 		textureDesc.Width = (int)existingDesc.Width;
 		textureDesc.Height = (int)existingDesc.Height;
 		textureDesc.Format = existingDesc.Format;
+		textureDesc.State = D3D12_RESOURCE_STATE_PRESENT;
 
 		UINT numRows;
 		GPU::GetDevice()->GetCopyableFootprints(&existingDesc,
@@ -682,6 +641,8 @@ ID env::ResourceManager::CreateTexture2D(const std::string& name, TextureBindTyp
 		if (any(bindType & TextureBindType::UnorderedAccess))
 			textureDesc.Views.UnorderedAccess = CreateUAV(&textureDesc);
 	}
+
+	existingTexture->SetName(std::wstring(name.begin(), name.end()).c_str());
 
 	ID resourceID = m_commonIDGenerator.GenerateUnique();
 	Texture2D* texture = new Texture2D(std::move(textureDesc));
@@ -877,30 +838,6 @@ ID env::ResourceManager::CreatePipelineState(const std::string& name, std::initi
 	return resourceID;
 }
 
-ID env::ResourceManager::CreateWindowTarget(const std::string& name, Window* window, float startXFactor, float startYFactor, float widthFactor, float heightFactor)
-{
-	WindowTarget targetDesc;
-
-	targetDesc.Name = name;
-	targetDesc.State = D3D12_RESOURCE_STATE_PRESENT;
-	targetDesc.startXFactor = startXFactor;
-	targetDesc.startYFactor = startYFactor;
-	targetDesc.startYFactor = startYFactor;
-	targetDesc.widthFactor = widthFactor;
-	targetDesc.heightFactor = heightFactor;
-	targetDesc.AppWindow = window;
-
-	AdjustViewportAndScissorRect(targetDesc, *window);
-
-	ID resourceID = m_commonIDGenerator.GenerateUnique();
-	WindowTarget* target = new WindowTarget(std::move(targetDesc));
-	m_targets[resourceID] = target;
-
-	window->PushTarget(target);
-
-	return resourceID;
-}
-
 env::BufferArray* env::ResourceManager::GetBufferArray(ID resourceID)
 {
 	if (m_buffersArrays.count(resourceID) == 0)
@@ -941,20 +878,6 @@ env::PipelineState* env::ResourceManager::GetPipelineState(ID resourceID)
 	if (m_pipelineStates.count(resourceID) == 0)
 		return nullptr;
 	return m_pipelineStates[resourceID];
-}
-
-//env::WindowTarget* env::ResourceManager::GetWindowTarget(ID resourceID)
-//{
-//	if (m_windowTargets.count(resourceID) == 0)
-//		return nullptr;
-//	return m_windowTargets[resourceID];
-//}
-
-env::WindowTarget* env::ResourceManager::GetTarget(ID resourceID)
-{
-	if (m_targets.count(resourceID) == 0)
-		return nullptr;
-	return m_targets[resourceID];
 }
 
 env::Resource* env::ResourceManager::GetResource(ID resourceID)

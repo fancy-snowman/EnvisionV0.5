@@ -496,7 +496,7 @@ void env::Renderer::EndFrame()
 	presentQueue.Execute();
 
 	// --------------------
-	WindowTarget* finalTarget = ResourceManager::Get()->GetTarget(packet.Targets.Result);
+	Texture2D* finalTarget = ResourceManager::Get()->GetTexture2D(packet.Targets.Result);
 
 	presentQueue.WaitForIdle();
 	presentList->Reset();
