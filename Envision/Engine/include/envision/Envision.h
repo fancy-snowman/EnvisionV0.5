@@ -8,4 +8,4 @@
 
 #include "envision/graphics/AssetManager.h"
 #include "envision/graphics/Renderer.h"
-#include "envision/graphics/RendererGUI.h"
+#include "envision/graphics/GUI.h"

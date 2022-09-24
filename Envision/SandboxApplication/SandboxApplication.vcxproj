@@ -179,11 +179,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="source\systems\CameraSystem.cpp" />
+    <ClCompile Include="source\systems\GUISystem.cpp" />
     <ClCompile Include="source\systems\RenderSystem.cpp" />
     <ClCompile Include="source\SandboxApplication.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\systems\CameraSystem.h" />
+    <ClInclude Include="include\systems\GUISystem.h" />
     <ClInclude Include="include\systems\RenderSystem.h" />
     <ClInclude Include="include\SandboxApplication.h" />
   </ItemGroup>

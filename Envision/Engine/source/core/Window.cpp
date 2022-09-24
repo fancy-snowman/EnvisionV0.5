@@ -3,8 +3,8 @@
 
 #include "envision/core/Application.h"
 #include "envision/core/Event.h"
-
 #include "envision/core/GPU.h"
+#include "envision/graphics/GUI.h"
 #include "envision/resource/ResourceManager.h"
 
 WNDCLASS env::Window::s_windowClass = { 0 };
@@ -22,7 +22,7 @@ void env::Window::InitWindowClass()
 		
 		Window* window = GetWindowObject(hwnd);
 
-		if (window && ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam))
+		if (ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam))
 			return true;
 		
 		switch (uMsg)
@@ -228,32 +228,7 @@ env::Window::Window(int width, int height, const std::string& title, Application
 		}
 	}
 
-	{ // Initialize ImGui
-		IMGUI_CHECKVERSION();
-		m_imguiContext = ImGui::CreateContext();
-
-		ImGuiIO& io = ImGui::GetIO(); (void)io;
-		//io.ConfigFlags |= ImGuiConfigFlags_
-
-		D3D12_DESCRIPTOR_HEAP_DESC desc;
-		ZeroMemory(&desc, sizeof(desc));
-		desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		desc.NumDescriptors = NUM_BACK_BUFFERS;
-		desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-
-		HRESULT hr = GPU::GetDevice()->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_imguiDescriptorHeap));
-		ASSERT_HR(hr, "Could not create descriptor heap for ImGui");
-
-		ImGui_ImplWin32_Init(m_handle);
-
-		Texture2D* backbuffer = env::ResourceManager::Get()->GetTexture2D(m_backbuffers[0]);
-		ImGui_ImplDX12_Init(GPU::GetDevice(),
-			NUM_BACK_BUFFERS,
-			backbuffer->Format,
-			m_imguiDescriptorHeap,
-			m_imguiDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-			m_imguiDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-	}
+	env::GUI::Initialize(this);
 }
 
 env::Window::~Window()
@@ -296,6 +271,14 @@ ID env::Window::GetCurrentBackbuffer()
 	return m_backbuffers[m_currentBackbufferindex];
 }
 
+DXGI_FORMAT env::Window::GetBackbufferFormat() const
+{
+	DXGI_SWAP_CHAIN_DESC desc;
+	m_swapchain->GetDesc(&desc);
+
+	return desc.BufferDesc.Format;
+}
+
 void env::Window::Present()
 {
 	m_swapchain->Present(0, 0);
@@ -304,6 +287,8 @@ void env::Window::Present()
 
 void env::Window::OnEventUpdate()
 {
+	UpdateWindow(m_handle);
+
 	MSG msg = { 0 };
 	while (PeekMessageA(&msg, m_handle, NULL, NULL, PM_REMOVE)) {
 		TranslateMessage(&msg);

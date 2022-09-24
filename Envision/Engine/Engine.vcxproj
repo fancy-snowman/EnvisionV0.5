@@ -189,7 +189,7 @@
     <ClCompile Include="source\core\IDGenerator.cpp" />
     <ClCompile Include="source\graphics\AssetManager.cpp" />
     <ClCompile Include="source\graphics\Renderer.cpp" />
-    <ClCompile Include="source\graphics\RendererGUI.cpp" />
+    <ClCompile Include="source\graphics\GUI.cpp" />
     <ClCompile Include="source\graphics\RootSignature.cpp" />
     <ClCompile Include="source\graphics\Shader.cpp" />
     <ClCompile Include="source\resource\BufferLayout.cpp" />
@@ -232,7 +232,7 @@
     <ClInclude Include="include\envision\graphics\CoreShaderDataStructures.h" />
     <ClInclude Include="include\envision\graphics\FramePacket.h" />
     <ClInclude Include="include\envision\graphics\Renderer.h" />
-    <ClInclude Include="include\envision\graphics\RendererGUI.h" />
+    <ClInclude Include="include\envision\graphics\GUI.h" />
     <ClInclude Include="include\envision\graphics\RootSignature.h" />
     <ClInclude Include="include\envision\graphics\Shader.h" />
     <ClInclude Include="include\envision\resource\BufferLayout.h" />

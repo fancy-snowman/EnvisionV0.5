@@ -17,9 +17,6 @@ namespace env
 		Application& m_application;
 		HWND m_handle = NULL;
 
-		ID3D12DescriptorHeap* m_imguiDescriptorHeap = nullptr;
-		ImGuiContext* m_imguiContext = nullptr;
-
 		static const UINT NUM_BACK_BUFFERS = 2;
 		UINT m_currentBackbufferindex;
 		IDXGISwapChain1* m_swapchain;
@@ -41,6 +38,7 @@ namespace env
 		int GetHeight() const;
 		float GetAspectRatio();
 		ID GetCurrentBackbuffer();
+		DXGI_FORMAT GetBackbufferFormat() const;
 
 		void Present();
 

@@ -14,7 +14,6 @@ env::Application::Application(int argc, char** argv, const std::string& name) :
 	ResourceManager::Initialize(m_IDGenerator);
 	AssetManager::Initialize(m_IDGenerator);
 	Renderer::Initialize(m_IDGenerator);
-	RendererGUI::Initialize(m_IDGenerator);
 
 	m_activeScene = new Scene();
 }
@@ -67,6 +66,12 @@ void env::Application::Run()
 		{
 			w->OnEventUpdate();
 			w->OnUpdate();
+		}
+
+		MSG msg = { 0 };
+		while (PeekMessageA(&msg, NULL, NULL, NULL, PM_REMOVE)) {
+			TranslateMessage(&msg);
+			DispatchMessageA(&msg);
 		}
 
 		Timepoint now = Time::Now();

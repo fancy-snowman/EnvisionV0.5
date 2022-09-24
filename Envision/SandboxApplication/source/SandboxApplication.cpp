@@ -1,5 +1,6 @@
 #include "SandboxApplication.h"
 #include "systems/CameraSystem.h"
+#include "systems/GUISystem.h"
 #include "systems/RenderSystem.h"
 #include <iostream>
 
@@ -46,6 +47,7 @@ SandboxApplication::SandboxApplication(int argc, char** argv) :
 
 	PushSystem(new CameraSystem(m_mainCameraEntity));
 	PushSystem(new RenderSystem(m_mainCameraEntity, m_mainWindow));
+	PushSystem(new GUISystem(m_mainWindow));
 }
 
 SandboxApplication::~SandboxApplication()
