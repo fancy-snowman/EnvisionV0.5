@@ -205,6 +205,11 @@ void env::Renderer::BeginFrame(const CameraSettings& cameraSettings, Transform& 
 	packet.Targets.Result = target;
 }
 
+void env::Renderer::BeginFrame(const CameraSettings& cameraSettings, Transform& cameraTransform, Window* target)
+{
+	BeginFrame(cameraSettings, cameraTransform, target->GetCurrentBackbuffer());
+}
+
 void env::Renderer::Submit(Transform& transform, ID mesh, ID material)
 {
 	FramePacket& packet = GetCurrentFramePacket();

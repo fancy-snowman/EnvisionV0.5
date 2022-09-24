@@ -4,6 +4,7 @@
 #include "envision/core/DescriptorAllocator.h"
 #include "envision/core/GPU.h"
 #include "envision/core/IDGenerator.h"
+#include "envision/core/Window.h"
 #include "envision/graphics/Assets.h"
 #include "envision/graphics/CoreShaderDataStructures.h"
 #include "envision/graphics/FramePacket.h"
@@ -70,6 +71,7 @@ namespace env
 		void Initialize();
 
 		void BeginFrame(const CameraSettings& cameraSettings, Transform& cameraTransform, ID target);
+		void BeginFrame(const CameraSettings& cameraSettings, Transform& cameraTransform, Window* target);
 		void Submit(Transform& transform, ID mesh, ID material);
 		void EndFrame();
 	};

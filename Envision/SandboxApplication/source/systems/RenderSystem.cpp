@@ -1,6 +1,6 @@
 #include "systems/RenderSystem.h"
 
-RenderLayer::RenderLayer(ID mainCameraEntity, env::Window* mainWindow) :
+RenderSystem::RenderSystem(ID mainCameraEntity, env::Window* mainWindow) :
 	m_mainCameraEntity(mainCameraEntity), m_mainWindow(mainWindow)
 {
 	for (int i = 0; i < NUM_FRAME_PACKETS; i++) {
@@ -9,14 +9,14 @@ RenderLayer::RenderLayer(ID mainCameraEntity, env::Window* mainWindow) :
 	}
 }
 
-RenderLayer::~RenderLayer()
+RenderSystem::~RenderSystem()
 {
 	for (int i = 0; i < NUM_FRAME_PACKETS; i++) {
 		delete m_presentLists[i];
 	}
 }
 
-void RenderLayer::OnUpdate(env::Scene& scene, const env::Duration& delta)
+void RenderSystem::OnUpdate(env::Scene& scene, const env::Duration& delta)
 {
 	static int targetFPS = 120;
 	static float targetFrameTime = 1.f / (float)targetFPS;
@@ -27,7 +27,6 @@ void RenderLayer::OnUpdate(env::Scene& scene, const env::Duration& delta)
 		return;
 	deltaSum -= targetFrameTime;
 
-	ID targetID =	m_mainWindow->GetCurrentBackbuffer();
 	env::CameraSettings& cameraSettings =
 		scene.GetComponent<env::CameraComponent>(m_mainCameraEntity).Settings;
 	env::Transform& cameraTransform =
@@ -35,7 +34,7 @@ void RenderLayer::OnUpdate(env::Scene& scene, const env::Duration& delta)
 
 	env::DirectList* presentList = m_presentLists[m_currentFramePacket];
 
-	env::Renderer::Get()->BeginFrame(cameraSettings, cameraTransform, targetID);
+	env::Renderer::Get()->BeginFrame(cameraSettings, cameraTransform, m_mainWindow);
 
 	// <MeshID, count>
 	std::unordered_map<ID, int> instances;
@@ -48,7 +47,7 @@ void RenderLayer::OnUpdate(env::Scene& scene, const env::Duration& delta)
 			++instances[render.Mesh];
 	});
 
-	env::Texture2D* target = env::ResourceManager::Get()->GetTexture2D(targetID);
+	env::Texture2D* target = env::ResourceManager::Get()->GetTexture2D(m_mainWindow->GetCurrentBackbuffer());
 
 	env::CommandQueue& presentQueue = env::GPU::GetPresentQueue();
 	presentQueue.WaitForFenceValueGPUSide(presentQueue.GetFenceValue()); // TODO: Wait for render queue instead when that's implemented

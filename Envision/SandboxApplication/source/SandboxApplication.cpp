@@ -45,7 +45,7 @@ SandboxApplication::SandboxApplication(int argc, char** argv) :
 	scene->SetComponent<env::TransformComponent>(m_mainCameraEntity, cameraTransform);
 
 	PushSystem(new CameraSystem(m_mainCameraEntity));
-	PushSystem(new RenderLayer(m_mainCameraEntity, m_mainWindow));
+	PushSystem(new RenderSystem(m_mainCameraEntity, m_mainWindow));
 }
 
 SandboxApplication::~SandboxApplication()

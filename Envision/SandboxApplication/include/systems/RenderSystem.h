@@ -1,7 +1,7 @@
 #pragma once
 #include "envision/Envision.h"
 
-class RenderLayer : public env::System
+class RenderSystem : public env::System
 {
 private:
 
@@ -15,8 +15,8 @@ private:
 
 public:
 
-	RenderLayer(ID mainCameraEntity, env::Window* mainWindow);
-	~RenderLayer() final;
+	RenderSystem(ID mainCameraEntity, env::Window* mainWindow);
+	~RenderSystem() final;
 
 public:
 
