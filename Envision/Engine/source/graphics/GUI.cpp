@@ -43,7 +43,7 @@ env::GUI::GUI(env::Window* window) :
 		//style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 	}
 
-	m_heap.Initialize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1, true);
+	m_heap.Initialize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 10, true);
 
 	ImGui_ImplWin32_Init(window->GetHandle());
 	ImGui_ImplDX12_Init(GPU::GetDevice(),

@@ -46,5 +46,10 @@ namespace env
 
 		void BeginFrame(ID target);
 		void EndFrame();
+
+		inline env::DescriptorAllocator& GetDescriptorAllocator()
+		{
+			return m_heap;
+		}
 	};
 }

@@ -9,6 +9,10 @@ private:
 	env::Window* m_mainWindow;
 	ID m_currentTarget;
 
+	env::DescriptorAllocation m_ambientMapDescriptor;
+	env::DescriptorAllocation m_diffuseMapDescriptor;
+	env::DescriptorAllocation m_specularMapDescriptor;
+
 public:
 
 	GUISystem(env::Window* mainWindow);
