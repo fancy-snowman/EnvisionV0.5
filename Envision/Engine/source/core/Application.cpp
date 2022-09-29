@@ -4,7 +4,7 @@
 #include "envision/core/Time.h"
 #include "envision/graphics/AssetManager.h"
 #include "envision/graphics/Renderer.h"
-#include "envision/graphics/RendererGUI.h"
+#include "envision/graphics/GUI.h"
 #include "envision/resource/ResourceManager.h"
 
 env::Application::Application(int argc, char** argv, const std::string& name) :

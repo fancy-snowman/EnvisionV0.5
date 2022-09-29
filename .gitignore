@@ -353,3 +353,6 @@ MigrationBackup/
 int/
 build/
 lib/
+
+# Dear ImGui
+imgui.ini 
