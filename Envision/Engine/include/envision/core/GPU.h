@@ -50,9 +50,12 @@ namespace env
 		static CommandQueue& GetCopyQueue();
 		static CommandQueue& GetPresentQueue();
 
+		static CommandQueue* GetCommandQueue(D3D12_COMMAND_LIST_TYPE type);
+
 		static DirectList* CreateDirectCommandList(const std::string& name, bool recordDirectly = false);
 		static ComputeList* CreateComputeCommandList(const std::string& name, bool recordDirectly = false);
 		static CopyList* CreateCopyCommandList(const std::string& name, bool recordDirectly = false);
+		static CommandList* CreateCommandList(const std::string& name, D3D12_COMMAND_LIST_TYPE type, bool recordDirectly = false);
 
 	private:
 

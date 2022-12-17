@@ -13,7 +13,7 @@ env::Application::Application(int argc, char** argv, const std::string& name) :
 	GPU::Initialize();
 	ResourceManager::Initialize(m_IDGenerator);
 	AssetManager::Initialize(m_IDGenerator);
-	Renderer::Initialize(m_IDGenerator);
+	//Renderer::Initialize(m_IDGenerator);
 
 	m_activeScene = new Scene();
 }

@@ -188,6 +188,12 @@
     <ClCompile Include="source\envpch.cpp" />
     <ClCompile Include="source\core\IDGenerator.cpp" />
     <ClCompile Include="source\graphics\AssetManager.cpp" />
+    <ClCompile Include="source\graphics\FrameDescriptorLinearAllocator.cpp" />
+    <ClCompile Include="source\graphics\FrameGraph.cpp" />
+    <ClCompile Include="source\graphics\FramePass.cpp" />
+    <ClCompile Include="source\graphics\FramePassContext.cpp" />
+    <ClCompile Include="source\graphics\FramePassSetupContext.cpp" />
+    <ClCompile Include="source\graphics\FrameResource.cpp" />
     <ClCompile Include="source\graphics\Renderer.cpp" />
     <ClCompile Include="source\graphics\GUI.cpp" />
     <ClCompile Include="source\graphics\RootSignature.cpp" />
@@ -230,6 +236,13 @@
     <ClInclude Include="include\envision\graphics\AssetManager.h" />
     <ClInclude Include="include\envision\graphics\Assets.h" />
     <ClInclude Include="include\envision\graphics\CoreShaderDataStructures.h" />
+    <ClInclude Include="include\envision\graphics\FrameDescriptorLinearAllocator.h" />
+    <ClInclude Include="include\envision\graphics\FrameGraph.h" />
+    <ClInclude Include="include\envision\graphics\FramePass.h" />
+    <ClInclude Include="include\envision\graphics\FramePassContext.h" />
+    <ClInclude Include="include\envision\graphics\FramePassSetupContext.h" />
+    <ClInclude Include="include\envision\graphics\FramePassRecordContext.h" />
+    <ClInclude Include="include\envision\graphics\FrameResource.h" />
     <ClInclude Include="include\envision\graphics\FramePacket.h" />
     <ClInclude Include="include\envision\graphics\Renderer.h" />
     <ClInclude Include="include\envision\graphics\GUI.h" />

@@ -67,6 +67,18 @@ env::CommandQueue& env::GPU::GetPresentQueue()
 	return Get()->m_presentQueue;
 }
 
+env::CommandQueue* env::GPU::GetCommandQueue(D3D12_COMMAND_LIST_TYPE type)
+{
+	env::CommandQueue* queue = nullptr;
+	if (type == D3D12_COMMAND_LIST_TYPE_COPY)
+		queue = &Get()->m_copyQueue;
+	if (type == D3D12_COMMAND_LIST_TYPE_COMPUTE)
+		queue = &Get()->m_computeQueue;
+	if (type == D3D12_COMMAND_LIST_TYPE_DIRECT)
+		queue = &Get()->m_directQueue;
+	return queue;
+}
+
 env::DirectList* env::GPU::CreateDirectCommandList(const std::string& name, bool recordDirectly)
 {
 	DirectList* list = new DirectList(name);
@@ -92,6 +104,26 @@ env::ComputeList* env::GPU::CreateComputeCommandList(const std::string& name, bo
 env::CopyList* env::GPU::CreateCopyCommandList(const std::string& name, bool recordDirectly)
 {
 	CopyList* list = new CopyList(name);
+	list->Initialize(Get()->m_device);
+
+	if (!recordDirectly)
+		list->Close();
+
+	return list;
+}
+
+env::CommandList* env::GPU::CreateCommandList(const std::string& name, D3D12_COMMAND_LIST_TYPE type, bool recordDirectly)
+{
+	env::CommandList* list = nullptr;
+
+	if (type == D3D12_COMMAND_LIST_TYPE_COPY)
+		list = new CopyList(name);
+	if (type == D3D12_COMMAND_LIST_TYPE_COMPUTE)
+		list = new ComputeList(name);
+	if (type == D3D12_COMMAND_LIST_TYPE_DIRECT)
+		list = new DirectList(name);
+
+	assert(list);
 	list->Initialize(Get()->m_device);
 
 	if (!recordDirectly)
