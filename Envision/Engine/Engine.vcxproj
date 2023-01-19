@@ -194,6 +194,7 @@
     <ClCompile Include="source\graphics\FramePassContext.cpp" />
     <ClCompile Include="source\graphics\FramePassSetupContext.cpp" />
     <ClCompile Include="source\graphics\FrameResource.cpp" />
+    <ClCompile Include="source\graphics\GPUHeap.cpp" />
     <ClCompile Include="source\graphics\Renderer.cpp" />
     <ClCompile Include="source\graphics\GUI.cpp" />
     <ClCompile Include="source\graphics\RootSignature.cpp" />
@@ -244,6 +245,7 @@
     <ClInclude Include="include\envision\graphics\FramePassRecordContext.h" />
     <ClInclude Include="include\envision\graphics\FrameResource.h" />
     <ClInclude Include="include\envision\graphics\FramePacket.h" />
+    <ClInclude Include="include\envision\graphics\GPUHeap.h" />
     <ClInclude Include="include\envision\graphics\Renderer.h" />
     <ClInclude Include="include\envision\graphics\GUI.h" />
     <ClInclude Include="include\envision\graphics\RootSignature.h" />

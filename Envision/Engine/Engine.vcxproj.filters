@@ -93,6 +93,9 @@
     <ClCompile Include="source\graphics\FramePassSetupContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\graphics\GPUHeap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\envision\envpch.h">
@@ -213,6 +216,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\envision\graphics\FramePassSetupContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\envision\graphics\GPUHeap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
